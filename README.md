@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vyktag E-Ticaret
 
-## Getting Started
+NFC dijital kartvizit **satış & pazarlama** mağazası. Ana firma: **VYK Teknoloji** · Marka: **Vyktag**.
 
-First, run the development server:
+Bu proje yalnızca mağaza + pazarlama katmanıdır. Dijital profil/SaaS platformu ayrı ve hazırdır (dkartvizit.com) — burada yeniden yazılmaz.
+
+## Ne satılıyor?
+
+- **Tek seferlik:** Fiziksel NFC kartlar (logo/kişiselleştirme ile)
+- **Tekrarlayan:** Premium / abonelik planları
+
+## Teknoloji
+
+| Katman | Seçim |
+|---|---|
+| Framework | Next.js (App Router, TypeScript) |
+| Stil | Tailwind CSS |
+| Veritabanı | MySQL (Hostinger) + Prisma ORM |
+| Ödeme | iyzico (tek çekim) + iyzico Abonelik (recurring) |
+| Hosting | Hostinger Kurumsal Web Hosting (managed Node.js, GitHub deploy) |
+| dkartvizit entegrasyonu | MVP'de manuel (admin sipariş sonrası hesap açar) |
+
+## Yol Haritası
+
+- [x] **Faz 0** — İskelet + git + deploy hattı + DB şeması
+- [ ] **Faz 1** — Pazarlama sitesi (anasayfa, ürünler, fiyatlandırma, SSS) · SEO
+- [ ] **Faz 2** — Mağaza: katalog, kart kişiselleştirme/logo yükleme, sepet
+- [ ] **Faz 3** — iyzico checkout (tek çekim + abonelik), sipariş oluşturma
+- [ ] **Faz 4** — Sipariş & admin paneli, dkartvizit'e manuel hesap devri, kargo takibi
+- [ ] **Faz 5** — Cila: analitik, çoklu dil, indirim kodları
+
+## Geliştirme
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`http://localhost:3000` adresinde açılır. Ortam değişkenleri için `.env.example` dosyasını `.env` olarak kopyalayın.
