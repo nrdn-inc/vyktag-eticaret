@@ -6,7 +6,7 @@ import { useCart } from "@/components/CartProvider";
 import { lineKey } from "@/lib/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { IyzicoCheckoutForm } from "@/components/IyzicoCheckoutForm";
-import { startCheckout, type CheckoutResult } from "@/app/odeme/actions";
+import { startCheckout, type CheckoutResult } from "./actions";
 
 const inputClass =
   "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";

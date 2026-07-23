@@ -38,7 +38,9 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const orderId = result.conversationId;
-  const order = orderId ? await prisma.order.findUnique({ where: { id: orderId } }) : null;
+  const order = orderId
+    ? await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } })
+    : null;
 
   if (!order) {
     console.error("[odeme/geri-donus] eşleşen sipariş bulunamadı, conversationId:", orderId);
@@ -48,7 +50,7 @@ export async function POST(request: Request): Promise<Response> {
   const success = isPaymentSuccessful(result);
   const amountKurus = Math.round(Number(result.paidPrice ?? result.price ?? 0) * 100);
 
-  await prisma.$transaction([
+  const operations: Prisma.PrismaPromise<unknown>[] = [
     prisma.order.update({
       where: { id: order.id },
       data: { status: success ? OrderStatus.PAID : OrderStatus.FAILED },
@@ -63,7 +65,25 @@ export async function POST(request: Request): Promise<Response> {
         rawResponse: result as unknown as Prisma.InputJsonValue,
       },
     }),
-  ]);
+  ];
+
+  // Ödeme başarılıysa, fiziksel ürün satırları için dkartvizit hesap devri kaydını (PENDING)
+  // hazırlar — admin bunu /admin/siparisler üzerinden manuel olarak "sağlandı" işaretler.
+  if (success) {
+    for (const item of order.items) {
+      if (item.productVariantId) {
+        operations.push(
+          prisma.dkartvizitHandoff.upsert({
+            where: { orderItemId: item.id },
+            update: {},
+            create: { orderItemId: item.id },
+          }),
+        );
+      }
+    }
+  }
+
+  await prisma.$transaction(operations);
 
   return Response.redirect(`${origin}/siparis/${order.orderNumber}`, 303);
 }
