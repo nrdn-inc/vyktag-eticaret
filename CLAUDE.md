@@ -21,6 +21,11 @@ Referans rakip: idycard.com.
 - `npm run dev` — geliştirme
 - `npm run build` / `npm start` — prod build
 - `npm run lint` — ESLint
+- `npm test` — Vitest test bench
+
+## Test Bench
+Her yeni özellik için test yazılır (Vitest). Bir özellik eklendiğinde/değiştirildiğinde
+`npm test` çalıştırılır ve geçmeden iş tamamlanmış sayılmaz — `tsc --noEmit` ve lint ile birlikte.
 
 ## Konvansiyonlar
 - Kullanıcıyla iletişim Türkçe.
