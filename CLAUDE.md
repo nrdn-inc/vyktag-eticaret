@@ -25,3 +25,15 @@ Referans rakip: idycard.com.
 ## Konvansiyonlar
 - Kullanıcıyla iletişim Türkçe.
 - Yol haritası fazları README.md'de.
+- Kod (değişken/fonksiyon adları, iç mantık yorumları): **İngilizce**.
+- Müşteriye görünen tüm metinler (UI, hata mesajları, e-postalar): **Türkçe**, Türkçe karakterler (ı, ş, ğ, ü, ö, ç, İ) doğru render edilmeli (UTF-8).
+- Doc-comment gerekiyorsa JSDoc/TSDoc formatı kullanılır, içeriği **Türkçe** yazılır.
+
+## Git / Versiyonlama
+- Push işlemlerini **her zaman Claude yapar**, kullanıcı manuel push yapmaz.
+- Semantic versioning `package.json` `"version"` alanında tutulur: `x.y.z`
+  - `x`: geriye uyumluluğu bozan değişiklik
+  - `y`: yeni özellik
+  - `z`: bug fix
+- Her commit mesajı `[x.y.z]` ile başlar, ardından yapılanlar **Türkçe** anlatılır.
+  Örnek: `[0.2.0] Ürün kataloğu ve sepet sayfası eklendi`
