@@ -23,7 +23,7 @@ Bu proje yalnızca mağaza + pazarlama katmanıdır. Dijital profil/SaaS platfor
 ## Yol Haritası
 
 - [x] **Faz 0** — İskelet + git + deploy hattı + DB şeması
-- [ ] **Faz 1** — Pazarlama sitesi (anasayfa, ürünler, fiyatlandırma, SSS) · SEO
+- [x] **Faz 1** — Pazarlama sitesi (anasayfa, ürünler, fiyatlandırma, SSS) · SEO
 - [ ] **Faz 2** — Mağaza: katalog, kart kişiselleştirme/logo yükleme, sepet
 - [ ] **Faz 3** — iyzico checkout (tek çekim + abonelik), sipariş oluşturma
 - [ ] **Faz 4** — Sipariş & admin paneli, dkartvizit'e manuel hesap devri, kargo takibi
