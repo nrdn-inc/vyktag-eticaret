@@ -3,6 +3,9 @@ import Link from "next/link";
 import { getActiveProducts, getActiveSubscriptionPlans } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 
+// ISR: fiyat/plan güncellemeleri en geç bu süre içinde yansır.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Fiyatlandırma",
   description: "Vyktag kart fiyatları ve premium abonelik planları. Tek seferlik alım veya aylık/yıllık abonelik.",

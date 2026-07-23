@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getActiveProducts } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 
+// ISR: katalog güncellemeleri en geç bu süre içinde yansır.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Ürünler",
   description: "Vyktag NFC kartları, etiketleri ve telefon kartları. Renk ve tasarım seçenekleriyle.",

@@ -2,6 +2,10 @@ import Link from "next/link";
 import { getActiveProducts } from "@/lib/catalog";
 import { ProductCard } from "@/components/ProductCard";
 
+// ISR: sayfa statik üretilir, en fazla bu süre kadar önbellekte tutulur;
+// süre dolduğunda arka planda yeniden oluşturulur (katalog güncellemeleri yansır).
+export const revalidate = 300;
+
 const HOW_IT_WORKS = [
   {
     step: "1",
