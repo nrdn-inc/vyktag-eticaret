@@ -114,13 +114,12 @@ export default function CartPage() {
           <span className="text-2xl font-bold">{formatPriceTRY(totalKurus)}</span>
         </div>
         <p className="mt-2 text-xs text-zinc-500">Kargo ve vergiler ödeme adımında hesaplanır.</p>
-        <button
-          type="button"
-          disabled
-          className="mt-6 w-full cursor-not-allowed rounded-full bg-zinc-300 px-8 py-3 text-sm font-semibold text-zinc-600 dark:bg-zinc-700 dark:text-zinc-400"
+        <Link
+          href="/odeme"
+          className="mt-6 block w-full rounded-full bg-brand px-8 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
         >
-          Ödemeye geç (yakında)
-        </button>
+          Ödemeye geç
+        </Link>
       </div>
     </div>
   );
