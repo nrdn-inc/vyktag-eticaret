@@ -35,6 +35,15 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
     }));
 }
 
+/** generateStaticParams için tüm aktif ürün slug'larını döner. */
+export async function getActiveProductSlugs(): Promise<string[]> {
+  const products = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { slug: true },
+  });
+  return products.map((p) => p.slug);
+}
+
 /** Ürün detay sayfası için tek bir ürünü slug'a göre getirir. */
 export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
   const product = await prisma.product.findFirst({

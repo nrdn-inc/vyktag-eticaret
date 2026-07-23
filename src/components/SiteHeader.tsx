@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { mainNav, siteConfig } from "@/lib/site";
+import { CartLink } from "@/components/CartLink";
 
 /** Tüm sayfalarda ortak üst menü: logo, gezinme bağlantıları ve mağaza çağrısı. */
 export function SiteHeader() {
@@ -24,12 +25,15 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <Link
-          href="/urunler"
-          className="rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          Mağaza
-        </Link>
+        <div className="flex items-center gap-3">
+          <CartLink />
+          <Link
+            href="/urunler"
+            className="hidden rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark sm:block"
+          >
+            Mağaza
+          </Link>
+        </div>
       </div>
     </header>
   );

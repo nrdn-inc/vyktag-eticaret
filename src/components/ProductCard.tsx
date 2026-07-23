@@ -20,7 +20,7 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
           {hasMultipleVariants ? `${formatPriceTRY(product.minPriceKurus)}'den başlayan` : formatPriceTRY(product.minPriceKurus)}
         </span>
         <Link
-          href={`/urunler`}
+          href={`/urunler/${product.slug}`}
           className="rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
         >
           İncele

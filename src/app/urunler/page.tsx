@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getActiveProducts } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 
@@ -58,9 +59,12 @@ export default async function ProductsPage() {
               </div>
 
               <div className="mt-auto pt-6">
-                <span className="inline-block rounded-full bg-zinc-100 px-4 py-2 text-sm font-medium text-zinc-500 dark:bg-zinc-800">
-                  Sepet ve satın alma yakında
-                </span>
+                <Link
+                  href={`/urunler/${product.slug}`}
+                  className="inline-block rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+                >
+                  İncele ve sepete ekle
+                </Link>
               </div>
             </div>
           </article>
