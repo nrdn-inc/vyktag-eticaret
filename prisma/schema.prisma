@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
+
+// Tracks the manual provisioning of a dkartvizit.com account/card after a physical card order ships.
+enum HandoffStatus {
+  PENDING
+  PROVISIONED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  fullName     String
+  role         UserRole @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  addresses           Address[]
+  orders              Order[]
+  subscriptions       Subscription[]
+  provisionedHandoffs DkartvizitHandoff[]
+
+  @@map("users")
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  fullName     String
+  phone        String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  district     String
+  postalCode   String
+  country      String   @default("Türkiye")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  ordersAsShipping Order[] @relation("ShippingAddress")
+  ordersAsBilling  Order[] @relation("BillingAddress")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// Catalog item, e.g. "Vyktag Kart". Actual price/stock live on ProductVariant
+// so a product can offer color/material options (or just a single variant).
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String   @db.Text
+  images      Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  variants ProductVariant[]
+
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id])
+  name       String
+  sku        String  @unique
+  priceKurus Int
+  stock      Int     @default(0)
+  isActive   Boolean @default(true)
+
+  orderItems OrderItem[]
+
+  @@index([productId])
+  @@map("product_variants")
+}
+
+model SubscriptionPlan {
+  id          String               @id @default(cuid())
+  slug        String               @unique
+  name        String
+  description String               @db.Text
+  priceKurus  Int
+  interval    SubscriptionInterval
+  features    Json
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  orderItems    OrderItem[]
+  subscriptions Subscription[]
+
+  @@map("subscription_plans")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
+  status      OrderStatus @default(PENDING)
+  totalKurus  Int
+
+  shippingAddressId String?
+  shippingAddress   Address? @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddressId  String?
+  billingAddress    Address? @relation("BillingAddress", fields: [billingAddressId], references: [id])
+
+  trackingCarrier String?
+  trackingNumber  String?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+
+  items    OrderItem[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String            @id @default(cuid())
+  orderId            String
+  order              Order             @relation(fields: [orderId], references: [id])
+  productVariantId   String?
+  productVariant     ProductVariant?   @relation(fields: [productVariantId], references: [id])
+  subscriptionPlanId String?
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+  quantity           Int               @default(1)
+  unitPriceKurus     Int
+  totalKurus         Int
+  // Card design fields (name, title, logo URL, color, etc.) — shape not finalized yet.
+  personalization    Json?
+  createdAt          DateTime          @default(now())
+
+  handoff DkartvizitHandoff?
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Subscription {
+  id                  String             @id @default(cuid())
+  userId              String
+  user                User               @relation(fields: [userId], references: [id])
+  planId              String
+  plan                SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status              SubscriptionStatus @default(ACTIVE)
+  iyzicoReferenceCode String?            @unique
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+  cancelAtPeriodEnd   Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  payments Payment[]
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String?
+  order          Order?        @relation(fields: [orderId], references: [id])
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  provider       String        @default("iyzico")
+  providerRef    String
+  status         PaymentStatus @default(PENDING)
+  amountKurus    Int
+  rawResponse    Json?
+  createdAt      DateTime      @default(now())
+
+  @@index([orderId])
+  @@index([subscriptionId])
+  @@map("payments")
+}
+
+// One row per physical-card order item: tracks the manual creation of the
+// customer's dkartvizit.com account/card after the order ships (MVP has no API integration).
+model DkartvizitHandoff {
+  id                 String        @id @default(cuid())
+  orderItemId        String        @unique
+  orderItem          OrderItem     @relation(fields: [orderItemId], references: [id])
+  status             HandoffStatus @default(PENDING)
+  dkartvizitUsername String?
+  notes              String?       @db.Text
+  provisionedById    String?
+  provisionedBy      User?         @relation(fields: [provisionedById], references: [id])
+  provisionedAt      DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@map("dkartvizit_handoffs")
+}
