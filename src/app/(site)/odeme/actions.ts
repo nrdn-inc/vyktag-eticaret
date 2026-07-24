@@ -18,6 +18,7 @@ export interface CheckoutInput {
   /** null: fatura adresi teslimat adresiyle aynı. */
   billing: CheckoutAddressInput | null;
   lines: CheckoutCartLine[];
+  contractAccepted: boolean;
 }
 
 export type CheckoutResult =
@@ -38,6 +39,10 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
   try {
     if (!TC_KIMLIK_REGEX.test(input.identityNumber)) {
       return { ok: false, error: "TC Kimlik No 11 haneli olmalıdır." };
+    }
+
+    if (!input.contractAccepted) {
+      return { ok: false, error: "Mesafeli Satış Sözleşmesi'ni onaylamanız gerekiyor." };
     }
 
     const order = await createOrderFromCart(input.lines, input.contact, input.shipping, input.billing);

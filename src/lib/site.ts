@@ -12,3 +12,20 @@ export const mainNav = [
   { label: "Fiyatlandırma", href: "/fiyatlandirma" },
   { label: "SSS", href: "/sss" },
 ] as const;
+
+/** Yasal metinlerde ve iletişim alanlarında kullanılan şirket bilgileri (vergi levhasına göre). */
+export const legalInfo = {
+  companyLegalName: "VYK Teknoloji Sanayi ve Ticaret Limited Şirketi",
+  address: "Silivrikapı Mah. Vidin Cad. Çağdaş Apt No: 32 B, Fatih/İstanbul",
+  taxOffice: "Fatih Vergi Dairesi",
+  taxNumber: "9261072855",
+  email: "satis@vyktag.com.tr",
+  phones: ["0535 357 73 00", "0531 698 33 61"],
+  withdrawalPeriodDays: 14,
+} as const;
+
+export const legalNav = [
+  { label: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
+  { label: "KVKK Aydınlatma Metni", href: "/kvkk" },
+  { label: "Gizlilik ve Çerez Politikası", href: "/gizlilik-politikasi" },
+] as const;

@@ -24,6 +24,7 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [district, setDistrict] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [contractAccepted, setContractAccepted] = useState(false);
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [billingAddressLine1, setBillingAddressLine1] = useState("");
   const [billingAddressLine2, setBillingAddressLine2] = useState("");
@@ -55,6 +56,7 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           personalization: item.personalization,
         })),
+        contractAccepted,
       });
       setResult(response);
     });
@@ -160,9 +162,35 @@ export default function CheckoutPage() {
             )}
           </section>
 
+          <section>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                required
+                type="checkbox"
+                checked={contractAccepted}
+                onChange={(e) => setContractAccepted(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                <Link
+                  href="/mesafeli-satis-sozlesmesi"
+                  target="_blank"
+                  className="font-medium text-brand hover:text-brand-dark"
+                >
+                  Mesafeli Satış Sözleşmesi
+                </Link>
+                &apos;ni ve{" "}
+                <Link href="/kvkk" target="_blank" className="font-medium text-brand hover:text-brand-dark">
+                  KVKK Aydınlatma Metni
+                </Link>
+                &apos;ni okudum, onaylıyorum.
+              </span>
+            </label>
+          </section>
+
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !contractAccepted}
             className="w-full rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending ? "İşleniyor…" : `Siparişi Onayla ve Öde · ${formatPriceTRY(totalKurus)}`}
