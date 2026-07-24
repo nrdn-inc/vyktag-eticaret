@@ -5,7 +5,11 @@ import Link from "next/link";
 import type { ProductWithVariants } from "@/lib/catalog";
 import type { CartItem, CartPersonalization } from "@/lib/cart";
 import { formatPriceTRY } from "@/lib/format";
+import { isVariantPurchasable } from "@/lib/stock";
 import { useCart } from "@/components/CartProvider";
+
+// Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
+const LOW_STOCK_THRESHOLD = 10;
 
 /** Ürün detay sayfasında varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
 export function AddToCartForm({ product }: { product: ProductWithVariants }) {
@@ -22,7 +26,12 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
   const selectedVariant =
     product.variants.find((v) => v.id === variantId) ?? product.variants[0];
 
+  const inStock = isVariantPurchasable(selectedVariant.stock);
+  const atMaxQuantity = quantity >= selectedVariant.stock;
+  const isLowStock = inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
+
   function handleAdd() {
+    if (!inStock) return;
     // Boş kişiselleştirme alanlarını dahil etme.
     const personalization: CartPersonalization = {};
     if (fullName.trim()) personalization.fullName = fullName.trim();
@@ -51,23 +60,29 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
         <div>
           <label className="text-sm font-semibold">Seçenek</label>
           <div className="mt-2 flex flex-wrap gap-2">
-            {product.variants.map((variant) => (
-              <button
-                key={variant.id}
-                type="button"
-                onClick={() => {
-                  setVariantId(variant.id);
-                  setAdded(false);
-                }}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                  variant.id === variantId
-                    ? "border-brand bg-brand text-white"
-                    : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-                }`}
-              >
-                {variant.name} · {formatPriceTRY(variant.priceKurus)}
-              </button>
-            ))}
+            {product.variants.map((variant) => {
+              const variantOutOfStock = !isVariantPurchasable(variant.stock);
+              return (
+                <button
+                  key={variant.id}
+                  type="button"
+                  disabled={variantOutOfStock}
+                  onClick={() => {
+                    setVariantId(variant.id);
+                    setQuantity(1);
+                    setAdded(false);
+                  }}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                    variant.id === variantId
+                      ? "border-brand bg-brand text-white"
+                      : "border-zinc-300 hover:border-brand dark:border-zinc-700"
+                  }`}
+                >
+                  {variant.name} · {formatPriceTRY(variant.priceKurus)}
+                  {variantOutOfStock && " · Tükendi"}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -110,16 +125,26 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
         </div>
       </div>
 
+      {/* Stok durumu */}
+      {!inStock ? (
+        <p className="text-sm font-semibold text-red-600">Bu ürün şu anda tükendi.</p>
+      ) : (
+        isLowStock && (
+          <p className="text-sm font-medium text-amber-600">Son {selectedVariant.stock} adet!</p>
+        )
+      )}
+
       {/* Adet + sepete ekle */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center rounded-full border border-zinc-300 dark:border-zinc-700">
           <button
             type="button"
+            disabled={!inStock}
             onClick={() => {
               setQuantity((q) => Math.max(1, q - 1));
               setAdded(false);
             }}
-            className="px-4 py-2 text-lg"
+            className="px-4 py-2 text-lg disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Adet azalt"
           >
             −
@@ -127,11 +152,12 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
           <span className="w-8 text-center font-semibold">{quantity}</span>
           <button
             type="button"
+            disabled={!inStock || atMaxQuantity}
             onClick={() => {
-              setQuantity((q) => q + 1);
+              setQuantity((q) => Math.min(selectedVariant.stock, q + 1));
               setAdded(false);
             }}
-            className="px-4 py-2 text-lg"
+            className="px-4 py-2 text-lg disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Adet artır"
           >
             +
@@ -141,9 +167,10 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
         <button
           type="button"
           onClick={handleAdd}
-          className="rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          disabled={!inStock}
+          className="rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Sepete ekle · {formatPriceTRY(selectedVariant.priceKurus * quantity)}
+          {inStock ? `Sepete ekle · ${formatPriceTRY(selectedVariant.priceKurus * quantity)}` : "Tükendi"}
         </button>
       </div>
 

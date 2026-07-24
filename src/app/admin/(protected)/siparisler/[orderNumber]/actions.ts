@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, HandoffStatus } from "@/generated/prisma/client";
 import { verifyAdminSession } from "@/lib/admin-session";
+import { setOrderStatus } from "@/lib/orders";
+import { InsufficientStockError } from "@/lib/stock";
 
 export interface ActionState {
   error?: string;
@@ -27,20 +29,20 @@ export async function updateOrderStatus(
     return { error: "Geçersiz durum." };
   }
 
-  const order = await prisma.order.findUnique({ where: { orderNumber } });
-  if (!order) {
-    return { error: "Sipariş bulunamadı." };
+  try {
+    // setOrderStatus durum güncellemesini ve stok uzlaştırmasını (iptal/iade'de iade,
+    // yeniden aktifleştirmede yeniden düşüm) tek transaction içinde yapar.
+    await setOrderStatus(orderNumber, status as OrderStatus);
+  } catch (error) {
+    if (error instanceof InsufficientStockError) {
+      return { error: error.message };
+    }
+    if (error instanceof Error && error.message === "Sipariş bulunamadı.") {
+      return { error: error.message };
+    }
+    console.error("[admin/updateOrderStatus] hata:", error);
+    return { error: "Durum güncellenemedi." };
   }
-
-  const now = new Date();
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      status: status as OrderStatus,
-      shippedAt: status === OrderStatus.SHIPPED && !order.shippedAt ? now : order.shippedAt,
-      deliveredAt: status === OrderStatus.DELIVERED && !order.deliveredAt ? now : order.deliveredAt,
-    },
-  });
 
   revalidateOrder(orderNumber);
   return { ok: true };

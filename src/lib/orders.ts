@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { Prisma, UserRole } from "@/generated/prisma/client";
+import { OrderStatus, Prisma, UserRole } from "@/generated/prisma/client";
 import type { CartPersonalization } from "@/lib/cart";
+import { InsufficientStockError, aggregateQuantitiesByVariant, isStockReleasedStatus } from "@/lib/stock";
 
 export interface CheckoutLine {
   variantId: string;
@@ -132,28 +133,134 @@ export async function createOrderFromCart(
   });
 
   const totalKurus = items.reduce((sum, item) => sum + item.totalKurus, 0);
+  const quantityByVariant = aggregateQuantitiesByVariant(lines);
 
   // orderNumber çakışması (çok düşük ihtimal) durumunda birkaç kez yeniden dener.
   let lastError: unknown;
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
-      return await prisma.order.create({
-        data: {
-          orderNumber: generateOrderNumber(),
-          userId: user.id,
-          totalKurus,
-          shippingAddressId: shippingAddress.id,
-          billingAddressId: billingAddress.id,
-          items: { create: items },
-        },
-        include: {
-          items: { include: { productVariant: { include: { product: true } } } },
-        },
+      return await prisma.$transaction(async (tx) => {
+        // Stok, sipariş oluşturulurken atomik olarak düşülür. Koşullu updateMany (stok >= adet)
+        // sayesinde iki eşzamanlı sipariş son ürünü aynı anda alamaz — aşırı satış engellenir.
+        for (const [variantId, quantity] of quantityByVariant) {
+          const result = await tx.productVariant.updateMany({
+            where: { id: variantId, isActive: true, stock: { gte: quantity } },
+            data: { stock: { decrement: quantity } },
+          });
+          if (result.count === 0) {
+            const variant = variantById.get(variantId)!;
+            throw new InsufficientStockError(`${variant.product.name} (${variant.name})`);
+          }
+        }
+
+        return tx.order.create({
+          data: {
+            orderNumber: generateOrderNumber(),
+            userId: user.id,
+            totalKurus,
+            shippingAddressId: shippingAddress.id,
+            billingAddressId: billingAddress.id,
+            items: { create: items },
+          },
+          include: {
+            items: { include: { productVariant: { include: { product: true } } } },
+          },
+        });
       });
     } catch (error) {
+      // Stok yetersizliği kalıcı bir durumdur; yeniden denenmez, doğrudan yükseltilir.
+      if (error instanceof InsufficientStockError) {
+        throw error;
+      }
       lastError = error;
     }
   }
 
   throw lastError instanceof Error ? lastError : new Error("Sipariş oluşturulamadı.");
+}
+
+/**
+ * Bir siparişin durumunu değiştirir ve stoğu uzlaştırır — hepsi tek bir transaction içinde:
+ * - Serbest bırakan bir duruma (FAILED/CANCELLED/REFUNDED) geçişte, stok henüz iade edilmediyse
+ *   iade eder (idempotent).
+ * - Serbest bırakılmış bir siparişi tekrar aktif bir duruma alırken, stoğu yeniden düşer
+ *   (koşullu; yeterli stok yoksa InsufficientStockError fırlatır).
+ * Ayrıca SHIPPED/DELIVERED anlarında shippedAt/deliveredAt zaman damgalarını doldurur.
+ */
+export async function setOrderStatus(orderNumber: string, status: OrderStatus) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({
+      where: { orderNumber },
+      include: { items: true },
+    });
+    if (!order) {
+      throw new Error("Sipariş bulunamadı.");
+    }
+
+    const shouldBeReleased = isStockReleasedStatus(status);
+    const variantLines = order.items.filter(
+      (item): item is typeof item & { productVariantId: string } => item.productVariantId !== null,
+    );
+
+    let stockRestored = order.stockRestored;
+
+    if (shouldBeReleased && !order.stockRestored) {
+      // Stoğu iade et.
+      for (const item of variantLines) {
+        await tx.productVariant.updateMany({
+          where: { id: item.productVariantId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+      stockRestored = true;
+    } else if (!shouldBeReleased && order.stockRestored) {
+      // Daha önce iade edilmiş stoğu yeniden düş (siparişi tekrar aktifleştirme).
+      for (const item of variantLines) {
+        const result = await tx.productVariant.updateMany({
+          where: { id: item.productVariantId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+        if (result.count === 0) {
+          throw new InsufficientStockError("Bu sipariş için stok yeniden ayrılamıyor");
+        }
+      }
+      stockRestored = false;
+    }
+
+    const now = new Date();
+    return tx.order.update({
+      where: { id: order.id },
+      data: {
+        status,
+        stockRestored,
+        shippedAt: status === OrderStatus.SHIPPED && !order.shippedAt ? now : order.shippedAt,
+        deliveredAt: status === OrderStatus.DELIVERED && !order.deliveredAt ? now : order.deliveredAt,
+      },
+    });
+  });
+}
+
+/**
+ * Ödeme sonucuna göre stoğu uzlaştırır (yalnızca callback için). Ödeme başarısızsa stoğu iade
+ * eder; başarılıysa (stok düşülü kalmalı) hiçbir şey yapmaz. Idempotent'tir.
+ */
+export async function releaseStockIfPaymentFailed(orderId: string, paymentSucceeded: boolean) {
+  if (paymentSucceeded) {
+    return;
+  }
+  await prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({ where: { id: orderId }, include: { items: true } });
+    if (!order || order.stockRestored) {
+      return;
+    }
+    for (const item of order.items) {
+      if (item.productVariantId) {
+        await tx.productVariant.updateMany({
+          where: { id: item.productVariantId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+    }
+    await tx.order.update({ where: { id: order.id }, data: { stockRestored: true } });
+  });
 }

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, PaymentStatus, type Prisma } from "@/generated/prisma/client";
 import { isPaymentSuccessful, retrieveCheckoutForm } from "@/lib/iyzico";
+import { releaseStockIfPaymentFailed } from "@/lib/orders";
 
 // iyzico'nun barındırdığı ödeme sayfası, müşterinin tarayıcısından bu adrese POST ile
 // yönlendirme yapar. Bu yüzden istek her zaman taze olmalı ve önbelleklenmemelidir.
@@ -84,6 +85,9 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   await prisma.$transaction(operations);
+
+  // Ödeme başarısızsa, sipariş oluşturulurken düşülen stoğu geri iade et (idempotent).
+  await releaseStockIfPaymentFailed(order.id, success);
 
   return Response.redirect(`${origin}/siparis/${order.orderNumber}`, 303);
 }

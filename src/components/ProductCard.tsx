@@ -1,17 +1,26 @@
 import Link from "next/link";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
+import { isVariantPurchasable } from "@/lib/stock";
 
 /** Katalog/anasayfa listelerinde tek bir ürünü özet olarak gösteren kart. */
 export function ProductCard({ product }: { product: ProductWithVariants }) {
   const hasMultipleVariants = product.variants.length > 1;
+  const allOutOfStock = product.variants.every((v) => !isVariantPurchasable(v.stock));
 
   return (
     <div className="flex flex-col rounded-2xl border border-zinc-200 bg-white p-6 transition-shadow hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
       <div className="mb-4 flex aspect-video items-center justify-center rounded-xl bg-gradient-to-br from-brand/10 to-brand/30 text-2xl font-semibold text-brand-dark">
         {product.name}
       </div>
-      <h3 className="text-lg font-semibold">{product.name}</h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-semibold">{product.name}</h3>
+        {allOutOfStock && (
+          <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+            Tükendi
+          </span>
+        )}
+      </div>
       <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
         {product.description}
       </p>
