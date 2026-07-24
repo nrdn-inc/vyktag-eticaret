@@ -11,14 +11,29 @@ import { useCart } from "@/components/CartProvider";
 // Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
 const LOW_STOCK_THRESHOLD = 10;
 
+interface AddToCartFormProps {
+  product: ProductWithVariants;
+  variantId: string;
+  onVariantChange: (variantId: string) => void;
+  fullName: string;
+  onFullNameChange: (value: string) => void;
+  title: string;
+  onTitleChange: (value: string) => void;
+}
+
 /** Ürün detay sayfasında varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
-export function AddToCartForm({ product }: { product: ProductWithVariants }) {
+export function AddToCartForm({
+  product,
+  variantId,
+  onVariantChange,
+  fullName,
+  onFullNameChange,
+  title,
+  onTitleChange,
+}: AddToCartFormProps) {
   const { addItem } = useCart();
 
-  const [variantId, setVariantId] = useState(product.variants[0].id);
   const [quantity, setQuantity] = useState(1);
-  const [fullName, setFullName] = useState("");
-  const [title, setTitle] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
@@ -68,7 +83,7 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
                   type="button"
                   disabled={variantOutOfStock}
                   onClick={() => {
-                    setVariantId(variant.id);
+                    onVariantChange(variant.id);
                     setQuantity(1);
                     setAdded(false);
                   }}
@@ -98,14 +113,14 @@ export function AddToCartForm({ product }: { product: ProductWithVariants }) {
             type="text"
             placeholder="Ad Soyad"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => onFullNameChange(e.target.value)}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
           <input
             type="text"
             placeholder="Unvan"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => onTitleChange(e.target.value)}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
           <input

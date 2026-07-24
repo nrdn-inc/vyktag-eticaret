@@ -26,12 +26,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/hesap"
-            className="hidden text-sm font-medium text-zinc-600 transition-colors hover:text-brand dark:text-zinc-300 sm:block"
-          >
-            Hesabım
-          </Link>
+          <div className="hidden items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 sm:flex">
+            <Link href="/hesap" className="transition-colors hover:text-brand">
+              Hesabım
+            </Link>
+            <span className="text-zinc-300 dark:text-zinc-700">·</span>
+            <Link href="/hesap/kayit" className="transition-colors hover:text-brand">
+              Kayıt Ol
+            </Link>
+          </div>
           <CartLink />
           <Link
             href="/urunler"
