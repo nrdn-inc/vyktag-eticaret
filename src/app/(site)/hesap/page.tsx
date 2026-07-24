@@ -49,9 +49,12 @@ export default async function HesapPage() {
                     <p className="font-medium">
                       {address.fullName}
                       {address.isDefault && (
-                        <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
-                          Varsayılan
-                        </span>
+                        <>
+                          {" "}
+                          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                            Varsayılan
+                          </span>
+                        </>
                       )}
                     </p>
                     <p className="mt-1 text-zinc-600 dark:text-zinc-400">
