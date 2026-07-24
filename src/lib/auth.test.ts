@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { hashPassword, verifyPassword, createAdminSessionToken, verifyAdminSessionToken } from "@/lib/auth";
+import {
+  hashPassword,
+  verifyPassword,
+  createAdminSessionToken,
+  verifyAdminSessionToken,
+  createCustomerSessionToken,
+  verifyCustomerSessionToken,
+  createEmailVerificationToken,
+  verifyEmailVerificationToken,
+} from "@/lib/auth";
 
 describe("hashPassword / verifyPassword", () => {
   it("verifies the correct password against its hash", async () => {
@@ -69,5 +78,39 @@ describe("createAdminSessionToken / verifyAdminSessionToken", () => {
     expect(verifyAdminSessionToken(null)).toBeNull();
     expect(verifyAdminSessionToken(undefined)).toBeNull();
     expect(verifyAdminSessionToken("")).toBeNull();
+  });
+});
+
+describe("müşteri oturumu ve e-posta doğrulama token'ları", () => {
+  const ORIGINAL_SECRET = "test-secret-anahtar";
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("round-trips a valid customer session token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const token = createCustomerSessionToken("musteri_1");
+    expect(verifyCustomerSessionToken(token)?.userId).toBe("musteri_1");
+  });
+
+  it("round-trips a valid email verification token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const token = createEmailVerificationToken("musteri_1");
+    expect(verifyEmailVerificationToken(token)?.userId).toBe("musteri_1");
+  });
+
+  it("rejects cross-purpose use: an email verification token is not a valid admin/customer session", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const emailToken = createEmailVerificationToken("musteri_1");
+    expect(verifyAdminSessionToken(emailToken)).toBeNull();
+    expect(verifyCustomerSessionToken(emailToken)).toBeNull();
+  });
+
+  it("rejects cross-purpose use: a customer session token is not a valid admin session or email token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const customerToken = createCustomerSessionToken("musteri_1");
+    expect(verifyAdminSessionToken(customerToken)).toBeNull();
+    expect(verifyEmailVerificationToken(customerToken)).toBeNull();
   });
 });

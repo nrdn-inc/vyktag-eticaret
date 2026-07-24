@@ -52,14 +52,15 @@ enum HandoffStatus {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  phone        String?
-  passwordHash String
-  fullName     String
-  role         UserRole @default(CUSTOMER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  phone           String?
+  passwordHash    String
+  fullName        String
+  role            UserRole  @default(CUSTOMER)
+  emailVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   addresses           Address[]
   orders              Order[]

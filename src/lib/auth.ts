@@ -27,7 +27,11 @@ export async function verifyPassword(password: string, stored: string): Promise<
 }
 
 export const ADMIN_SESSION_COOKIE = "vyktag_admin_session";
+export const CUSTOMER_SESSION_COOKIE = "vyktag_musteri_oturum";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 gün
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 saat
+
+type TokenPurpose = "admin-session" | "customer-session" | "email-verify";
 
 function getSessionSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -41,20 +45,27 @@ function sign(value: string): string {
   return createHmac("sha256", getSessionSecret()).update(value).digest("hex");
 }
 
-export interface AdminSessionPayload {
+export interface SignedTokenPayload {
   userId: string;
+  purpose: TokenPurpose;
   exp: number;
 }
 
-/** userId'yi imzalı, süresi dolan bir oturum token'ına (payload.imza) kodlar. */
-export function createAdminSessionToken(userId: string): string {
-  const payload: AdminSessionPayload = { userId, exp: Date.now() + SESSION_TTL_MS };
+/** userId'yi, amacı (purpose) belirtilen ve süresi dolan imzalı bir token'a kodlar. */
+function createSignedToken(userId: string, purpose: TokenPurpose, ttlMs: number): string {
+  const payload: SignedTokenPayload = { userId, purpose, exp: Date.now() + ttlMs };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
   return `${payloadB64}.${sign(payloadB64)}`;
 }
 
-/** Token imzasını ve süresini doğrular; geçerliyse payload'ı döner, değilse null. */
-export function verifyAdminSessionToken(token: string | undefined | null): AdminSessionPayload | null {
+/**
+ * Token imzasını, süresini ve amacını (purpose) doğrular; geçerliyse payload'ı döner, değilse null.
+ * Amaç kontrolü, ör. bir e-posta doğrulama token'ının oturum token'ı olarak kullanılmasını engeller.
+ */
+function verifySignedToken(
+  token: string | undefined | null,
+  expectedPurpose: TokenPurpose,
+): SignedTokenPayload | null {
   if (!token) {
     return null;
   }
@@ -71,12 +82,44 @@ export function verifyAdminSessionToken(token: string | undefined | null): Admin
   }
 
   try {
-    const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8")) as AdminSessionPayload;
-    if (typeof payload.userId !== "string" || typeof payload.exp !== "number" || payload.exp < Date.now()) {
+    const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8")) as SignedTokenPayload;
+    if (
+      typeof payload.userId !== "string" ||
+      typeof payload.exp !== "number" ||
+      payload.exp < Date.now() ||
+      payload.purpose !== expectedPurpose
+    ) {
       return null;
     }
     return payload;
   } catch {
     return null;
   }
+}
+
+export type AdminSessionPayload = SignedTokenPayload;
+
+export function createAdminSessionToken(userId: string): string {
+  return createSignedToken(userId, "admin-session", SESSION_TTL_MS);
+}
+
+export function verifyAdminSessionToken(token: string | undefined | null): SignedTokenPayload | null {
+  return verifySignedToken(token, "admin-session");
+}
+
+export function createCustomerSessionToken(userId: string): string {
+  return createSignedToken(userId, "customer-session", SESSION_TTL_MS);
+}
+
+export function verifyCustomerSessionToken(token: string | undefined | null): SignedTokenPayload | null {
+  return verifySignedToken(token, "customer-session");
+}
+
+/** Kayıt sonrası e-postaya gönderilen doğrulama bağlantısı için 24 saat geçerli token üretir. */
+export function createEmailVerificationToken(userId: string): string {
+  return createSignedToken(userId, "email-verify", EMAIL_VERIFICATION_TTL_MS);
+}
+
+export function verifyEmailVerificationToken(token: string | undefined | null): SignedTokenPayload | null {
+  return verifySignedToken(token, "email-verify");
 }
