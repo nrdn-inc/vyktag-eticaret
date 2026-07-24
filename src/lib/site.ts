@@ -11,6 +11,7 @@ export const mainNav = [
   { label: "Ürünler", href: "/urunler" },
   { label: "Fiyatlandırma", href: "/fiyatlandirma" },
   { label: "SSS", href: "/sss" },
+  { label: "Hakkımızda", href: "/hakkimizda" },
 ] as const;
 
 /** Yasal metinlerde ve iletişim alanlarında kullanılan şirket bilgileri (vergi levhasına göre). */
@@ -26,6 +27,7 @@ export const legalInfo = {
 
 export const legalNav = [
   { label: "Mesafeli Satış Sözleşmesi", href: "/mesafeli-satis-sozlesmesi" },
+  { label: "Teslimat ve İade Şartları", href: "/teslimat-ve-iade" },
   { label: "KVKK Aydınlatma Metni", href: "/kvkk" },
   { label: "Gizlilik ve Çerez Politikası", href: "/gizlilik-politikasi" },
 ] as const;
