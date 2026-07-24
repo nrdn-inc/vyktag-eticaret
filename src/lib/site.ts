@@ -12,6 +12,7 @@ export const mainNav = [
   { label: "Fiyatlandırma", href: "/fiyatlandirma" },
   { label: "SSS", href: "/sss" },
   { label: "Hakkımızda", href: "/hakkimizda" },
+  { label: "Giriş", href: "https://dkartvizit.com" },
 ] as const;
 
 /** Yasal metinlerde ve iletişim alanlarında kullanılan şirket bilgileri (vergi levhasına göre). */

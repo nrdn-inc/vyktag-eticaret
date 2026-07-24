@@ -14,15 +14,20 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 sm:flex">
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-zinc-600 transition-colors hover:text-brand dark:text-zinc-300"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {mainNav.map((item) => {
+            const navLinkClass =
+              "text-sm font-medium text-zinc-600 transition-colors hover:text-brand dark:text-zinc-300";
+            const isExternal = item.href.startsWith("http");
+            return isExternal ? (
+              <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" className={navLinkClass}>
+                {item.label}
+              </a>
+            ) : (
+              <Link key={item.href} href={item.href} className={navLinkClass}>
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-3">
