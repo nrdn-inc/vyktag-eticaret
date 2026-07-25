@@ -155,3 +155,125 @@ export function retrieveCheckoutForm(token: string): Promise<CheckoutFormRetriev
 export function isPaymentSuccessful(result: Pick<CheckoutFormRetrieveResponse, "status" | "paymentStatus">): boolean {
   return result.status === "success" && result.paymentStatus === "SUCCESS";
 }
+
+// --- Abonelik (iyzico Subscription API) ---
+// Not: Bu uçlar iyzico'nun standart Checkout Form'undan ayrı, ayrıca etkinleştirilmesi
+// gereken "Abonelik" ürününü kullanır. Fiyatlandırma Planı (pricingPlanReferenceCode) iyzico
+// panelinde/API'sinde önceden oluşturulmuş olmalıdır — bkz. SubscriptionPlan.iyzicoPricingPlanRef.
+
+export interface SubscriptionAddressInput {
+  contactName: string;
+  city: string;
+  district: string;
+  country: string;
+  address: string;
+  zipCode: string;
+}
+
+export interface SubscriptionCustomerInput {
+  name: string;
+  surname: string;
+  identityNumber: string;
+  email: string;
+  gsmNumber: string;
+  billingAddress: SubscriptionAddressInput;
+  shippingAddress: SubscriptionAddressInput;
+}
+
+export interface BuildSubscriptionCheckoutFormRequestInput {
+  conversationId: string;
+  callbackUrl: string;
+  pricingPlanReferenceCode: string;
+  customer: SubscriptionCustomerInput;
+}
+
+/** iyzico Abonelik Checkout Form Initialize isteği için gövdeyi oluşturur. Saf fonksiyon, ağ çağrısı yapmaz. */
+export function buildSubscriptionCheckoutFormRequest(input: BuildSubscriptionCheckoutFormRequestInput) {
+  return {
+    locale: "tr",
+    conversationId: input.conversationId,
+    callbackUrl: input.callbackUrl,
+    pricingPlanReferenceCode: input.pricingPlanReferenceCode,
+    subscriptionInitialStatus: Iyzipay.SUBSCRIPTION_INITIAL_STATUS.ACTIVE,
+    customer: input.customer,
+  };
+}
+
+/** Abonelik Checkout Form'u başlatır ve ödeme sayfası içeriğini (token + gömülecek script) döner. */
+export function initializeSubscriptionCheckoutForm(
+  input: BuildSubscriptionCheckoutFormRequestInput,
+): Promise<CheckoutFormInitializeResponse> {
+  const request = buildSubscriptionCheckoutFormRequest(input);
+  return new Promise((resolve, reject) => {
+    getClient().subscriptionCheckoutForm.initialize(request as never, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (result.status !== "success") {
+        const message =
+          (result as unknown as IyzicoErrorFields).errorMessage ??
+          "iyzico abonelik başlatma isteği başarısız oldu.";
+        reject(new Error(message));
+        return;
+      }
+      resolve({ token: result.token, checkoutFormContent: result.checkoutFormContent });
+    });
+  });
+}
+
+export interface SubscriptionCheckoutFormData {
+  conversationId?: string;
+  referenceCode: string;
+  customerReferenceCode: string;
+  pricingPlanReferenceCode: string;
+  subscriptionStatus: string;
+}
+
+export interface SubscriptionCheckoutFormRetrieveResponse {
+  status: string;
+  // iyzico'nun v2 uçları sonucu genelde "data" altında sarmalar; SDK'nın gövdeyi olduğu gibi
+  // döndüğü göz önüne alınarak, düz (sarmalanmamış) bir gövdeyle de uyumlu olacak şekilde
+  // her iki şekli de kabul ediyoruz (bkz. extractSubscriptionCheckoutData).
+  data?: SubscriptionCheckoutFormData;
+  conversationId?: string;
+  referenceCode?: string;
+  customerReferenceCode?: string;
+  pricingPlanReferenceCode?: string;
+  subscriptionStatus?: string;
+}
+
+/** Abonelik sorgu sonucunun "data" sarmalı olsun ya da olmasın alan setini normalize eder. */
+export function extractSubscriptionCheckoutData(
+  result: SubscriptionCheckoutFormRetrieveResponse,
+): SubscriptionCheckoutFormData | null {
+  const data = result.data ?? {
+    conversationId: result.conversationId,
+    referenceCode: result.referenceCode ?? "",
+    customerReferenceCode: result.customerReferenceCode ?? "",
+    pricingPlanReferenceCode: result.pricingPlanReferenceCode ?? "",
+    subscriptionStatus: result.subscriptionStatus ?? "",
+  };
+  if (!data.referenceCode || !data.subscriptionStatus) {
+    return null;
+  }
+  return data;
+}
+
+/** Abonelik ödeme sonucunu iyzico'dan sorgular. Abonelik durumu yalnızca bu sunucu-sunucu çağrısına göre belirlenmelidir. */
+export function retrieveSubscriptionCheckoutForm(token: string): Promise<SubscriptionCheckoutFormRetrieveResponse> {
+  return new Promise((resolve, reject) => {
+    getClient().subscriptionCheckoutForm.retrieve({ checkoutFormToken: token } as never, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result as unknown as SubscriptionCheckoutFormRetrieveResponse);
+    });
+  });
+}
+
+/** iyzico sorgu sonucunun abonelik gerçekten aktifleşmiş sayılıp sayılamayacağını belirler. */
+export function isSubscriptionActive(data: Pick<SubscriptionCheckoutFormData, "subscriptionStatus">): boolean {
+  return data.subscriptionStatus === "ACTIVE";
+}

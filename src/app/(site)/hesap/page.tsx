@@ -12,7 +12,12 @@ export const metadata = {
   title: "Hesabım",
 };
 
-export default async function HesapPage() {
+export default async function HesapPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ abonelik?: string }>;
+}) {
+  const { abonelik } = await searchParams;
   const user = await verifyCustomerSession();
   const [addresses, billingProfiles] = await Promise.all([
     prisma.address.findMany({
@@ -27,6 +32,17 @@ export default async function HesapPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+      {abonelik === "basarili" && (
+        <div className="mb-8 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+          Aboneliğiniz başarıyla başlatıldı.
+        </div>
+      )}
+      {abonelik === "hata" && (
+        <div className="mb-8 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          Abonelik işlemi tamamlanamadı. Kartınızdan tutar çekildiyse ve bu mesajı görüyorsanız
+          lütfen bizimle iletişime geçin.
+        </div>
+      )}
       <header className="mb-10 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Hesabım</h1>

@@ -179,6 +179,10 @@ model SubscriptionPlan {
   interval    SubscriptionInterval
   features    Json
   isActive    Boolean              @default(true)
+  // iyzico Abonelik ürününde bu plana karşılık gelen Fiyatlandırma Planı referans kodu.
+  // null ise bu plan iyzico tarafında henüz kurulmamıştır — vitrinde "Yakında" gösterilir
+  // ve satın alma akışı kapalı kalır (bkz. catalog.ts:getActiveSubscriptionPlans).
+  iyzicoPricingPlanRef String?
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 

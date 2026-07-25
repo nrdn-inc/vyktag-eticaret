@@ -74,6 +74,8 @@ export interface SubscriptionPlanSummary {
   priceKurus: number;
   interval: "MONTHLY" | "YEARLY";
   features: string[];
+  /** iyzico tarafında bir Fiyatlandırma Planı tanımlıysa true — yalnızca bu durumda satın alınabilir. */
+  purchasable: boolean;
 }
 
 /** Fiyatlandırma sayfası için aktif abonelik planlarını fiyata göre sıralı döner. */
@@ -91,5 +93,38 @@ export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlanSumm
     priceKurus: plan.priceKurus,
     interval: plan.interval,
     features: plan.features as string[],
+    purchasable: plan.iyzicoPricingPlanRef !== null,
   }));
+}
+
+export interface PurchasableSubscriptionPlan {
+  id: string;
+  slug: string;
+  name: string;
+  priceKurus: number;
+  interval: "MONTHLY" | "YEARLY";
+  iyzicoPricingPlanRef: string;
+}
+
+/**
+ * Abonelik ödeme akışı için tek bir planı getirir. Plan pasifse ya da iyzico tarafında henüz bir
+ * Fiyatlandırma Planı tanımlı değilse (satın alınamaz durumdaysa) null döner — çağıran taraf bunu
+ * "satışa kapalı" olarak ele almalıdır. iyzicoPricingPlanRef yalnızca sunucu tarafında kullanılmalı,
+ * istemciye gönderilmemelidir.
+ */
+export async function getPurchasableSubscriptionPlanBySlug(
+  slug: string,
+): Promise<PurchasableSubscriptionPlan | null> {
+  const plan = await prisma.subscriptionPlan.findFirst({ where: { slug, isActive: true } });
+  if (!plan || !plan.iyzicoPricingPlanRef) {
+    return null;
+  }
+  return {
+    id: plan.id,
+    slug: plan.slug,
+    name: plan.name,
+    priceKurus: plan.priceKurus,
+    interval: plan.interval,
+    iyzicoPricingPlanRef: plan.iyzicoPricingPlanRef,
+  };
 }
