@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 export type CardVariant = "siyah" | "beyaz" | "özel";
+export type CardAccent = "altin" | "gumus";
 
 interface NfcCardProps {
   /** Kartın üzerinde görünen ad; boşsa yer tutucu gösterilir. */
@@ -9,37 +10,40 @@ interface NfcCardProps {
   title?: string;
   /** Kart rengi/teması. */
   variant?: CardVariant;
+  /** Baskı rengi (yonga ve QR vurgu rengi) — varsayılan mevcut görünümü korur. */
+  accent?: CardAccent;
   /** Kart yüzeyinde soldan sağa geçen parlama animasyonu. */
   shine?: boolean;
   className?: string;
   style?: CSSProperties;
 }
 
-interface VariantTheme {
+interface SurfaceTheme {
   surface: string;
   primaryText: string;
   mutedText: string;
-  chip: string;
-  chipLine: string;
   wave: string;
   qr: string;
 }
 
-/** Ürün varyant adını (ör. "Siyah", "Özel Tasarım") kart temasına eşler. */
+interface AccentTheme {
+  chip: string;
+  chipLine: string;
+}
+
+/** Ürün varyant adını (ör. "Siyah · Altın Baskı") kart temasına eşler. */
 export function resolveCardVariant(variantName: string | undefined): CardVariant {
-  const normalized = (variantName ?? "").toLocaleLowerCase("tr-TR");
-  if (normalized.includes("siyah")) return "siyah";
-  if (normalized.includes("beyaz")) return "beyaz";
+  const normalized = (variantName ?? "").trim().toLocaleLowerCase("tr-TR");
+  if (normalized.startsWith("siyah")) return "siyah";
+  if (normalized.startsWith("beyaz")) return "beyaz";
   return "özel";
 }
 
-const THEMES: Record<CardVariant, VariantTheme> = {
+const SURFACE_THEMES: Record<CardVariant, SurfaceTheme> = {
   siyah: {
     surface: "bg-zinc-900 ring-1 ring-white/10",
     primaryText: "text-white",
     mutedText: "text-zinc-400",
-    chip: "from-amber-200 to-amber-400",
-    chipLine: "bg-amber-700/40",
     wave: "text-brand",
     qr: "bg-white/90",
   },
@@ -47,8 +51,6 @@ const THEMES: Record<CardVariant, VariantTheme> = {
     surface: "bg-white ring-1 ring-zinc-200",
     primaryText: "text-zinc-900",
     mutedText: "text-zinc-500",
-    chip: "from-amber-300 to-amber-500",
-    chipLine: "bg-amber-700/40",
     wave: "text-brand-dark",
     qr: "bg-zinc-900/85",
   },
@@ -56,11 +58,15 @@ const THEMES: Record<CardVariant, VariantTheme> = {
     surface: "bg-gradient-to-br from-brand via-brand-dark to-accent ring-1 ring-white/20",
     primaryText: "text-white",
     mutedText: "text-white/75",
-    chip: "from-amber-200 to-amber-400",
-    chipLine: "bg-amber-800/40",
     wave: "text-white",
     qr: "bg-white/90",
   },
+};
+
+// "altin" mevcut (öntanımlı) görünümü birebir korur; "gumus" gümüş varak baskı içindir.
+const ACCENT_THEMES: Record<CardAccent, AccentTheme> = {
+  altin: { chip: "from-amber-200 to-amber-400", chipLine: "bg-amber-700/40" },
+  gumus: { chip: "from-zinc-300 to-zinc-400", chipLine: "bg-zinc-600/40" },
 };
 
 /** Temassız ödeme kartlarındaki NFC dalga simgesi. */
@@ -81,8 +87,8 @@ function NfcWaves({ className }: { className?: string }) {
   );
 }
 
-/** Kartın sol üstündeki altın renkli yonga grafiği. */
-function Chip({ theme }: { theme: VariantTheme }) {
+/** Kartın sol üstündeki renkli yonga grafiği. */
+function Chip({ theme }: { theme: AccentTheme }) {
   return (
     <div
       className={`relative h-6 w-8 overflow-hidden rounded-md bg-gradient-to-br ${theme.chip} sm:h-7 sm:w-10`}
@@ -95,7 +101,7 @@ function Chip({ theme }: { theme: VariantTheme }) {
 }
 
 /** Sağ alttaki dekoratif QR kod deseni (gerçek QR değil, görsel yer tutucu). */
-function QrGlyph({ theme }: { theme: VariantTheme }) {
+function QrGlyph({ theme }: { theme: SurfaceTheme }) {
   // Sabit desen: her render'da aynı görünsün diye rastgele üretilmez.
   const cells = [
     1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1,
@@ -114,23 +120,26 @@ function QrGlyph({ theme }: { theme: VariantTheme }) {
 }
 
 /**
- * Fiziksel Vyktag kartının görsel temsili. Ürün fotoğrafı yerine kullanılır;
- * varyanta göre renk değiştirir ve isteğe bağlı olarak canlı önizleme sunar.
+ * Fiziksel VYKTag kartının görsel temsili. Ürün fotoğrafı yerine kullanılır;
+ * kart rengine (variant) ve baskı rengine (accent) göre renk değiştirir, isteğe
+ * bağlı olarak canlı kişiselleştirme önizlemesi sunar.
  */
 export function NfcCard({
   fullName,
   title,
   variant = "özel",
+  accent = "altin",
   shine = false,
   className = "",
   style,
 }: NfcCardProps) {
-  const theme = THEMES[variant];
+  const surface = SURFACE_THEMES[variant];
+  const accentTheme = ACCENT_THEMES[accent];
 
   return (
     <div
       style={style}
-      className={`relative isolate flex aspect-[1.586/1] w-full flex-col justify-between overflow-hidden rounded-2xl p-4 shadow-xl transition-colors duration-300 sm:p-5 ${theme.surface} ${className}`}
+      className={`relative isolate flex aspect-[1.586/1] w-full flex-col justify-between overflow-hidden rounded-2xl p-4 shadow-xl transition-colors duration-300 sm:p-5 ${surface.surface} ${className}`}
     >
       {shine && (
         <span
@@ -140,25 +149,25 @@ export function NfcCard({
       )}
 
       <div className="flex items-start justify-between">
-        <Chip theme={theme} />
-        <NfcWaves className={`h-6 w-6 sm:h-7 sm:w-7 ${theme.wave}`} />
+        <Chip theme={accentTheme} />
+        <NfcWaves className={`h-6 w-6 sm:h-7 sm:w-7 ${surface.wave}`} />
       </div>
 
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className={`truncate text-sm font-bold sm:text-base ${theme.primaryText}`}>
+          <p className={`truncate text-sm font-bold sm:text-base ${surface.primaryText}`}>
             {fullName?.trim() || "Ad Soyad"}
           </p>
-          <p className={`truncate text-[11px] sm:text-xs ${theme.mutedText}`}>
+          <p className={`truncate text-[11px] sm:text-xs ${surface.mutedText}`}>
             {title?.trim() || "Unvan"}
           </p>
           <p
-            className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${theme.mutedText}`}
+            className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${surface.mutedText}`}
           >
-            vyktag
+            VYKTag
           </p>
         </div>
-        <QrGlyph theme={theme} />
+        <QrGlyph theme={surface} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = {
   title: "Sıkça Sorulan Sorular",
-  description: "Vyktag NFC dijital kartvizitler hakkında sık sorulan sorular ve yanıtları.",
+  description: "VYKTag NFC dijital kartvizitler hakkında sık sorulan sorular ve yanıtları.",
 };
 
 export default function FaqPage() {

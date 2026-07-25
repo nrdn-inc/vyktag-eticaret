@@ -28,7 +28,7 @@ export function ComparisonTable() {
         <div className="px-6 py-4 text-sm font-semibold text-zinc-500">Özellik</div>
         <div className="px-6 py-4 text-sm font-semibold text-zinc-500">Basılı kartvizit</div>
         <div className="flex items-center gap-2 bg-brand/10 px-6 py-4 text-sm font-semibold text-brand-dark">
-          Vyktag dijital kartvizit
+          VYKTag dijital kartvizit
         </div>
       </div>
 

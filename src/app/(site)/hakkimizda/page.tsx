@@ -8,7 +8,7 @@ import { NfcCard } from "@/components/visuals/NfcCard";
 
 export const metadata: Metadata = {
   title: "Hakkımızda",
-  description: "Vyktag, VYK Teknoloji'nin NFC dijital kartvizit markasıdır. Kim olduğumuzu ve ne yaptığımızı öğrenin.",
+  description: "VYKTag, VYK Teknoloji'nin NFC dijital kartvizit markasıdır. Kim olduğumuzu ve ne yaptığımızı öğrenin.",
 };
 
 export default function HakkimizdaPage() {
@@ -25,13 +25,13 @@ export default function HakkimizdaPage() {
               Kartvizitin geleceğini üretiyoruz
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400">
-              {legalInfo.companyLegalName}, Vyktag markasıyla NFC teknolojisi kullanan dijital
+              {legalInfo.companyLegalName}, VYKTag markasıyla NFC teknolojisi kullanan dijital
               kartvizit ürünleri geliştiren ve satan bir teknoloji şirketidir.
             </p>
           </div>
           <div className="mx-auto w-full max-w-xs">
             <div className="animate-float">
-              <NfcCard variant="özel" fullName="Vyktag" title="VYK Teknoloji" shine />
+              <NfcCard variant="özel" fullName="VYKTag" title="VYK Teknoloji" shine />
             </div>
           </div>
         </div>
@@ -46,12 +46,12 @@ export default function HakkimizdaPage() {
               <p>
                 Kağıt kartvizitin yerini alan, tek dokunuşla iletişim bilgilerinizi, sosyal medya
                 hesaplarınızı ve tüm bağlantılarınızı paylaşmanızı sağlayan fiziksel NFC kartlar
-                üretiyoruz. Her Vyktag kartı, dkartvizit.com üzerinde barındırılan bir dijital
+                üretiyoruz. Her VYKTag kartı, dkartvizit.com üzerinde barındırılan bir dijital
                 profile bağlıdır; siparişiniz sonrası bu profili sizin için biz açar ve hazırlarız.
               </p>
               <p>
                 Ürün gamımızda standart ve kişiye özel tasarımlı kartlar, anahtarlığa takılabilen
-                kompakt Vyktag Tag ve telefonun arkasına yapıştırılan Vyktag Phonecard bulunur.
+                kompakt VYKTag Tag ve telefonun arkasına yapıştırılan VYKTag Phonecard bulunur.
                 Daha fazla bilgi için{" "}
                 <Link href="/urunler" className="font-medium text-brand hover:text-brand-dark">
                   ürünlerimizi

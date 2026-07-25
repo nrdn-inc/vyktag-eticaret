@@ -1,10 +1,10 @@
 /** Site geneli sabit bilgiler ve navigasyon menüsü. */
 export const siteConfig = {
-  name: "Vyktag",
+  name: "VYKTag",
   company: "VYK Teknoloji",
   tagline: "Tek dokunuşla dijital kartvizit",
   description:
-    "Vyktag NFC dijital kartvizitleri ile iletişim bilgilerinizi tek dokunuşla paylaşın. Fiziksel kartlar, telefon etiketleri ve premium dijital profil.",
+    "VYKTag NFC dijital kartvizitleri ile iletişim bilgilerinizi tek dokunuşla paylaşın. Fiziksel kartlar, telefon etiketleri ve premium dijital profil.",
 } as const;
 
 export const mainNav = [

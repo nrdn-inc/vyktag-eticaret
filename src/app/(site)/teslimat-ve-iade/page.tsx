@@ -4,7 +4,7 @@ import { legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Teslimat ve İade Şartları",
-  description: "Vyktag siparişlerinde teslimat süreleri ve cayma/iade koşulları.",
+  description: "VYKTag siparişlerinde teslimat süreleri ve cayma/iade koşulları.",
 };
 
 export default function TeslimatVeIadePage() {

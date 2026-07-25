@@ -13,7 +13,7 @@ function makeItem(overrides: Partial<CartItem> = {}): CartItem {
   return {
     variantId: "v1",
     productSlug: "vyktag-kart",
-    productName: "Vyktag Kart",
+    productName: "VYKTag Kart",
     variantName: "Siyah",
     unitPriceKurus: 59990,
     quantity: 1,

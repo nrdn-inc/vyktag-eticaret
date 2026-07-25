@@ -68,7 +68,7 @@ export default async function Home() {
       <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
         <Reveal>
           <SectionHeading
-            eyebrow="Neden Vyktag?"
+            eyebrow="Neden VYKTag?"
             title="Kağıt kartvizitin yapamadığı her şey"
             text="Tek bir NFC kart; sınırsız güncellenebilen, ölçümlenebilen ve markanızı her zaman güncel temsil eden bir sisteme dönüşür."
           />

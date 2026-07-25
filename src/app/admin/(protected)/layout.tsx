@@ -15,7 +15,7 @@ export default async function AdminLayout({
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-6">
             <Link href="/admin/siparisler" className="font-bold tracking-tight">
-              Vyktag Yönetim
+              VYKTag Yönetim
             </Link>
             <nav className="flex items-center gap-4 text-sm">
               <Link href="/admin/siparisler" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">

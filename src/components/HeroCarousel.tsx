@@ -127,7 +127,7 @@ export function HeroCarousel() {
             <ProductPhoto
               key={index}
               src={CARD_VARIANT_PHOTOS[slide.variant]}
-              alt="Vyktag NFC kart — gerçek ürün fotoğrafı"
+              alt="VYKTag NFC kart — gerçek ürün fotoğrafı"
               priority={index === 0}
               sizes="(min-width: 1024px) 28rem, 90vw"
               className="animate-fade-up"

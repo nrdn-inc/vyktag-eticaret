@@ -1,7 +1,7 @@
 import type { CardVariant } from "@/components/visuals/NfcCard";
 
 /**
- * Gerçek ürün stüdyo fotoğrafları. Yalnızca Vyktag Kart için mevcuttur (Tag ve Phonecard
+ * Gerçek ürün stüdyo fotoğrafları. Yalnızca VYKTag Kart için mevcuttur (Tag ve Phonecard
  * farklı bir form faktörüne sahip olduğundan bu fotoğraflarla temsil edilemez).
  */
 export const CARD_VARIANT_PHOTOS: Record<CardVariant, string> = {

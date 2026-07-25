@@ -1,9 +1,9 @@
 @AGENTS.md
 
-# CLAUDE.md — Vyktag E-Ticaret
+# CLAUDE.md — VYKTag E-Ticaret
 
 ## Proje
-NFC dijital kartvizit **satış & pazarlama mağazası** (marka: Vyktag, firma: VYK Teknoloji).
+NFC dijital kartvizit **satış & pazarlama mağazası** (marka: VYKTag, firma: VYK Teknoloji).
 Yalnızca mağaza + pazarlama. Profil/SaaS platformu ayrı ve hazır: **dkartvizit.com** — burada yeniden yazma.
 Referans rakip: idycard.com.
 

@@ -14,10 +14,10 @@ export async function sendVerificationEmail(userId: string, email: string, fullN
 
   await sendEmail({
     to: email,
-    subject: "Vyktag hesabınızı doğrulayın",
+    subject: "VYKTag hesabınızı doğrulayın",
     html: `
       <p>Merhaba ${escapeHtml(fullName)},</p>
-      <p>Vyktag hesabınızı doğrulamak ve şifrenizi belirlemek için aşağıdaki bağlantıya tıklayın:</p>
+      <p>VYKTag hesabınızı doğrulamak ve şifrenizi belirlemek için aşağıdaki bağlantıya tıklayın:</p>
       <p><a href="${verifyUrl}">${verifyUrl}</a></p>
       <p>Bu bağlantı 24 saat geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.</p>
     `,
@@ -32,10 +32,10 @@ export async function sendPasswordResetEmail(userId: string, email: string, full
 
   await sendEmail({
     to: email,
-    subject: "Vyktag şifre sıfırlama isteğiniz",
+    subject: "VYKTag şifre sıfırlama isteğiniz",
     html: `
       <p>Merhaba ${escapeHtml(fullName)},</p>
-      <p>Vyktag hesabınızın şifresini sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+      <p>VYKTag hesabınızın şifresini sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
       <p><a href="${resetUrl}">${resetUrl}</a></p>
       <p>Bu bağlantı 1 saat geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz; şifreniz değişmeyecektir.</p>
     `,
@@ -46,7 +46,7 @@ export async function sendPasswordResetEmail(userId: string, email: string, full
 export async function sendTwoFactorCode(email: string, fullName: string, code: string): Promise<void> {
   await sendEmail({
     to: email,
-    subject: "Vyktag giriş doğrulama kodunuz",
+    subject: "VYKTag giriş doğrulama kodunuz",
     html: `
       <p>Merhaba ${escapeHtml(fullName)},</p>
       <p>Hesabınıza giriş yapmak için doğrulama kodunuz:</p>

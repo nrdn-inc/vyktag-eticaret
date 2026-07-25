@@ -8,11 +8,14 @@ describe("seedCatalog", () => {
     await seedCatalog(prisma);
   });
 
-  it("creates every product with its variants", async () => {
+  it("creates every product with its (active) variants", async () => {
     for (const productSeed of CARD_PRODUCTS) {
       const product = await prisma.product.findUnique({
         where: { slug: productSeed.slug },
-        include: { variants: true },
+        // Yalnızca aktif varyantlar sayılır: geçmiş bir şema geçişinden kalan deaktive
+        // SKU'lar (bkz. VYK-KART-SIYAH/BEYAZ/CUSTOM) siparişlerle referans bütünlüğü
+        // için veritabanında kalır ama seed listesinin bir parçası değildir.
+        include: { variants: { where: { isActive: true } } },
       });
 
       expect(product).not.toBeNull();

@@ -7,21 +7,23 @@ import type { ProductWithVariants } from "@/lib/catalog";
 const singleVariant: ProductWithVariants = {
   id: "p1",
   slug: "vyktag-tag",
-  name: "Vyktag Tag",
+  name: "VYKTag Tag",
   description: "Kompakt NFC etiket.",
   minPriceKurus: 39990,
-  variants: [{ id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10 }],
+  variants: [
+    { id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10, attributes: null },
+  ],
 };
 
 const multiVariant: ProductWithVariants = {
   id: "p2",
   slug: "vyktag-kart",
-  name: "Vyktag Kart",
+  name: "VYKTag Kart",
   description: "NFC kart.",
   minPriceKurus: 59990,
   variants: [
-    { id: "v2", name: "Siyah", sku: "VYK-KART-SIYAH", priceKurus: 59990, stock: 10 },
-    { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5 },
+    { id: "v2", name: "Siyah", sku: "VYK-KART-SIYAH", priceKurus: 59990, stock: 10, attributes: null },
+    { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5, attributes: null },
   ],
 };
 
@@ -29,15 +31,17 @@ const outOfStock: ProductWithVariants = {
   ...singleVariant,
   id: "p3",
   slug: "vyktag-phonecard",
-  name: "Vyktag Phonecard",
-  variants: [{ id: "v4", name: "Standart", sku: "VYK-PHONE-STD", priceKurus: 44990, stock: 0 }],
+  name: "VYKTag Phonecard",
+  variants: [
+    { id: "v4", name: "Standart", sku: "VYK-PHONE-STD", priceKurus: 44990, stock: 0, attributes: null },
+  ],
 };
 
 describe("ProductCard", () => {
   it("shows a single fixed price without a starting-from label", () => {
     render(<ProductCard product={singleVariant} />);
 
-    expect(screen.getByRole("heading", { name: "Vyktag Tag" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "VYKTag Tag" })).toBeInTheDocument();
     expect(screen.getByText("₺399,90")).toBeInTheDocument();
     expect(screen.queryByText("başlangıç fiyatı")).not.toBeInTheDocument();
   });

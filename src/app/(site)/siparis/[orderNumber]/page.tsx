@@ -79,7 +79,7 @@ export default async function OrderStatusPage({
               <span>
                 {item.productVariant
                   ? `${item.productVariant.product.name} (${item.productVariant.name})`
-                  : "Vyktag ürünü"}{" "}
+                  : "VYKTag ürünü"}{" "}
                 ×{item.quantity}
               </span>
               <span className="font-medium">{formatPriceTRY(item.totalKurus)}</span>

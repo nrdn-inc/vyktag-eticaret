@@ -1,6 +1,6 @@
-# Vyktag E-Ticaret
+# VYKTag E-Ticaret
 
-NFC dijital kartvizit **satış & pazarlama** mağazası. Ana firma: **VYK Teknoloji** · Marka: **Vyktag**.
+NFC dijital kartvizit **satış & pazarlama** mağazası. Ana firma: **VYK Teknoloji** · Marka: **VYKTag**.
 
 Bu proje yalnızca mağaza + pazarlama katmanıdır. Dijital profil/SaaS platformu ayrı ve hazırdır (dkartvizit.com) — burada yeniden yazılmaz.
 

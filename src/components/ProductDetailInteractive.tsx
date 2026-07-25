@@ -22,6 +22,7 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
         <CardPreview
           productName={product.name}
           variantName={selectedVariant.name}
+          variantAttributes={selectedVariant.attributes}
           fullName={fullName}
           title={title}
         />

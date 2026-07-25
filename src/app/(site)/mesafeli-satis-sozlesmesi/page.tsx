@@ -3,7 +3,7 @@ import { legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Mesafeli Satış Sözleşmesi",
-  description: "Vyktag mağazasından yapılan alışverişlerde geçerli mesafeli satış sözleşmesi ve cayma hakkı koşulları.",
+  description: "VYKTag mağazasından yapılan alışverişlerde geçerli mesafeli satış sözleşmesi ve cayma hakkı koşulları.",
 };
 
 export default function MesafeliSatisSozlesmesiPage() {

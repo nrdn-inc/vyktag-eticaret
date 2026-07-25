@@ -4,7 +4,7 @@ import { formatPriceTRY } from "@/lib/format";
 import { StockForm } from "./StockForm";
 
 export const metadata: Metadata = {
-  title: "Stok | Vyktag Yönetim",
+  title: "Stok | VYKTag Yönetim",
 };
 
 export const dynamic = "force-dynamic";

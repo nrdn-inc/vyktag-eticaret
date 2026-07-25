@@ -13,17 +13,29 @@ describe("getActiveProducts", () => {
     expect(kart?.variants.length).toBeGreaterThan(0);
     expect(kart?.minPriceKurus).toBe(Math.min(...(kart?.variants.map((v) => v.priceKurus) ?? [])));
   });
+
+  it("excludes temporarily hidden products (VYKTag Tag/Phonecard)", async () => {
+    const products = await getActiveProducts();
+    expect(products.some((p) => p.slug === "vyktag-tag")).toBe(false);
+    expect(products.some((p) => p.slug === "vyktag-phonecard")).toBe(false);
+  });
 });
 
 describe("getProductBySlug", () => {
   it("returns the matching product with its variants", async () => {
-    const product = await getProductBySlug("vyktag-tag");
-    expect(product?.name).toBe("Vyktag Tag");
-    expect(product?.variants.some((v) => v.sku === "VYK-TAG-STD")).toBe(true);
+    const product = await getProductBySlug("vyktag-kart");
+    expect(product?.name).toBe("VYKTag Kart");
+    expect(product?.variants.some((v) => v.sku === "VYK-KART-SIYAH-GUMUS")).toBe(true);
   });
 
   it("returns null for an unknown slug", async () => {
     const product = await getProductBySlug("olmayan-urun");
+    expect(product).toBeNull();
+  });
+
+  // VYKTag Tag ve Phonecard şimdilik gizli (isActive: false) — ileride tekrar açılacak.
+  it("returns null for a temporarily hidden product", async () => {
+    const product = await getProductBySlug("vyktag-tag");
     expect(product).toBeNull();
   });
 });

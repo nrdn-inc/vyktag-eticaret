@@ -56,7 +56,7 @@ export const HOW_IT_WORKS: HowItWorksStep[] = [
   {
     step: "01",
     title: "Kartınızı seçin",
-    text: "Vyktag Kart, Tag veya Phonecard arasından size uygun olanı seçin. Dilerseniz logonuzu ve kurumsal tasarımınızı ekleyerek kişiselleştirin.",
+    text: "VYKTag Kart, Tag veya Phonecard arasından size uygun olanı seçin. Dilerseniz logonuzu ve kurumsal tasarımınızı ekleyerek kişiselleştirin.",
   },
   {
     step: "02",
@@ -169,7 +169,7 @@ export interface FaqItem {
 /** Ürün ve platform hakkında sık sorulan sorular (mağaza + broşür sayfa 10). */
 export const FAQ: FaqItem[] = [
   {
-    q: "Vyktag kart nasıl çalışır?",
+    q: "VYKTag kart nasıl çalışır?",
     a: "Kartın içinde bir NFC çipi bulunur. Kartı NFC destekli bir telefona yaklaştırdığınızda dijital kartvizit profiliniz otomatik olarak açılır. NFC desteklemeyen telefonlar için kartın üzerindeki QR kod da aynı işi görür.",
   },
   {

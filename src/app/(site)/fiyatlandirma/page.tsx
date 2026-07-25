@@ -12,7 +12,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Fiyatlandırma",
-  description: "Vyktag kart fiyatları ve premium abonelik planları. Tek seferlik alım veya aylık/yıllık abonelik.",
+  description: "VYKTag kart fiyatları ve premium abonelik planları. Tek seferlik alım veya aylık/yıllık abonelik.",
 };
 
 /** Abonelik periyodunu Türkçe kısa eke çevirir. */
@@ -171,7 +171,7 @@ export default async function PricingPage() {
                 Neden basılı kartvizitten daha ekonomik?
               </h2>
               <p className="mt-3 text-zinc-600 dark:text-zinc-400">
-                Basılı kartvizit her bilgi değişikliğinde yeniden maliyet çıkarır. Vyktag&apos;te
+                Basılı kartvizit her bilgi değişikliğinde yeniden maliyet çıkarır. VYKTag&apos;te
                 güncelleme ücretsizdir.
               </p>
             </div>

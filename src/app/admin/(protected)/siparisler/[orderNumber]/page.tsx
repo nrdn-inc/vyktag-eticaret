@@ -10,7 +10,7 @@ import { TrackingForm } from "./TrackingForm";
 import { HandoffForm } from "./HandoffForm";
 
 export const metadata: Metadata = {
-  title: "Sipariş Detayı | Vyktag Yönetim",
+  title: "Sipariş Detayı | VYKTag Yönetim",
 };
 
 export const dynamic = "force-dynamic";

@@ -1,14 +1,18 @@
-import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
+import { NfcCard } from "@/components/visuals/NfcCard";
+import { resolveVariantVisual } from "@/lib/product-variant-attributes";
 
 interface CardPreviewProps {
   productName: string;
   variantName: string;
+  variantAttributes: unknown;
   fullName: string;
   title: string;
 }
 
-/** Ürün detay sayfasında kişiselleştirme alanlarına göre canlı güncellenen kart önizlemesi. */
-export function CardPreview({ productName, variantName, fullName, title }: CardPreviewProps) {
+/** Ürün detay sayfasında kart rengi/baskı rengi ve kişiselleştirme alanlarına göre canlı güncellenen kart önizlemesi. */
+export function CardPreview({ productName, variantName, variantAttributes, fullName, title }: CardPreviewProps) {
+  const { cardVariant, accent } = resolveVariantVisual({ name: variantName, attributes: variantAttributes });
+
   return (
     <div>
       <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-border-soft bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
@@ -24,12 +28,7 @@ export function CardPreview({ productName, variantName, fullName, title }: CardP
         </div>
 
         <div className="tilt-card relative w-full max-w-[20rem]">
-          <NfcCard
-            variant={resolveCardVariant(variantName)}
-            fullName={fullName}
-            title={title}
-            shine
-          />
+          <NfcCard variant={cardVariant} accent={accent} fullName={fullName} title={title} shine />
         </div>
       </div>
 

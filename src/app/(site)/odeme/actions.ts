@@ -89,7 +89,7 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
         id: item.id,
         name: item.productVariant
           ? `${item.productVariant.product.name} - ${item.productVariant.name}`
-          : "Vyktag ürünü",
+          : "VYKTag ürünü",
         category1: "Dijital Kartvizit",
         itemType: "PHYSICAL",
         priceKurus: item.totalKurus,

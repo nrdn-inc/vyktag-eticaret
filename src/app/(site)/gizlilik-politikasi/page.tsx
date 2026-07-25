@@ -3,7 +3,7 @@ import { legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Gizlilik ve Çerez Politikası",
-  description: "Vyktag mağazasında kişisel verilerin ve çerezlerin nasıl kullanıldığına ilişkin gizlilik politikası.",
+  description: "VYKTag mağazasında kişisel verilerin ve çerezlerin nasıl kullanıldığına ilişkin gizlilik politikası.",
 };
 
 export default function GizlilikPolitikasiPage() {
@@ -23,7 +23,7 @@ export default function GizlilikPolitikasiPage() {
           </h2>
           <p>
             Bu politika, <strong>{legalInfo.companyLegalName}</strong>{" "}
-            (&quot;Vyktag&quot;) tarafından işletilen vyktag.com.tr sitesini ziyaret eden veya
+            (&quot;VYKTag&quot;) tarafından işletilen vyktag.com.tr sitesini ziyaret eden veya
             sitemizden alışveriş yapan kullanıcıların kişisel verilerinin ve çerezlerin nasıl
             toplandığını, kullanıldığını ve korunduğunu açıklar. Kişisel verilerin işlenmesine ilişkin
             ayrıntılı bilgi için{" "}

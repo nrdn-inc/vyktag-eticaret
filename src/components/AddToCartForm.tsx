@@ -6,7 +6,9 @@ import type { ProductWithVariants } from "@/lib/catalog";
 import type { CartItem, CartPersonalization } from "@/lib/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/stock";
+import { parseVariantAttributes } from "@/lib/product-variant-attributes";
 import { useCart } from "@/components/CartProvider";
+import { CardOptionSelector } from "@/components/CardOptionSelector";
 
 // Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
 const LOW_STOCK_THRESHOLD = 10;
@@ -45,6 +47,11 @@ export function AddToCartForm({
   const selectedVariant =
     product.variants.find((v) => v.id === variantId) ?? product.variants[0];
 
+  // Tüm varyantlar yapılandırılmış attributes taşıyorsa (VYKTag Kart), kart rengi + baskı
+  // rengi + özel tasarım seçicisi gösterilir; aksi halde (Tag/Phonecard gibi tek boyutlu
+  // varyantlarda) eski düz "Seçenek" buton listesi kullanılır.
+  const hasStructuredOptions = product.variants.every((v) => parseVariantAttributes(v.attributes) !== null);
+
   const inStock = isVariantPurchasable(selectedVariant.stock);
   const atMaxQuantity = quantity >= selectedVariant.stock;
   const isLowStock = inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
@@ -75,35 +82,47 @@ export function AddToCartForm({
   return (
     <div className="space-y-6">
       {/* Varyant seçimi */}
-      {product.variants.length > 1 && (
-        <div>
-          <label className="text-sm font-semibold">Seçenek</label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {product.variants.map((variant) => {
-              const variantOutOfStock = !isVariantPurchasable(variant.stock);
-              return (
-                <button
-                  key={variant.id}
-                  type="button"
-                  disabled={variantOutOfStock}
-                  onClick={() => {
-                    onVariantChange(variant.id);
-                    setQuantity(1);
-                    setAdded(false);
-                  }}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                    variant.id === variantId
-                      ? "border-brand bg-brand text-white"
-                      : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-                  }`}
-                >
-                  {variant.name} · {formatPriceTRY(variant.priceKurus)}
-                  {variantOutOfStock && " · Tükendi"}
-                </button>
-              );
-            })}
+      {hasStructuredOptions ? (
+        <CardOptionSelector
+          variants={product.variants}
+          selectedVariantId={selectedVariant.id}
+          onSelect={(id) => {
+            onVariantChange(id);
+            setQuantity(1);
+            setAdded(false);
+          }}
+        />
+      ) : (
+        product.variants.length > 1 && (
+          <div>
+            <label className="text-sm font-semibold">Seçenek</label>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {product.variants.map((variant) => {
+                const variantOutOfStock = !isVariantPurchasable(variant.stock);
+                return (
+                  <button
+                    key={variant.id}
+                    type="button"
+                    disabled={variantOutOfStock}
+                    onClick={() => {
+                      onVariantChange(variant.id);
+                      setQuantity(1);
+                      setAdded(false);
+                    }}
+                    className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      variant.id === variantId
+                        ? "border-brand bg-brand text-white"
+                        : "border-zinc-300 hover:border-brand dark:border-zinc-700"
+                    }`}
+                  >
+                    {variant.name} · {formatPriceTRY(variant.priceKurus)}
+                    {variantOutOfStock && " · Tükendi"}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* Kişiselleştirme */}

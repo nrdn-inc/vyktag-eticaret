@@ -12,6 +12,7 @@ export interface ProductWithVariants {
     sku: string;
     priceKurus: number;
     stock: number;
+    attributes: unknown;
   }[];
 }
 

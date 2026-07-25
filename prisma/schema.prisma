@@ -133,7 +133,7 @@ model BillingProfile {
   @@map("billing_profiles")
 }
 
-// Catalog item, e.g. "Vyktag Kart". Actual price/stock live on ProductVariant
+// Catalog item, e.g. "VYKTag Kart". Actual price/stock live on ProductVariant
 // so a product can offer color/material options (or just a single variant).
 model Product {
   id          String   @id @default(cuid())
@@ -159,6 +159,10 @@ model ProductVariant {
   priceKurus Int
   stock      Int     @default(0)
   isActive   Boolean @default(true)
+  // Yapılandırılmış varyant seçenekleri (ör. { cardColor: "Siyah", printColor: "Altın",
+  // customDesign: true }) — VYKTag Kart'ta kart rengi + baskı rengi seçicisini besler.
+  // Bu alana sahip olmayan (null) ürünlerde eski düz "Seçenek" listesi kullanılır.
+  attributes Json?
 
   orderItems OrderItem[]
 

@@ -15,7 +15,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Ürünler",
-  description: "Vyktag NFC kartları, etiketleri ve telefon kartları. Renk ve tasarım seçenekleriyle.",
+  description: "VYKTag NFC kartları, etiketleri ve telefon kartları. Renk ve tasarım seçenekleriyle.",
 };
 
 export default async function ProductsPage() {

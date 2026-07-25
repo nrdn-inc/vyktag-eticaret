@@ -50,7 +50,7 @@ function makeInput(): BuildCheckoutFormRequestInput {
     basketItems: [
       {
         id: "item_1",
-        name: "Vyktag Kart - Özel Tasarım",
+        name: "VYKTag Kart - Özel Tasarım",
         category1: "Dijital Kartvizit",
         itemType: "PHYSICAL",
         priceKurus: 1599_80,

@@ -6,7 +6,7 @@ import { formatPriceTRY } from "@/lib/format";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/order-status";
 
 export const metadata: Metadata = {
-  title: "Siparişler | Vyktag Yönetim",
+  title: "Siparişler | VYKTag Yönetim",
 };
 
 export const dynamic = "force-dynamic";

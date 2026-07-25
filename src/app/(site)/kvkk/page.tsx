@@ -3,7 +3,7 @@ import { legalInfo } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "KVKK Aydınlatma Metni",
-  description: "Vyktag / VYK Teknoloji kişisel verilerin korunması kanunu (KVKK) aydınlatma metni.",
+  description: "VYKTag / VYK Teknoloji kişisel verilerin korunması kanunu (KVKK) aydınlatma metni.",
 };
 
 export default function KvkkPage() {
@@ -25,7 +25,7 @@ export default function KvkkPage() {
           <p>
             İşbu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu&apos;nun (&quot;Kanun&quot;)
             10. maddesi uyarınca veri sorumlusu sıfatıyla <strong>{legalInfo.companyLegalName}</strong>{" "}
-            (&quot;Vyktag&quot; / &quot;Şirket&quot;) tarafından,{" "}
+            (&quot;VYKTag&quot; / &quot;Şirket&quot;) tarafından,{" "}
             {`${legalInfo.address} adresinde faaliyet gösteren şirketimizce işlenen kişisel verileriniz hakkında sizleri bilgilendirmek amacıyla hazırlanmıştır.`}
           </p>
         </section>
