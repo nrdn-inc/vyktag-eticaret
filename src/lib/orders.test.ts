@@ -52,4 +52,23 @@ describe("sanitizePersonalization", () => {
     });
     expect(result).toEqual({ fullName: "Ayşe" });
   });
+
+  it("keeps a well-formed, size-limited logo data URL", () => {
+    const logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAE=";
+    expect(sanitizePersonalization({ fullName: "Ayşe", logo })).toEqual({ fullName: "Ayşe", logo });
+  });
+
+  it("drops an oversized logo instead of truncating it (truncation would corrupt the base64 data)", () => {
+    const hugeLogo = "data:image/png;base64," + "A".repeat(500_000);
+    const result = sanitizePersonalization({ fullName: "Ayşe", logo: hugeLogo });
+    expect(result).toEqual({ fullName: "Ayşe" });
+  });
+
+  it("drops a logo value that isn't a valid rasterized image data URL (e.g. svg/html/script)", () => {
+    const result = sanitizePersonalization({
+      fullName: "Ayşe",
+      logo: "data:text/html;base64,PHNjcmlwdD48L3NjcmlwdD4=",
+    });
+    expect(result).toEqual({ fullName: "Ayşe" });
+  });
 });

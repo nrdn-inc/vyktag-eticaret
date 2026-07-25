@@ -19,7 +19,7 @@ const VARIANTS: ProductWithVariants["variants"] = [
 describe("CardOptionSelector", () => {
   it("switches to the white-card variant with the same print color when card color changes", () => {
     const onSelect = vi.fn();
-    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-altin" onSelect={onSelect} />);
+    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-altin" onSelect={onSelect} onLogoChange={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Beyaz" }));
     expect(onSelect).toHaveBeenCalledWith("beyaz-altin");
@@ -27,7 +27,7 @@ describe("CardOptionSelector", () => {
 
   it("falls back to the first available print color when the current one doesn't exist for the new card color", () => {
     const onSelect = vi.fn();
-    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-gumus" onSelect={onSelect} />);
+    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-gumus" onSelect={onSelect} onLogoChange={vi.fn()} />);
 
     // Beyaz'da "Gümüş Baskı" yok — sıradaki uygun seçenek olan "Altın Baskı"ya düşmeli.
     fireEvent.click(screen.getByRole("button", { name: "Beyaz" }));
@@ -36,7 +36,7 @@ describe("CardOptionSelector", () => {
 
   it("preserves the custom design flag when switching print color", () => {
     const onSelect = vi.fn();
-    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-gumus-ozel" onSelect={onSelect} />);
+    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="siyah-gumus-ozel" onSelect={onSelect} onLogoChange={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Altın Baskı" }));
     expect(onSelect).toHaveBeenCalledWith("siyah-altin-ozel");
@@ -44,17 +44,45 @@ describe("CardOptionSelector", () => {
 
   it("toggles custom design on and off for the same card/print color", () => {
     const onSelect = vi.fn();
-    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-altin" onSelect={onSelect} />);
+    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-altin" onSelect={onSelect} onLogoChange={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("checkbox"));
     expect(onSelect).toHaveBeenCalledWith("beyaz-altin-ozel");
   });
 
   it("only offers the print colors that exist for the currently selected card color", () => {
-    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-siyah" onSelect={vi.fn()} />);
+    render(<CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-siyah" onSelect={vi.fn()} onLogoChange={vi.fn()} />);
 
     expect(screen.getByRole("button", { name: /Siyah Baskı/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Altın Baskı/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Gümüş Baskı/ })).not.toBeInTheDocument();
+  });
+
+  it("only shows the logo upload control when custom design is selected", () => {
+    const { rerender } = render(
+      <CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-altin" onSelect={vi.fn()} onLogoChange={vi.fn()} />,
+    );
+    expect(screen.queryByText("Logo yükle")).not.toBeInTheDocument();
+
+    rerender(
+      <CardOptionSelector variants={VARIANTS} selectedVariantId="beyaz-altin-ozel" onSelect={vi.fn()} onLogoChange={vi.fn()} />,
+    );
+    expect(screen.getByText("Logo yükle")).toBeInTheDocument();
+  });
+
+  it("clears the uploaded logo when custom design is unchecked", () => {
+    const onLogoChange = vi.fn();
+    render(
+      <CardOptionSelector
+        variants={VARIANTS}
+        selectedVariantId="beyaz-altin-ozel"
+        onSelect={vi.fn()}
+        logoDataUrl="data:image/png;base64,AAAA"
+        onLogoChange={onLogoChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("checkbox"));
+    expect(onLogoChange).toHaveBeenCalledWith(undefined);
   });
 });

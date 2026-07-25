@@ -57,9 +57,17 @@ export default function CartPage() {
               className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="font-semibold">
+                <h2 className="flex items-center gap-2 font-semibold">
+                  {personalization.logo && (
+                    // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL.
+                    <img
+                      src={personalization.logo}
+                      alt="Logo önizleme"
+                      className="h-8 w-8 rounded-md border border-zinc-200 object-contain dark:border-zinc-700"
+                    />
+                  )}
                   {item.productName}
-                  <span className="ml-2 text-sm font-normal text-zinc-500">
+                  <span className="text-sm font-normal text-zinc-500">
                     {item.variantName}
                   </span>
                 </h2>

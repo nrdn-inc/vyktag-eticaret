@@ -6,6 +6,8 @@ export interface CartPersonalization {
   title?: string;
   phone?: string;
   note?: string;
+  /** Özel Tasarım seçiliyken yüklenen logonun rasterize edilmiş data URL'i (bkz. lib/logo-upload.ts). */
+  logo?: string;
 }
 
 export interface CartItem {

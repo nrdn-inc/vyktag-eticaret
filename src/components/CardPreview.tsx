@@ -7,10 +7,18 @@ interface CardPreviewProps {
   variantAttributes: unknown;
   fullName: string;
   title: string;
+  logoDataUrl?: string;
 }
 
 /** Ürün detay sayfasında kart rengi/baskı rengi ve kişiselleştirme alanlarına göre canlı güncellenen kart önizlemesi. */
-export function CardPreview({ productName, variantName, variantAttributes, fullName, title }: CardPreviewProps) {
+export function CardPreview({
+  productName,
+  variantName,
+  variantAttributes,
+  fullName,
+  title,
+  logoDataUrl,
+}: CardPreviewProps) {
   const { cardVariant, accent } = resolveVariantVisual({ name: variantName, attributes: variantAttributes });
 
   return (
@@ -28,7 +36,14 @@ export function CardPreview({ productName, variantName, variantAttributes, fullN
         </div>
 
         <div className="tilt-card relative w-full max-w-[20rem]">
-          <NfcCard variant={cardVariant} accent={accent} fullName={fullName} title={title} shine />
+          <NfcCard
+            variant={cardVariant}
+            accent={accent}
+            fullName={fullName}
+            title={title}
+            logoDataUrl={logoDataUrl}
+            shine
+          />
         </div>
       </div>
 

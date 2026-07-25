@@ -38,11 +38,23 @@ function formatPersonalization(value: unknown): string | null {
   if (!value || typeof value !== "object") {
     return null;
   }
-  const entries = Object.entries(value as Record<string, unknown>).filter(([, v]) => v !== null && v !== "");
+  // "logo" ayrı bir görsel bloğu olarak gösterilir (bkz. aşağıdaki <img>) — burada metne
+  // dökülmez, aksi halde koca bir base64 dizisi sayfaya taşardı.
+  const entries = Object.entries(value as Record<string, unknown>).filter(
+    ([key, v]) => key !== "logo" && v !== null && v !== "",
+  );
   if (entries.length === 0) {
     return null;
   }
   return entries.map(([key, v]) => `${key}: ${String(v)}`).join(" · ");
+}
+
+function personalizationLogo(value: unknown): string | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const logo = (value as Record<string, unknown>).logo;
+  return typeof logo === "string" ? logo : null;
 }
 
 export default async function AdminOrderDetailPage({
@@ -105,6 +117,7 @@ export default async function AdminOrderDetailPage({
         <ul className="mt-3 space-y-4">
           {order.items.map((item) => {
             const personalization = formatPersonalization(item.personalization);
+            const logo = personalizationLogo(item.personalization);
             const isPhysical = Boolean(item.productVariant);
             return (
               <li key={item.id} className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
@@ -119,6 +132,23 @@ export default async function AdminOrderDetailPage({
                     </p>
                     {personalization && (
                       <p className="mt-1 text-sm text-zinc-500">Kişiselleştirme: {personalization}</p>
+                    )}
+                    {logo && (
+                      <div className="mt-2 flex items-center gap-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- müşterinin yüklediği data URL, next/image optimizasyonuna uygun değil. */}
+                        <img
+                          src={logo}
+                          alt="Müşteri logosu"
+                          className="h-12 w-12 rounded-md border border-zinc-200 object-contain dark:border-zinc-700"
+                        />
+                        <a
+                          href={logo}
+                          download={`logo-${order.orderNumber}.png`}
+                          className="text-sm font-medium text-brand hover:text-brand-dark"
+                        >
+                          Logoyu indir
+                        </a>
+                      </div>
                     )}
                   </div>
                   <p className="font-medium">{formatPriceTRY(item.totalKurus)}</p>

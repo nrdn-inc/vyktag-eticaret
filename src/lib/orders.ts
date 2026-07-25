@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { OrderStatus, Prisma, UserRole } from "@/generated/prisma/client";
 import type { CartPersonalization } from "@/lib/cart";
 import { InsufficientStockError, aggregateQuantitiesByVariant, isStockReleasedStatus } from "@/lib/stock";
+import { isValidLogoDataUrl } from "@/lib/logo-upload";
 
 export interface CheckoutLine {
   variantId: string;
@@ -46,6 +47,11 @@ export function sanitizePersonalization(
     if (typeof value === "string" && value.trim()) {
       sanitized[key] = value.trim().slice(0, PERSONALIZATION_FIELD_MAX_LENGTH);
     }
+  }
+  // logo, diğer alanların aksine kırpılamaz — bir base64 dizisini ortadan kesmek onu bozuk
+  // (çözülemez) hale getirir. Bu yüzden geçerli ve boyut sınırı içinde değilse tamamen atılır.
+  if (isValidLogoDataUrl(personalization.logo)) {
+    sanitized.logo = personalization.logo;
   }
   return Object.keys(sanitized).length > 0 ? sanitized : undefined;
 }

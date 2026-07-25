@@ -14,6 +14,8 @@ interface NfcCardProps {
   accent?: CardAccent;
   /** Kart yüzeyinde soldan sağa geçen parlama animasyonu. */
   shine?: boolean;
+  /** Özel Tasarım seçiliyken yüklenen logonun canlı önizlemesi (data URL). */
+  logoDataUrl?: string;
   className?: string;
   style?: CSSProperties;
 }
@@ -130,6 +132,7 @@ export function NfcCard({
   variant = "özel",
   accent = "altin",
   shine = false,
+  logoDataUrl,
   className = "",
   style,
 }: NfcCardProps) {
@@ -154,18 +157,28 @@ export function NfcCard({
       </div>
 
       <div className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className={`truncate text-sm font-bold sm:text-base ${surface.primaryText}`}>
-            {fullName?.trim() || "Ad Soyad"}
-          </p>
-          <p className={`truncate text-[11px] sm:text-xs ${surface.mutedText}`}>
-            {title?.trim() || "Unvan"}
-          </p>
-          <p
-            className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${surface.mutedText}`}
-          >
-            VYKTag
-          </p>
+        <div className="flex min-w-0 items-center gap-2">
+          {logoDataUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL, next/image optimizasyonuna uygun değil.
+            <img
+              src={logoDataUrl}
+              alt="Logo"
+              className="h-8 w-8 shrink-0 rounded-md bg-white/90 object-contain p-0.5 sm:h-9 sm:w-9"
+            />
+          )}
+          <div className="min-w-0">
+            <p className={`truncate text-sm font-bold sm:text-base ${surface.primaryText}`}>
+              {fullName?.trim() || "Ad Soyad"}
+            </p>
+            <p className={`truncate text-[11px] sm:text-xs ${surface.mutedText}`}>
+              {title?.trim() || "Unvan"}
+            </p>
+            <p
+              className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${surface.mutedText}`}
+            >
+              VYKTag
+            </p>
+          </div>
         </div>
         <QrGlyph theme={surface} />
       </div>

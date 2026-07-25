@@ -2,6 +2,7 @@ import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/stock";
 import { parseVariantAttributes, type CardColor, type PrintColor } from "@/lib/product-variant-attributes";
+import { LogoUploadInput } from "@/components/LogoUploadInput";
 
 type Variant = ProductWithVariants["variants"][number];
 
@@ -9,6 +10,8 @@ interface CardOptionSelectorProps {
   variants: Variant[];
   selectedVariantId: string;
   onSelect: (variantId: string) => void;
+  logoDataUrl?: string;
+  onLogoChange: (dataUrl: string | undefined) => void;
 }
 
 const CARD_COLOR_ORDER: CardColor[] = ["Siyah", "Beyaz"];
@@ -19,7 +22,13 @@ function uniqueInOrder<T>(values: T[], order: T[]): T[] {
 }
 
 /** VYKTag Kart için kart rengi + baskı rengi + özel tasarım/logo eklentisini seçtiren kontrol grubu. */
-export function CardOptionSelector({ variants, selectedVariantId, onSelect }: CardOptionSelectorProps) {
+export function CardOptionSelector({
+  variants,
+  selectedVariantId,
+  onSelect,
+  logoDataUrl,
+  onLogoChange,
+}: CardOptionSelectorProps) {
   const parsed = variants.map((v) => ({ variant: v, attrs: parseVariantAttributes(v.attributes)! }));
 
   const selected = parsed.find((p) => p.variant.id === selectedVariantId) ?? parsed[0];
@@ -58,6 +67,9 @@ export function CardOptionSelector({ variants, selectedVariantId, onSelect }: Ca
   function toggleCustomDesign(customDesign: boolean) {
     const match = findVariant(selected.attrs.cardColor, selected.attrs.printColor, customDesign);
     if (match) onSelect(match.variant.id);
+    // Ücretli seçenek kapatılınca yüklenen logo da temizlenir — aksi halde özel tasarım
+    // ücreti ödenmeyen bir siparişe sessizce bir logo iliştirilmiş olur.
+    if (!customDesign) onLogoChange(undefined);
   }
 
   const baseVariant = findVariant(selected.attrs.cardColor, selected.attrs.printColor, false);
@@ -114,14 +126,22 @@ export function CardOptionSelector({ variants, selectedVariantId, onSelect }: Ca
       </div>
 
       {baseVariant && customVariant && (
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={selected.attrs.customDesign}
-            onChange={(e) => toggleCustomDesign(e.target.checked)}
-          />
-          Özel tasarım/logo ekleyin (+{formatPriceTRY(customDesignSurcharge)})
-        </label>
+        <div>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={selected.attrs.customDesign}
+              onChange={(e) => toggleCustomDesign(e.target.checked)}
+            />
+            Özel tasarım/logo ekleyin (+{formatPriceTRY(customDesignSurcharge)})
+          </label>
+
+          {selected.attrs.customDesign && (
+            <div className="mt-4">
+              <LogoUploadInput value={logoDataUrl} onChange={onLogoChange} />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

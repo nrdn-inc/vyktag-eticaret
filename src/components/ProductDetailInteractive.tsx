@@ -13,6 +13,7 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
   const [variantId, setVariantId] = useState(product.variants[0].id);
   const [fullName, setFullName] = useState("");
   const [title, setTitle] = useState("");
+  const [logoDataUrl, setLogoDataUrl] = useState<string | undefined>(undefined);
 
   const selectedVariant = product.variants.find((v) => v.id === variantId) ?? product.variants[0];
 
@@ -25,6 +26,7 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
           variantAttributes={selectedVariant.attributes}
           fullName={fullName}
           title={title}
+          logoDataUrl={logoDataUrl}
         />
 
         <div>
@@ -45,6 +47,8 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
               onFullNameChange={setFullName}
               title={title}
               onTitleChange={setTitle}
+              logoDataUrl={logoDataUrl}
+              onLogoChange={setLogoDataUrl}
             />
           </div>
         </div>

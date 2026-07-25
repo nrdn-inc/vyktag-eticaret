@@ -25,6 +25,8 @@ interface AddToCartFormProps {
   onFullNameChange: (value: string) => void;
   title: string;
   onTitleChange: (value: string) => void;
+  logoDataUrl: string | undefined;
+  onLogoChange: (dataUrl: string | undefined) => void;
 }
 
 /** Ürün detay sayfasında varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
@@ -36,6 +38,8 @@ export function AddToCartForm({
   onFullNameChange,
   title,
   onTitleChange,
+  logoDataUrl,
+  onLogoChange,
 }: AddToCartFormProps) {
   const { addItem } = useCart();
 
@@ -51,6 +55,7 @@ export function AddToCartForm({
   // rengi + özel tasarım seçicisi gösterilir; aksi halde (Tag/Phonecard gibi tek boyutlu
   // varyantlarda) eski düz "Seçenek" buton listesi kullanılır.
   const hasStructuredOptions = product.variants.every((v) => parseVariantAttributes(v.attributes) !== null);
+  const selectedAttrs = parseVariantAttributes(selectedVariant.attributes);
 
   const inStock = isVariantPurchasable(selectedVariant.stock);
   const atMaxQuantity = quantity >= selectedVariant.stock;
@@ -64,6 +69,7 @@ export function AddToCartForm({
     if (title.trim()) personalization.title = title.trim();
     if (phone.trim()) personalization.phone = phone.trim();
     if (note.trim()) personalization.note = note.trim();
+    if (logoDataUrl) personalization.logo = logoDataUrl;
 
     const item: CartItem = {
       variantId: selectedVariant.id,
@@ -91,6 +97,8 @@ export function AddToCartForm({
             setQuantity(1);
             setAdded(false);
           }}
+          logoDataUrl={logoDataUrl}
+          onLogoChange={onLogoChange}
         />
       ) : (
         product.variants.length > 1 && (
@@ -128,9 +136,11 @@ export function AddToCartForm({
       {/* Kişiselleştirme */}
       <div>
         <h3 className="text-sm font-semibold">Kart üzerindeki bilgiler (isteğe bağlı)</h3>
-        <p className="mt-1 text-xs text-zinc-500">
-          Logonuzu siparişiniz sonrası sizden ayrıca rica edeceğiz.
-        </p>
+        {!selectedAttrs?.customDesign && (
+          <p className="mt-1 text-xs text-zinc-500">
+            Logonuzu siparişiniz sonrası sizden ayrıca rica edeceğiz.
+          </p>
+        )}
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <input
             type="text"
