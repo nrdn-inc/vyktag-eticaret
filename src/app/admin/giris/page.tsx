@@ -17,12 +17,12 @@ export default function AdminLoginPage() {
         <form action={action} className="mt-6 space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium">
-              E-posta
+              Kullanıcı adı veya e-posta
             </label>
             <input
               id="email"
               name="email"
-              type="email"
+              type="text"
               required
               autoComplete="username"
               className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"

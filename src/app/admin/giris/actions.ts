@@ -4,14 +4,14 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
-import { ADMIN_SESSION_COOKIE, createAdminSessionToken, verifyPassword } from "@/lib/auth";
+import { ADMIN_SESSION_COOKIE, CUSTOMER_SESSION_COOKIE, createAdminSessionToken, verifyPassword } from "@/lib/auth";
 import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
 
 export interface LoginState {
   error?: string;
 }
 
-const GENERIC_ERROR = "E-posta veya şifre hatalı.";
+const GENERIC_ERROR = "Kullanıcı adı/e-posta veya şifre hatalı.";
 const RATE_LIMIT_ERROR = "Çok fazla başarısız deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
@@ -58,6 +58,10 @@ export async function loginAdmin(_prevState: LoginState, formData: FormData): Pr
 }
 
 export async function logoutAdmin(): Promise<void> {
-  (await cookies()).delete(ADMIN_SESSION_COOKIE);
+  const cookieStore = await cookies();
+  cookieStore.delete(ADMIN_SESSION_COOKIE);
+  // Hesabım girişinde admin hesapları için müşteri çerezi de kurulduğundan (bkz.
+  // hesap/giris/actions.ts), buradan çıkışın da o oturumu kapatması gerekir.
+  cookieStore.delete(CUSTOMER_SESSION_COOKIE);
   redirect("/admin/giris");
 }

@@ -3,8 +3,11 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@/generated/prisma/client";
 import {
+  ADMIN_SESSION_COOKIE,
   CUSTOMER_SESSION_COOKIE,
+  createAdminSessionToken,
   createCustomerSessionToken,
   createTwoFactorChallengeToken,
   verifyPassword,
@@ -26,9 +29,41 @@ export interface TwoFactorLoginState {
   token?: string;
 }
 
-const GENERIC_ERROR = "E-posta veya şifre hatalı.";
+const GENERIC_ERROR = "Kullanıcı adı/e-posta veya şifre hatalı.";
 const RATE_LIMIT_ERROR = "Çok fazla başarısız deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
+
+/**
+ * Oturum çerezini (ve admin ise ayrıca admin panelinin kendi oturum çerezini) yazar;
+ * admin panelinin oturum kontrolü (bkz. admin-session.ts) müşteri çerezinden tamamen
+ * ayrı olduğu için, admin hesapları hesabım girişinden sonra panele düzgün geçebilsin diye
+ * iki çerez de aynı anda kurulur. Ardından role'e göre uygun sayfaya yönlendirir.
+ */
+async function establishSessionAndRedirect(user: { id: string; role: UserRole }): Promise<never> {
+  const cookieStore = await cookies();
+  const customerToken = createCustomerSessionToken(user.id);
+  cookieStore.set(CUSTOMER_SESSION_COOKIE, customerToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+
+  if (user.role === UserRole.ADMIN) {
+    const adminToken = createAdminSessionToken(user.id);
+    cookieStore.set(ADMIN_SESSION_COOKIE, adminToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: SESSION_MAX_AGE_SECONDS,
+    });
+    redirect("/admin/siparisler");
+  }
+
+  redirect("/hesap");
+}
 
 export async function loginCustomer(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
@@ -93,16 +128,7 @@ export async function loginCustomer(_prevState: LoginState, formData: FormData):
     return { twoFactorToken };
   }
 
-  const token = createCustomerSessionToken(user.id);
-  (await cookies()).set(CUSTOMER_SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
-  });
-
-  redirect("/hesap");
+  return establishSessionAndRedirect(user);
 }
 
 /** 2FA akışının ikinci adımı: e-postayla gönderilen kodu doğrular ve doğruysa oturumu açar. */
@@ -125,19 +151,19 @@ export async function verifyTwoFactorLogin(
     return { error: "Kod hatalı veya süresi dolmuş.", token };
   }
 
-  const sessionToken = createCustomerSessionToken(userId);
-  (await cookies()).set(CUSTOMER_SESSION_COOKIE, sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_MAX_AGE_SECONDS,
-  });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    return { error: "Hesap bulunamadı." };
+  }
 
-  redirect("/hesap");
+  return establishSessionAndRedirect(user);
 }
 
 export async function logoutCustomer(): Promise<void> {
-  (await cookies()).delete(CUSTOMER_SESSION_COOKIE);
+  const cookieStore = await cookies();
+  cookieStore.delete(CUSTOMER_SESSION_COOKIE);
+  // Admin hesapları için hesabım girişinde admin çerezi de kurulduğundan (bkz.
+  // establishSessionAndRedirect), tek çıkış işleminin her iki oturumu da kapatması gerekir.
+  cookieStore.delete(ADMIN_SESSION_COOKIE);
   redirect("/hesap/giris");
 }
