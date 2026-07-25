@@ -1,4 +1,20 @@
+import { execSync } from "node:child_process";
 import type { NextConfig } from "next";
+
+/**
+ * Her dağıtımda değişen bir kimlik: istemcide önceki dağıtımdan kalan bir sayfa,
+ * yeni sunucuyla client-side navigasyon (ör. <Link>) denediğinde Next.js bu kimlik
+ * uyuşmazlığını fark edip düz istemci içi geçiş yerine tam sayfa yenilemesi yapar.
+ * Aksi halde eski istemci yeni sunucunun RSC akış verisini çözemez ve bunu ham
+ * metin olarak ekrana basar (bkz. Next.js "Version Skew" dokümantasyonu).
+ */
+function resolveDeploymentId(): string {
+  try {
+    return execSync("git rev-parse --short HEAD").toString().trim();
+  } catch {
+    return String(Date.now());
+  }
+}
 
 // iyzico'nun barındırdığı Checkout Form widget'ı, ödeme sayfamıza gömülen inline bir
 // <script> ile çalışır ve kendi alan adlarından kaynak yükler (bkz.
@@ -46,6 +62,8 @@ const nextConfig: NextConfig = {
   // iyzipay, kaynaklarını fs.readdirSync + dinamik require ile çalışma anında yükler;
   // bu Next.js'in sunucu bundle'ına dahil edilemez, native Node.js require'a bırakılmalı.
   serverExternalPackages: ["iyzipay"],
+
+  deploymentId: resolveDeploymentId(),
 
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
