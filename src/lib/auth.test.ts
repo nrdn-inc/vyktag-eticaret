@@ -8,6 +8,10 @@ import {
   verifyCustomerSessionToken,
   createEmailVerificationToken,
   verifyEmailVerificationToken,
+  createPasswordResetToken,
+  verifyPasswordResetToken,
+  createTwoFactorChallengeToken,
+  verifyTwoFactorChallengeToken,
 } from "@/lib/auth";
 
 describe("hashPassword / verifyPassword", () => {
@@ -112,5 +116,81 @@ describe("müşteri oturumu ve e-posta doğrulama token'ları", () => {
     const customerToken = createCustomerSessionToken("musteri_1");
     expect(verifyAdminSessionToken(customerToken)).toBeNull();
     expect(verifyEmailVerificationToken(customerToken)).toBeNull();
+  });
+
+  it("round-trips a valid customer session token that carries an iat", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const before = Date.now();
+    const token = createCustomerSessionToken("musteri_1");
+    const payload = verifyCustomerSessionToken(token);
+    expect(payload?.iat).toBeGreaterThanOrEqual(before);
+  });
+});
+
+describe("createPasswordResetToken / verifyPasswordResetToken", () => {
+  const ORIGINAL_SECRET = "test-secret-anahtar";
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("round-trips a valid password reset token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const token = createPasswordResetToken("musteri_1");
+    expect(verifyPasswordResetToken(token)?.userId).toBe("musteri_1");
+  });
+
+  it("rejects cross-purpose use: a password reset token is not a valid session or email token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const resetToken = createPasswordResetToken("musteri_1");
+    expect(verifyCustomerSessionToken(resetToken)).toBeNull();
+    expect(verifyEmailVerificationToken(resetToken)).toBeNull();
+    expect(verifyAdminSessionToken(resetToken)).toBeNull();
+  });
+
+  it("rejects an email verification token used as a password reset token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const emailToken = createEmailVerificationToken("musteri_1");
+    expect(verifyPasswordResetToken(emailToken)).toBeNull();
+  });
+});
+
+describe("createTwoFactorChallengeToken / verifyTwoFactorChallengeToken", () => {
+  const ORIGINAL_SECRET = "test-secret-anahtar";
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("accepts the correct code and returns the userId", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const { token, code } = createTwoFactorChallengeToken("musteri_1");
+    expect(code).toMatch(/^[0-9]{6}$/);
+    expect(verifyTwoFactorChallengeToken(token, code)).toBe("musteri_1");
+  });
+
+  it("rejects an incorrect code", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const { token, code } = createTwoFactorChallengeToken("musteri_1");
+    const wrongCode = code === "000000" ? "111111" : "000000";
+    expect(verifyTwoFactorChallengeToken(token, wrongCode)).toBeNull();
+  });
+
+  it("does not leak the code hash to other token purposes", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const { token, code } = createTwoFactorChallengeToken("musteri_1");
+    expect(verifyCustomerSessionToken(token)).toBeNull();
+    expect(verifyPasswordResetToken(token)).toBeNull();
+    // Farklı bir secret altında aynı kod bile geçerli olmamalı.
+    vi.stubEnv("ADMIN_SESSION_SECRET", "farkli-anahtar");
+    expect(verifyTwoFactorChallengeToken(token, code)).toBeNull();
+  });
+
+  it("rejects null/empty tokens and codes", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    expect(verifyTwoFactorChallengeToken(null, "123456")).toBeNull();
+    expect(verifyTwoFactorChallengeToken(undefined, "123456")).toBeNull();
+    const { token } = createTwoFactorChallengeToken("musteri_1");
+    expect(verifyTwoFactorChallengeToken(token, "")).toBeNull();
   });
 });

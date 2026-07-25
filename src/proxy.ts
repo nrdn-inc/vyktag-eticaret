@@ -9,7 +9,13 @@ import {
 
 const ADMIN_LOGIN_PATH = "/admin/giris";
 const CUSTOMER_LOGIN_PATH = "/hesap/giris";
-const CUSTOMER_PUBLIC_PATHS = ["/hesap/giris", "/hesap/kayit", "/hesap/dogrula"];
+const CUSTOMER_PUBLIC_PATHS = [
+  "/hesap/giris",
+  "/hesap/kayit",
+  "/hesap/dogrula",
+  "/hesap/sifremi-unuttum",
+  "/hesap/sifre-sifirla",
+];
 
 /**
  * /admin/* ve /hesap/* için iyimser (yalnızca imza/süre) kontrol yapar; DB'ye karşı asıl

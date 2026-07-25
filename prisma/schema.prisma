@@ -51,6 +51,11 @@ enum HandoffStatus {
   PROVISIONED
 }
 
+enum BillingProfileType {
+  INDIVIDUAL
+  CORPORATE
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -59,10 +64,15 @@ model User {
   fullName        String
   role            UserRole  @default(CUSTOMER)
   emailVerifiedAt DateTime?
+  // Şifre sıfırlandığında damgalanır; customer-session.ts bunu kullanarak bu tarihten
+  // önce üretilmiş (ör. çalınmış) oturum token'larını geçersiz kılar.
+  passwordChangedAt DateTime?
+  twoFactorEnabled  Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   addresses           Address[]
+  billingProfiles     BillingProfile[]
   orders              Order[]
   subscriptions       Subscription[]
   provisionedHandoffs DkartvizitHandoff[]
@@ -90,6 +100,37 @@ model Address {
 
   @@index([userId])
   @@map("addresses")
+}
+
+// Müşteri hesabında saklanan fatura bilgisi profili — şahıs (TC Kimlik No) veya kurumsal
+// (vergi dairesi/vergi no) olarak ayrılır. Şu an sipariş/ödeme akışına bağlı değildir,
+// yalnızca hesap bilgisi olarak tutulur.
+model BillingProfile {
+  id     String             @id @default(cuid())
+  userId String
+  user   User               @relation(fields: [userId], references: [id])
+  type   BillingProfileType
+  title  String
+
+  // INDIVIDUAL (şahıs) alanları
+  fullName   String?
+  nationalId String?
+
+  // CORPORATE (kurumsal) alanları
+  companyName String?
+  taxOffice   String?
+  taxNumber   String?
+
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  district     String
+  postalCode   String
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@map("billing_profiles")
 }
 
 // Catalog item, e.g. "Vyktag Kart". Actual price/stock live on ProductVariant

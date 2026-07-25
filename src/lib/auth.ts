@@ -1,4 +1,4 @@
-import { randomBytes, scrypt as scryptCallback, timingSafeEqual, createHmac } from "node:crypto";
+import { randomBytes, randomInt, scrypt as scryptCallback, timingSafeEqual, createHmac } from "node:crypto";
 import { promisify } from "node:util";
 
 const scrypt = promisify(scryptCallback);
@@ -30,8 +30,10 @@ export const ADMIN_SESSION_COOKIE = "vyktag_admin_session";
 export const CUSTOMER_SESSION_COOKIE = "vyktag_musteri_oturum";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 gün
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 saat
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 saat
+const TWO_FACTOR_TTL_MS = 10 * 60 * 1000; // 10 dakika
 
-type TokenPurpose = "admin-session" | "customer-session" | "email-verify";
+type TokenPurpose = "admin-session" | "customer-session" | "email-verify" | "password-reset" | "2fa-pending";
 
 function getSessionSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -48,12 +50,16 @@ function sign(value: string): string {
 export interface SignedTokenPayload {
   userId: string;
   purpose: TokenPurpose;
+  /** Üretim zamanı (ms) — eski (iat alanı olmayan) token'larla geriye dönük uyum için opsiyoneldir. */
+  iat?: number;
   exp: number;
+  /** Amaca özgü ek veri (ör. 2FA kod karması). Token imzalı olduğundan değiştirilemez. */
+  data?: string;
 }
 
 /** userId'yi, amacı (purpose) belirtilen ve süresi dolan imzalı bir token'a kodlar. */
-function createSignedToken(userId: string, purpose: TokenPurpose, ttlMs: number): string {
-  const payload: SignedTokenPayload = { userId, purpose, exp: Date.now() + ttlMs };
+function createSignedToken(userId: string, purpose: TokenPurpose, ttlMs: number, data?: string): string {
+  const payload: SignedTokenPayload = { userId, purpose, iat: Date.now(), exp: Date.now() + ttlMs, ...(data !== undefined ? { data } : {}) };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
   return `${payloadB64}.${sign(payloadB64)}`;
 }
@@ -122,4 +128,43 @@ export function createEmailVerificationToken(userId: string): string {
 
 export function verifyEmailVerificationToken(token: string | undefined | null): SignedTokenPayload | null {
   return verifySignedToken(token, "email-verify");
+}
+
+/** Şifremi unuttum e-postasındaki bağlantı için 1 saat geçerli token üretir. */
+export function createPasswordResetToken(userId: string): string {
+  return createSignedToken(userId, "password-reset", PASSWORD_RESET_TTL_MS);
+}
+
+export function verifyPasswordResetToken(token: string | undefined | null): SignedTokenPayload | null {
+  return verifySignedToken(token, "password-reset");
+}
+
+/** 6 haneli 2FA kodunu, sunucu secret'ı olmadan çevrimdışı tahmin edilemeyecek şekilde HMAC ile karma yapar. */
+function hashTwoFactorCode(code: string): string {
+  return createHmac("sha256", getSessionSecret()).update(`2fa:${code}`).digest("hex");
+}
+
+/**
+ * Giriş sırasında e-postayla gönderilecek rastgele 6 haneli bir 2FA kodu üretir ve kodun
+ * karmasını taşıyan, 10 dakika geçerli imzalı bir "pending" token döner. Kodun kendisi hiçbir
+ * yerde saklanmaz — yalnızca HMAC karması token içinde (imzalı, değiştirilemez) tutulur.
+ */
+export function createTwoFactorChallengeToken(userId: string): { token: string; code: string } {
+  const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+  const token = createSignedToken(userId, "2fa-pending", TWO_FACTOR_TTL_MS, hashTwoFactorCode(code));
+  return { token, code };
+}
+
+/** Pending 2FA token'ını ve kullanıcının girdiği kodu doğrular; eşleşirse userId, değilse null döner. */
+export function verifyTwoFactorChallengeToken(token: string | undefined | null, submittedCode: string): string | null {
+  const payload = verifySignedToken(token, "2fa-pending");
+  if (!payload?.data) {
+    return null;
+  }
+  const expected = Buffer.from(payload.data);
+  const actual = Buffer.from(hashTwoFactorCode(submittedCode));
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) {
+    return null;
+  }
+  return payload.userId;
 }
