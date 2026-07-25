@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@/generated/prisma/client";
 import { verifyCustomerSession } from "@/lib/customer-session";
 import { logoutCustomer } from "./giris/actions";
 import { deleteAddress, deleteBillingProfile, setDefaultAddress, setDefaultBillingProfile } from "./actions";
@@ -32,14 +34,24 @@ export default async function HesapPage() {
             {`${user.fullName} · ${user.email}`}
           </p>
         </div>
-        <form action={logoutCustomer}>
-          <button
-            type="submit"
-            className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
-          >
-            Çıkış yap
-          </button>
-        </form>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {user.role === UserRole.ADMIN && (
+            <Link
+              href="/admin/siparisler"
+              className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
+            >
+              Yönetim Paneli
+            </Link>
+          )}
+          <form action={logoutCustomer}>
+            <button
+              type="submit"
+              className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
+            >
+              Çıkış yap
+            </button>
+          </form>
+        </div>
       </header>
 
       <section>
