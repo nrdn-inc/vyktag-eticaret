@@ -7,6 +7,8 @@ import { PRODUCT_BADGES, VALUE_PROPS } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/visuals/Icon";
 import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
+import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
+import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
 // ISR: katalog güncellemeleri en geç bu süre içinde yansır.
 export const revalidate = 300;
@@ -54,11 +56,18 @@ export default async function ProductsPage() {
                     </span>
                   )}
                   <div className="tilt-card w-full max-w-[15rem]">
-                    <NfcCard
-                      variant={resolveCardVariant(product.variants[0]?.name)}
-                      fullName="Ad Soyad"
-                      title="Unvan"
-                    />
+                    {PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) ? (
+                      <ProductPhoto
+                        src={CARD_VARIANT_PHOTOS[resolveCardVariant(product.variants[0]?.name)]}
+                        alt={`${product.name} — gerçek ürün fotoğrafı`}
+                      />
+                    ) : (
+                      <NfcCard
+                        variant={resolveCardVariant(product.variants[0]?.name)}
+                        fullName="Ad Soyad"
+                        title="Unvan"
+                      />
+                    )}
                   </div>
                 </div>
 

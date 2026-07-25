@@ -4,6 +4,8 @@ import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/stock";
 import { PRODUCT_BADGES } from "@/lib/marketing";
 import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
+import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
+import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
 /** Katalog/anasayfa listelerinde tek bir ürünü özet olarak gösteren kart. */
 export function ProductCard({ product }: { product: ProductWithVariants }) {
@@ -11,6 +13,7 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
   const allOutOfStock = product.variants.every((v) => !isVariantPurchasable(v.stock));
   const badge = PRODUCT_BADGES[product.slug];
   const previewVariant = resolveCardVariant(product.variants[0]?.name);
+  const hasRealPhoto = PRODUCTS_WITH_REAL_PHOTOS.has(product.slug);
 
   return (
     <Link
@@ -31,7 +34,11 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
         )}
 
         <div className="tilt-card mx-auto max-w-[15rem]">
-          <NfcCard variant={previewVariant} fullName="Ad Soyad" title="Unvan" />
+          {hasRealPhoto ? (
+            <ProductPhoto src={CARD_VARIANT_PHOTOS[previewVariant]} alt={`${product.name} — gerçek ürün fotoğrafı`} />
+          ) : (
+            <NfcCard variant={previewVariant} fullName="Ad Soyad" title="Unvan" />
+          )}
         </div>
       </div>
 
