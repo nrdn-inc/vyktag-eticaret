@@ -12,6 +12,8 @@ import {
   verifyPasswordResetToken,
   createTwoFactorChallengeToken,
   verifyTwoFactorChallengeToken,
+  createTotpChallengeToken,
+  verifyTotpChallengeToken,
 } from "@/lib/auth";
 
 describe("hashPassword / verifyPassword", () => {
@@ -192,5 +194,35 @@ describe("createTwoFactorChallengeToken / verifyTwoFactorChallengeToken", () => 
     expect(verifyTwoFactorChallengeToken(undefined, "123456")).toBeNull();
     const { token } = createTwoFactorChallengeToken("musteri_1");
     expect(verifyTwoFactorChallengeToken(token, "")).toBeNull();
+  });
+});
+
+describe("createTotpChallengeToken / verifyTotpChallengeToken", () => {
+  const ORIGINAL_SECRET = "test-secret-anahtar";
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("round-trips a valid TOTP challenge token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const token = createTotpChallengeToken("musteri_1");
+    expect(verifyTotpChallengeToken(token)).toBe("musteri_1");
+  });
+
+  it("is not interchangeable with the email 2FA pending token (different purposes)", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    const totpToken = createTotpChallengeToken("musteri_1");
+    expect(verifyTwoFactorChallengeToken(totpToken, "123456")).toBeNull();
+
+    const { token: emailToken } = createTwoFactorChallengeToken("musteri_1");
+    expect(verifyTotpChallengeToken(emailToken)).toBeNull();
+  });
+
+  it("rejects null/empty tokens", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", ORIGINAL_SECRET);
+    expect(verifyTotpChallengeToken(null)).toBeNull();
+    expect(verifyTotpChallengeToken(undefined)).toBeNull();
+    expect(verifyTotpChallengeToken("")).toBeNull();
   });
 });

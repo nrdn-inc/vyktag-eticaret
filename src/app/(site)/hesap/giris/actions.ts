@@ -3,24 +3,29 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@/generated/prisma/client";
+import { TwoFactorMethod, UserRole } from "@/generated/prisma/client";
 import {
   ADMIN_SESSION_COOKIE,
   CUSTOMER_SESSION_COOKIE,
   createAdminSessionToken,
   createCustomerSessionToken,
+  createTotpChallengeToken,
   createTwoFactorChallengeToken,
   verifyPassword,
+  verifyTotpChallengeToken,
   verifyTwoFactorChallengeToken,
 } from "@/lib/auth";
 import { sendTwoFactorCode, sendVerificationEmail } from "@/lib/customer-auth";
 import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
+import { verifyTotpCode } from "@/lib/totp";
 
 export interface LoginState {
   error?: string;
   unverifiedEmail?: string;
   /** Doldurulduğunda 2FA kod adımına geçilir; şifre zaten doğrulandı, oturum henüz açılmadı. */
   twoFactorToken?: string;
+  /** twoFactorToken hangi doğrulama akışına gönderilecek (e-posta kodu mu, authenticator kodu mu). */
+  twoFactorMethod?: "EMAIL" | "TOTP";
 }
 
 export interface TwoFactorLoginState {
@@ -111,6 +116,13 @@ export async function loginCustomer(_prevState: LoginState, formData: FormData):
   }
 
   if (user.twoFactorEnabled) {
+    if (user.twoFactorMethod === TwoFactorMethod.TOTP) {
+      // Authenticator kodu DB'deki kalıcı sırdan anlık hesaplanır; e-posta gönderimi yok,
+      // dolayısıyla e-posta bombalama sınırlamasına burada gerek yok.
+      const twoFactorToken = createTotpChallengeToken(user.id);
+      return { twoFactorToken, twoFactorMethod: "TOTP" };
+    }
+
     // 2FA kodu gönderimini de ayrıca sınırlıyoruz — aksi halde tekrar tekrar giriş denemesi
     // hesabın e-postasını bombalamak için kullanılabilir.
     const withinTwoFaLimit = consumeRateLimit(`2fa-send:${user.id}`, { max: 5, windowMs: 10 * 60 * 1000 });
@@ -125,13 +137,13 @@ export async function loginCustomer(_prevState: LoginState, formData: FormData):
       console.error("[hesap/giris] 2FA kodu gönderilemedi:", error);
       return { error: "Doğrulama kodu gönderilemedi. Lütfen birkaç dakika sonra tekrar deneyin." };
     }
-    return { twoFactorToken };
+    return { twoFactorToken, twoFactorMethod: "EMAIL" };
   }
 
   return establishSessionAndRedirect(user);
 }
 
-/** 2FA akışının ikinci adımı: e-postayla gönderilen kodu doğrular ve doğruysa oturumu açar. */
+/** 2FA akışının ikinci adımı (e-posta yöntemi): e-postayla gönderilen kodu doğrular ve doğruysa oturumu açar. */
 export async function verifyTwoFactorLogin(
   _prevState: TwoFactorLoginState,
   formData: FormData,
@@ -154,6 +166,33 @@ export async function verifyTwoFactorLogin(
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
     return { error: "Hesap bulunamadı." };
+  }
+
+  return establishSessionAndRedirect(user);
+}
+
+/** 2FA akışının ikinci adımı (authenticator yöntemi): uygulamada görünen kodu sırdan yeniden hesaplayıp doğrular. */
+export async function verifyTotpLogin(
+  _prevState: TwoFactorLoginState,
+  formData: FormData,
+): Promise<TwoFactorLoginState> {
+  const token = String(formData.get("token") ?? "");
+  const code = String(formData.get("code") ?? "").trim();
+
+  const ip = clientIpFromHeaders(await headers());
+  const withinLimit = consumeRateLimit(`2fa-verify:ip:${ip}`, { max: 10, windowMs: 10 * 60 * 1000 });
+  if (!withinLimit) {
+    return { error: RATE_LIMIT_ERROR, token };
+  }
+
+  const userId = verifyTotpChallengeToken(token);
+  if (!userId) {
+    return { error: "Kod hatalı veya süresi dolmuş.", token };
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.twoFactorSecret || !verifyTotpCode(user.twoFactorSecret, code)) {
+    return { error: "Kod hatalı veya süresi dolmuş.", token };
   }
 
   return establishSessionAndRedirect(user);

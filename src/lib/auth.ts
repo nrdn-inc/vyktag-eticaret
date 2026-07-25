@@ -33,7 +33,13 @@ const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 saat
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 saat
 const TWO_FACTOR_TTL_MS = 10 * 60 * 1000; // 10 dakika
 
-type TokenPurpose = "admin-session" | "customer-session" | "email-verify" | "password-reset" | "2fa-pending";
+type TokenPurpose =
+  | "admin-session"
+  | "customer-session"
+  | "email-verify"
+  | "password-reset"
+  | "2fa-pending"
+  | "2fa-pending-totp";
 
 function getSessionSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -167,4 +173,18 @@ export function verifyTwoFactorChallengeToken(token: string | undefined | null, 
     return null;
   }
   return payload.userId;
+}
+
+/**
+ * TOTP ile giriş yapan kullanıcılar için 10 dakika geçerli "pending" token üretir. E-posta
+ * akışının aksine kodun kendisi (veya bir karması) token içinde taşınmaz — TOTP kodu, DB'deki
+ * kalıcı sırdan doğrulama anında yeniden hesaplanır (bkz. totp.ts:verifyTotpCode).
+ */
+export function createTotpChallengeToken(userId: string): string {
+  return createSignedToken(userId, "2fa-pending-totp", TWO_FACTOR_TTL_MS);
+}
+
+/** Pending TOTP giriş token'ını doğrular; geçerliyse userId, değilse null döner. */
+export function verifyTotpChallengeToken(token: string | undefined | null): string | null {
+  return verifySignedToken(token, "2fa-pending-totp")?.userId ?? null;
 }

@@ -198,7 +198,7 @@ export default async function HesapPage({
 
       <section className="mt-12">
         <h2 className="mb-4 text-lg font-semibold">Güvenlik</h2>
-        <TwoFactorToggleForm enabled={user.twoFactorEnabled} />
+        <TwoFactorToggleForm enabled={user.twoFactorEnabled} method={user.twoFactorMethod} />
       </section>
     </div>
   );

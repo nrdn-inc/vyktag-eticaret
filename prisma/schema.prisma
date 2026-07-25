@@ -56,6 +56,11 @@ enum BillingProfileType {
   CORPORATE
 }
 
+enum TwoFactorMethod {
+  EMAIL
+  TOTP
+}
+
 model User {
   id              String    @id @default(cuid())
   email           String    @unique
@@ -68,6 +73,10 @@ model User {
   // önce üretilmiş (ör. çalınmış) oturum token'larını geçersiz kılar.
   passwordChangedAt DateTime?
   twoFactorEnabled  Boolean   @default(false)
+  twoFactorMethod   TwoFactorMethod @default(EMAIL)
+  // Yalnızca twoFactorMethod=TOTP iken doludur (Base32 paylaşılan sır). E-posta yöntemine
+  // geçildiğinde veya 2FA kapatıldığında temizlenir — bkz. hesap/actions.ts.
+  twoFactorSecret   String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

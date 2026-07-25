@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import QRCode from "qrcode";
 import { prisma } from "@/lib/prisma";
-import { BillingProfileType } from "@/generated/prisma/client";
+import { BillingProfileType, TwoFactorMethod } from "@/generated/prisma/client";
 import { verifyCustomerSession } from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/auth";
 import { isValidNationalId, isValidTaxNumber } from "@/lib/billing-profiles";
+import { buildOtpAuthUrl, generateTotpSecret, verifyTotpCode } from "@/lib/totp";
 
 export interface AddressFormState {
   error?: string;
@@ -169,7 +171,11 @@ export interface TwoFactorToggleState {
   success?: boolean;
 }
 
-async function setTwoFactorEnabled(formData: FormData, enabled: boolean): Promise<TwoFactorToggleState> {
+/** İki adımlı doğrulamayı e-posta yöntemiyle etkinleştirir. Kimlik doğrulaması için mevcut şifre yeniden istenir. */
+export async function enableTwoFactor(
+  _prevState: TwoFactorToggleState,
+  formData: FormData,
+): Promise<TwoFactorToggleState> {
   const user = await verifyCustomerSession();
   const password = String(formData.get("password") ?? "");
 
@@ -178,23 +184,95 @@ async function setTwoFactorEnabled(formData: FormData, enabled: boolean): Promis
     return { error: "Şifre hatalı." };
   }
 
-  await prisma.user.update({ where: { id: user.id }, data: { twoFactorEnabled: enabled } });
+  // Daha önce yarım kalmış bir TOTP eşleştirmesinden kalan sır varsa temizlenir.
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null },
+  });
   revalidatePath("/hesap");
   return { success: true };
 }
 
-/** İki adımlı doğrulamayı etkinleştirir. Kimlik doğrulaması için mevcut şifre yeniden istenir. */
-export async function enableTwoFactor(
-  _prevState: TwoFactorToggleState,
-  formData: FormData,
-): Promise<TwoFactorToggleState> {
-  return setTwoFactorEnabled(formData, true);
-}
-
-/** İki adımlı doğrulamayı kapatır. Kimlik doğrulaması için mevcut şifre yeniden istenir. */
+/** İki adımlı doğrulamayı (yöntemi ne olursa olsun) kapatır. Kimlik doğrulaması için mevcut şifre yeniden istenir. */
 export async function disableTwoFactor(
   _prevState: TwoFactorToggleState,
   formData: FormData,
 ): Promise<TwoFactorToggleState> {
-  return setTwoFactorEnabled(formData, false);
+  const user = await verifyCustomerSession();
+  const password = String(formData.get("password") ?? "");
+
+  const passwordOk = await verifyPassword(password, user.passwordHash);
+  if (!passwordOk) {
+    return { error: "Şifre hatalı." };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { twoFactorEnabled: false, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null },
+  });
+  revalidatePath("/hesap");
+  return { success: true };
+}
+
+export interface TotpEnrollmentState {
+  error?: string;
+  secret?: string;
+  otpAuthUrl?: string;
+  qrDataUrl?: string;
+}
+
+/**
+ * Authenticator uygulamasıyla eşleştirmenin ilk adımı: yeni bir TOTP sırrı üretir, DB'ye
+ * yazar (henüz etkinleştirilmez — bkz. confirmTotpEnrollment) ve QR kod + manuel giriş için
+ * sırrı döner. Kimlik doğrulaması için mevcut şifre istenir.
+ */
+export async function startTotpEnrollment(
+  _prevState: TotpEnrollmentState,
+  formData: FormData,
+): Promise<TotpEnrollmentState> {
+  const user = await verifyCustomerSession();
+  const password = String(formData.get("password") ?? "");
+
+  const passwordOk = await verifyPassword(password, user.passwordHash);
+  if (!passwordOk) {
+    return { error: "Şifre hatalı." };
+  }
+
+  const secret = generateTotpSecret();
+  await prisma.user.update({ where: { id: user.id }, data: { twoFactorSecret: secret } });
+
+  const otpAuthUrl = buildOtpAuthUrl(secret, user.email);
+  const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
+
+  return { secret, otpAuthUrl, qrDataUrl };
+}
+
+export interface TotpConfirmState {
+  error?: string;
+  success?: boolean;
+}
+
+/** Eşleştirmenin ikinci adımı: uygulamada görünen 6 haneli kodu doğrular, doğruysa TOTP'yi etkinleştirir. */
+export async function confirmTotpEnrollment(
+  _prevState: TotpConfirmState,
+  formData: FormData,
+): Promise<TotpConfirmState> {
+  const user = await verifyCustomerSession();
+  const code = String(formData.get("code") ?? "").trim();
+
+  const fresh = await prisma.user.findUnique({ where: { id: user.id } });
+  if (!fresh?.twoFactorSecret) {
+    return { error: "Önce authenticator uygulamasıyla eşleştirmeyi başlatın." };
+  }
+
+  if (!verifyTotpCode(fresh.twoFactorSecret, code)) {
+    return { error: "Kod hatalı veya süresi dolmuş." };
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.TOTP },
+  });
+  revalidatePath("/hesap");
+  return { success: true };
 }
