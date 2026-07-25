@@ -1,5 +1,6 @@
 import "server-only";
 import { createEmailVerificationToken } from "@/lib/auth";
+import { escapeHtml } from "@/lib/html-escape";
 import { sendEmail } from "@/lib/mailer";
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,7 +16,7 @@ export async function sendVerificationEmail(userId: string, email: string, fullN
     to: email,
     subject: "Vyktag hesabınızı doğrulayın",
     html: `
-      <p>Merhaba ${fullName},</p>
+      <p>Merhaba ${escapeHtml(fullName)},</p>
       <p>Vyktag hesabınızı doğrulamak ve şifrenizi belirlemek için aşağıdaki bağlantıya tıklayın:</p>
       <p><a href="${verifyUrl}">${verifyUrl}</a></p>
       <p>Bu bağlantı 24 saat geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayabilirsiniz.</p>

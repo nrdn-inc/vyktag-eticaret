@@ -18,6 +18,17 @@ describe("isRevalidateAuthorized", () => {
     expect(isRevalidateAuthorized("gizli", undefined)).toBe(false);
     expect(isRevalidateAuthorized("gizli", "")).toBe(false);
   });
+
+  it("rejects a secret of different length without throwing", () => {
+    // timingSafeEqual eşit uzunlukta buffer bekler; kısa devre kontrolü olmadan atardı.
+    expect(isRevalidateAuthorized("kisa", "cok-daha-uzun-bir-gizli-anahtar")).toBe(false);
+    expect(isRevalidateAuthorized("cok-daha-uzun-bir-gizli-anahtar", "kisa")).toBe(false);
+  });
+
+  it("accepts a long, realistic secret", () => {
+    const secret = "a".repeat(64);
+    expect(isRevalidateAuthorized(secret, secret)).toBe(true);
+  });
 });
 
 describe("REVALIDATE_PATHS", () => {

@@ -28,6 +28,8 @@ function getTransporter(): Transporter {
   return cachedTransporter;
 }
 
+export { escapeHtml } from "@/lib/html-escape";
+
 export interface SendEmailInput {
   to: string;
   subject: string;

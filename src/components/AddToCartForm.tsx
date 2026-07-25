@@ -11,6 +11,10 @@ import { useCart } from "@/components/CartProvider";
 // Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
 const LOW_STOCK_THRESHOLD = 10;
 
+// Sunucu tarafındaki sınırla eşleşir (bkz. lib/orders.ts PERSONALIZATION_FIELD_MAX_LENGTH);
+// burada yalnızca kullanıcıya anında geri bildirim vermek için tekrarlanır.
+const PERSONALIZATION_FIELD_MAX_LENGTH = 200;
+
 interface AddToCartFormProps {
   product: ProductWithVariants;
   variantId: string;
@@ -114,6 +118,7 @@ export function AddToCartForm({
             placeholder="Ad Soyad"
             value={fullName}
             onChange={(e) => onFullNameChange(e.target.value)}
+            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
           <input
@@ -121,6 +126,7 @@ export function AddToCartForm({
             placeholder="Unvan"
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
+            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
           <input
@@ -128,6 +134,7 @@ export function AddToCartForm({
             placeholder="Telefon"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
           <input
@@ -135,6 +142,7 @@ export function AddToCartForm({
             placeholder="Not (ör. tasarım tercihi)"
             value={note}
             onChange={(e) => setNote(e.target.value)}
+            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
             className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
         </div>

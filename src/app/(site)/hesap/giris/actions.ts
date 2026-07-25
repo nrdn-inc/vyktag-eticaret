@@ -1,10 +1,11 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { CUSTOMER_SESSION_COOKIE, createCustomerSessionToken, verifyPassword } from "@/lib/auth";
 import { sendVerificationEmail } from "@/lib/customer-auth";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
 
 export interface LoginState {
   error?: string;
@@ -12,6 +13,7 @@ export interface LoginState {
 }
 
 const GENERIC_ERROR = "E-posta veya şifre hatalı.";
+const RATE_LIMIT_ERROR = "Çok fazla başarısız deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 export async function loginCustomer(_prevState: LoginState, formData: FormData): Promise<LoginState> {
@@ -20,6 +22,18 @@ export async function loginCustomer(_prevState: LoginState, formData: FormData):
 
   if (!email || !password) {
     return { error: GENERIC_ERROR };
+  }
+
+  // Kaba kuvvet koruması: aynı IP'den çok sayıda farklı hesap denemesi VE aynı hesaba
+  // karşı çok sayıda deneme ayrı ayrı sınırlanır (bkz. rate-limit.ts).
+  const ip = clientIpFromHeaders(await headers());
+  const withinIpLimit = consumeRateLimit(`customer-login:ip:${ip}`, { max: 20, windowMs: 10 * 60 * 1000 });
+  const withinAccountLimit = consumeRateLimit(`customer-login:acct:${ip}:${email}`, {
+    max: 5,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!withinIpLimit || !withinAccountLimit) {
+    return { error: RATE_LIMIT_ERROR };
   }
 
   const user = await prisma.user.findUnique({ where: { email } });

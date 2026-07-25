@@ -1,14 +1,18 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
 import { EMAIL_REGEX, sendVerificationEmail } from "@/lib/customer-auth";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
 
 export interface RegisterState {
   error?: string;
   success?: boolean;
 }
+
+const RATE_LIMIT_ERROR = "Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 
 /**
  * Kayıt e-postayla doğrulanana kadar şifre alınmaz; hesap, kimse bilemeyeceği rastgele bir
@@ -25,6 +29,15 @@ export async function registerCustomer(_prevState: RegisterState, formData: Form
   }
   if (!EMAIL_REGEX.test(email)) {
     return { error: "Geçerli bir e-posta adresi girin." };
+  }
+
+  // Aynı e-postaya tekrar tekrar doğrulama maili tetiklenmesini (e-posta bombalama) ve
+  // bir IP'den toplu hesap oluşturmayı sınırlar.
+  const ip = clientIpFromHeaders(await headers());
+  const withinIpLimit = consumeRateLimit(`register:ip:${ip}`, { max: 10, windowMs: 60 * 60 * 1000 });
+  const withinEmailLimit = consumeRateLimit(`register:email:${email}`, { max: 3, windowMs: 60 * 60 * 1000 });
+  if (!withinIpLimit || !withinEmailLimit) {
+    return { error: RATE_LIMIT_ERROR };
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

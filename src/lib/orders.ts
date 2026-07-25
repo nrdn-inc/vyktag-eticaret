@@ -27,6 +27,29 @@ export interface CheckoutAddressInput {
 
 const ORDER_NUMBER_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // karışabilecek 0/O, 1/I hariç
 
+// personalization (Json) sütununun bir uzunluk sınırı yok; User/Address gibi String
+// alanların aksine (Prisma varsayılanı VARCHAR(191)) buraya kısıtlamasız, çok büyük bir
+// gövde gönderilebilir (depolama istismarı / DoS). Sipariş oluşturma tek herkese açık,
+// kimlik doğrulaması gerektirmeyen yazma yolu olduğundan her alanı burada sınırlıyoruz.
+const PERSONALIZATION_FIELD_MAX_LENGTH = 200;
+
+/** Kişiselleştirme alanlarını makul bir uzunlukta tutar; her alanı ayrı ayrı kırpar. */
+export function sanitizePersonalization(
+  personalization: CartPersonalization | undefined,
+): CartPersonalization | undefined {
+  if (!personalization) {
+    return undefined;
+  }
+  const sanitized: CartPersonalization = {};
+  for (const key of ["fullName", "title", "phone", "note"] as const) {
+    const value = personalization[key];
+    if (typeof value === "string" && value.trim()) {
+      sanitized[key] = value.trim().slice(0, PERSONALIZATION_FIELD_MAX_LENGTH);
+    }
+  }
+  return Object.keys(sanitized).length > 0 ? sanitized : undefined;
+}
+
 /** "VYK-YYYYMMDD-XXXXXX" biçiminde, insan tarafından okunabilir bir sipariş numarası üretir. */
 export function generateOrderNumber(now: Date = new Date()): string {
   const datePart = [now.getFullYear(), now.getMonth() + 1, now.getDate()]
@@ -121,13 +144,14 @@ export async function createOrderFromCart(
     const variant = variantById.get(line.variantId)!;
     const quantity = Math.max(1, Math.floor(line.quantity));
     const unitPriceKurus = variant.priceKurus;
+    const personalization = sanitizePersonalization(line.personalization);
     return {
       productVariantId: variant.id,
       quantity,
       unitPriceKurus,
       totalKurus: unitPriceKurus * quantity,
-      personalization: line.personalization
-        ? (line.personalization as Prisma.InputJsonValue)
+      personalization: personalization
+        ? (personalization as Prisma.InputJsonValue)
         : undefined,
     };
   });
