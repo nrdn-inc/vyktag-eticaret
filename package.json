@@ -1,6 +1,6 @@
 {
   "name": "4_vyktag_eticaret",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:db": "vitest run --config vitest.db.config.ts",
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts"
   },

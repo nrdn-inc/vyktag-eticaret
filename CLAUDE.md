@@ -21,11 +21,18 @@ Referans rakip: idycard.com.
 - `npm run dev` — geliştirme
 - `npm run build` / `npm start` — prod build
 - `npm run lint` — ESLint
-- `npm test` — Vitest test bench
+- `npm test` — Vitest test bench (veritabanına dokunmayan testler)
+- `npm run test:db` — canlı veritabanına bağlanan testler (`*.db.test.ts`)
 
 ## Test Bench
 Her yeni özellik için test yazılır (Vitest). Bir özellik eklendiğinde/değiştirildiğinde
 `npm test` çalıştırılır ve geçmeden iş tamamlanmış sayılmaz — `tsc --noEmit` ve lint ile birlikte.
+
+**Veritabanı testleri ayrıdır.** Proje ayrı bir test veritabanı kullanmıyor; `*.db.test.ts`
+dosyaları CANLI Hostinger veritabanına bağlanır ve yazar. Hostinger hesabı saatte yalnızca
+500 yeni bağlantıya izin verdiği için bunlar varsayılan `npm test` koşumunun dışında tutulur
+ve `npm run test:db` ile tek işlemde çalıştırılır (bkz. vitest.db.config.ts).
+Veritabanına sorgu atan bir test yazıyorsan dosya adı `*.db.test.ts` olmalı.
 
 ## Konvansiyonlar
 - Kullanıcıyla iletişim Türkçe.

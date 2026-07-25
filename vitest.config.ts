@@ -1,17 +1,15 @@
-import { fileURLToPath } from "node:url";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vitest/config";
-import "dotenv/config";
+import { configDefaults, defineConfig } from "vitest/config";
+import { DB_TEST_PATTERN, sharedConfig } from "./vitest.shared";
 
+// Varsayılan `npm test`: yalnızca veritabanına DOKUNMAYAN testler. Böylece geliştirme
+// sırasında sık sık test çalıştırmak canlı Hostinger veritabanına bağlantı açmaz ve
+// hesabın saatlik bağlantı kotasını (MAX_CONNECTIONS_PER_HOUR=500) tüketmez.
+// Veritabanı testleri için: npm run test:db (bkz. vitest.db.config.ts)
 export default defineConfig({
-  plugins: [react()],
+  ...sharedConfig,
   test: {
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
-  },
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
+    exclude: [...configDefaults.exclude, DB_TEST_PATTERN],
   },
 });
