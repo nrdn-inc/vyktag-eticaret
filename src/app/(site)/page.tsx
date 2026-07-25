@@ -13,7 +13,7 @@ import { ProductCarousel } from "@/components/ProductCarousel";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/visuals/Icon";
-import { PhoneMockup } from "@/components/visuals/PhoneMockup";
+import { ProfilePagePhoto } from "@/components/visuals/ProfilePagePhoto";
 
 // ISR: sayfa statik üretilir, en fazla bu süre kadar önbellekte tutulur;
 // süre dolduğunda arka planda yeniden oluşturulur (katalog güncellemeleri yansır).
@@ -154,7 +154,7 @@ export default async function Home() {
                 aria-hidden
                 className="absolute inset-x-8 top-8 -z-10 h-72 rounded-full bg-gradient-to-br from-brand/25 to-accent/20 blur-3xl"
               />
-              <PhoneMockup />
+              <ProfilePagePhoto />
             </div>
           </Reveal>
         </div>
