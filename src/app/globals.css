@@ -6,6 +6,13 @@
   /* Vyktag marka rengi — logodaki turkuaz/camgöbeği tonu */
   --brand: #06b6d4;
   --brand-dark: #0891b2;
+  /* Vurgu rengi — rozet, gradient ve grafiklerde marka rengine eşlik eder */
+  --accent: #6366f1;
+  --accent-dark: #4f46e5;
+  /* Yüzeyler: kart ve bölüm arka planları */
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --border-soft: #e4e4e7;
 }
 
 @theme inline {
@@ -13,6 +20,11 @@
   --color-foreground: var(--foreground);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-soft: var(--border-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -21,6 +33,9 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --surface: #18181b;
+    --surface-muted: #09090b;
+    --border-soft: #27272a;
   }
 }
 
@@ -28,4 +43,136 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Animasyonlar
+   Tümü `prefers-reduced-motion` altında devre dışı bırakılır (en altta).
+--------------------------------------------------------------------------- */
+
+@keyframes vyk-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vyk-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-0.75rem) rotate(-1deg);
+  }
+}
+
+/* NFC dalgalarının dışa doğru yayılması */
+@keyframes vyk-ripple {
+  0% {
+    opacity: 0.55;
+    transform: scale(0.75);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+/* Kart yüzeyinde soldan sağa geçen parlama */
+@keyframes vyk-sheen {
+  0% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  60%,
+  100% {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+@keyframes vyk-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-fade-up {
+  animation: vyk-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float {
+  animation: vyk-float 6s ease-in-out infinite;
+}
+
+.animate-ripple {
+  animation: vyk-ripple 2.6s ease-out infinite;
+}
+
+.animate-sheen {
+  animation: vyk-sheen 5s ease-in-out infinite;
+}
+
+.animate-marquee {
+  animation: vyk-marquee 32s linear infinite;
+}
+
+/* Kaydırınca beliren bölümler: Reveal bileşeni görünür olunca is-visible ekler. */
+.reveal {
+  opacity: 0;
+  transform: translateY(1.5rem);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Fare üzerine gelince hafif 3B eğim veren kart sarmalayıcı */
+.tilt-card {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-style: preserve-3d;
+}
+
+.tilt-card:hover {
+  transform: perspective(1000px) rotateX(6deg) rotateY(-8deg) translateY(-0.5rem);
+}
+
+/* Yatay kaydırmalı listelerde kaydırma çubuğunu gizler (kaydırma korunur) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-float,
+  .animate-ripple,
+  .animate-sheen,
+  .animate-marquee {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .tilt-card:hover {
+    transform: none;
+  }
 }

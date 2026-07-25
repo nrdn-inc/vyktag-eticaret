@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ProductCard } from "@/components/ProductCard";
@@ -26,15 +25,50 @@ const multiVariant: ProductWithVariants = {
   ],
 };
 
+const outOfStock: ProductWithVariants = {
+  ...singleVariant,
+  id: "p3",
+  slug: "vyktag-phonecard",
+  name: "Vyktag Phonecard",
+  variants: [{ id: "v4", name: "Standart", sku: "VYK-PHONE-STD", priceKurus: 44990, stock: 0 }],
+};
+
 describe("ProductCard", () => {
-  it("shows a single fixed price for single-variant products", () => {
+  it("shows a single fixed price without a starting-from label", () => {
     render(<ProductCard product={singleVariant} />);
+
     expect(screen.getByRole("heading", { name: "Vyktag Tag" })).toBeInTheDocument();
     expect(screen.getByText("₺399,90")).toBeInTheDocument();
+    expect(screen.queryByText("başlangıç fiyatı")).not.toBeInTheDocument();
   });
 
-  it("shows a starting-from price for multi-variant products", () => {
+  it("marks the price as a starting point for multi-variant products", () => {
     render(<ProductCard product={multiVariant} />);
-    expect(screen.getByText(/₺599,90'den başlayan/)).toBeInTheDocument();
+
+    expect(screen.getByText("₺599,90")).toBeInTheDocument();
+    expect(screen.getByText("başlangıç fiyatı")).toBeInTheDocument();
+  });
+
+  it("lists the available variant names for multi-variant products", () => {
+    render(<ProductCard product={multiVariant} />);
+
+    expect(screen.getByText("Siyah")).toBeInTheDocument();
+    expect(screen.getByText("Özel")).toBeInTheDocument();
+  });
+
+  it("links the whole card to the product detail page", () => {
+    render(<ProductCard product={singleVariant} />);
+
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/urunler/vyktag-tag");
+  });
+
+  it("shows the campaign badge configured for the product slug", () => {
+    render(<ProductCard product={multiVariant} />);
+    expect(screen.getByText("En çok satan")).toBeInTheDocument();
+  });
+
+  it("flags products whose variants are all out of stock", () => {
+    render(<ProductCard product={outOfStock} />);
+    expect(screen.getByText("Tükendi")).toBeInTheDocument();
   });
 });

@@ -1,3 +1,5 @@
+import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
+
 interface CardPreviewProps {
   productName: string;
   variantName: string;
@@ -5,32 +7,36 @@ interface CardPreviewProps {
   title: string;
 }
 
-function variantTheme(variantName: string) {
-  const normalized = variantName.toLocaleLowerCase("tr-TR");
-  if (normalized.includes("siyah")) {
-    return { card: "bg-zinc-900", text: "text-white", sub: "text-zinc-300" };
-  }
-  if (normalized.includes("beyaz")) {
-    return { card: "border border-zinc-200 bg-white", text: "text-zinc-900", sub: "text-zinc-500" };
-  }
-  return { card: "bg-gradient-to-br from-brand to-brand-dark", text: "text-white", sub: "text-white/80" };
-}
-
 /** Ürün detay sayfasında kişiselleştirme alanlarına göre canlı güncellenen kart önizlemesi. */
 export function CardPreview({ productName, variantName, fullName, title }: CardPreviewProps) {
-  const theme = variantTheme(variantName);
-
   return (
-    <div className="flex aspect-square items-center justify-center rounded-3xl bg-gradient-to-br from-brand/10 to-brand/30 p-8">
-      <div
-        className={`flex aspect-[1.6/1] w-full flex-col justify-between rounded-2xl p-6 shadow-lg transition-colors duration-200 ${theme.card}`}
-      >
-        <span className={`text-xs font-semibold uppercase tracking-widest ${theme.sub}`}>{productName}</span>
-        <div>
-          <p className={`text-lg font-bold ${theme.text}`}>{fullName.trim() || "Ad Soyad"}</p>
-          <p className={`text-sm ${theme.sub}`}>{title.trim() || "Unvan"}</p>
+    <div>
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-border-soft bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
+        {/* NFC dalgaları */}
+        <div aria-hidden className="absolute inset-0 flex items-center justify-center">
+          {[0, 1, 2].map((ring) => (
+            <span
+              key={ring}
+              className="animate-ripple absolute h-48 w-48 rounded-full border border-brand/25 sm:h-64 sm:w-64"
+              style={{ animationDelay: `${ring * 0.8}s` }}
+            />
+          ))}
+        </div>
+
+        <div className="tilt-card relative w-full max-w-[20rem]">
+          <NfcCard
+            variant={resolveCardVariant(variantName)}
+            fullName={fullName}
+            title={title}
+            shine
+          />
         </div>
       </div>
+
+      <p className="mt-4 text-center text-xs text-zinc-500">
+        {productName} · {variantName} — canlı önizleme. Gerçek ürün baskısı tasarım onayınızla
+        yapılır.
+      </p>
     </div>
   );
 }

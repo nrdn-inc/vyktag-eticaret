@@ -31,6 +31,15 @@ export default function RootLayout({
       lang="tr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        {/*
+          Giriş animasyonları JavaScript ile tetiklenir. JavaScript çalışmazsa
+          içerik gizli kalmamalı; bu stil animasyonu tamamen devre dışı bırakır.
+        */}
+        <noscript>
+          <style>{`.reveal{opacity:1 !important;transform:none !important}`}</style>
+        </noscript>
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
