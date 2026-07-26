@@ -12,7 +12,7 @@ interface ProductPhotoProps {
 export function ProductPhoto({ src, alt, className = "", sizes, priority }: ProductPhotoProps) {
   return (
     <div
-      className={`relative aspect-[6/5] w-full overflow-hidden rounded-2xl shadow-xl ring-1 ring-zinc-900/5 ${className}`}
+      className={`relative aspect-[6/5] w-full overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-zinc-900/5 ${className}`}
     >
       <Image
         src={src}
@@ -20,7 +20,8 @@ export function ProductPhoto({ src, alt, className = "", sizes, priority }: Prod
         fill
         priority={priority}
         sizes={sizes ?? "(min-width: 1024px) 20rem, 90vw"}
-        className="object-cover"
+        // Fotoğrafların en-boy oranı varyanta göre değişiyor; kırpmak yerine tamamı gösterilir.
+        className="object-contain"
       />
     </div>
   );
