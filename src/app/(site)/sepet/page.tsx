@@ -5,6 +5,7 @@ import { lineKey } from "@/lib/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { useCart } from "@/components/CartProvider";
 import { CheckoutOrderBump } from "@/components/CheckoutOrderBump";
+import { BundleUpsell } from "@/components/BundleUpsell";
 
 export default function CartPage() {
   const { items, totalKurus, ready, updateQuantity, removeItem } = useCart();
@@ -117,6 +118,7 @@ export default function CartPage() {
       </div>
 
       <CheckoutOrderBump />
+      <BundleUpsell />
 
       {/* Toplam + ödeme */}
       <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">

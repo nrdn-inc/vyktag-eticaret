@@ -6,7 +6,8 @@ import { InsufficientStockError, aggregateQuantitiesByVariant, isStockReleasedSt
 import { isValidLogoDataUrl } from "@/lib/logo-upload";
 
 export interface CheckoutLine {
-  variantId: string;
+  variantId?: string;
+  subscriptionPlanId?: string;
   quantity: number;
   personalization?: CartPersonalization;
 }
@@ -105,17 +106,29 @@ export async function createOrderFromCart(
     throw new Error("Sepetiniz boş.");
   }
 
-  const variantIds = [...new Set(lines.map((l) => l.variantId))];
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: variantIds }, isActive: true },
-    include: { product: true },
-  });
+  const variantIds = [...new Set(lines.map((l) => l.variantId).filter(Boolean) as string[])];
+  const planIds = [...new Set(lines.map((l) => l.subscriptionPlanId).filter(Boolean) as string[])];
 
-  if (variants.length !== variantIds.length) {
-    throw new Error("Sepetinizdeki bazı ürünler artık mevcut değil. Lütfen sepetinizi güncelleyin.");
+  const [variants, plans] = await Promise.all([
+    variantIds.length > 0
+      ? prisma.productVariant.findMany({
+          where: { id: { in: variantIds }, isActive: true },
+          include: { product: true },
+        })
+      : [],
+    planIds.length > 0
+      ? prisma.subscriptionPlan.findMany({
+          where: { id: { in: planIds }, isActive: true },
+        })
+      : [],
+  ]);
+
+  if (variants.length !== variantIds.length || plans.length !== planIds.length) {
+    throw new Error("Sepetinizdeki bazı ürünler veya planlar artık mevcut değil. Lütfen sepetinizi güncelleyin.");
   }
 
   const variantById = new Map(variants.map((v) => [v.id, v]));
+  const planById = new Map(plans.map((p) => [p.id, p]));
   const user = await findOrCreateGuestUser(contact);
 
   const shippingAddress = await prisma.address.create({
@@ -147,12 +160,19 @@ export async function createOrderFromCart(
     : shippingAddress;
 
   const items = lines.map((line) => {
-    const variant = variantById.get(line.variantId)!;
     const quantity = Math.max(1, Math.floor(line.quantity));
-    const unitPriceKurus = variant.priceKurus;
+    let unitPriceKurus = 0;
+    
+    if (line.variantId) {
+      unitPriceKurus = variantById.get(line.variantId)!.priceKurus;
+    } else if (line.subscriptionPlanId) {
+      unitPriceKurus = planById.get(line.subscriptionPlanId)!.priceKurus;
+    }
+
     const personalization = sanitizePersonalization(line.personalization);
     return {
-      productVariantId: variant.id,
+      productVariantId: line.variantId || null,
+      subscriptionPlanId: line.subscriptionPlanId || null,
       quantity,
       unitPriceKurus,
       totalKurus: unitPriceKurus * quantity,
@@ -163,7 +183,13 @@ export async function createOrderFromCart(
   });
 
   const totalKurus = items.reduce((sum, item) => sum + item.totalKurus, 0);
-  const quantityByVariant = aggregateQuantitiesByVariant(lines);
+  
+  const quantityByVariant = new Map<string, number>();
+  for (const line of lines) {
+    if (line.variantId) {
+      quantityByVariant.set(line.variantId, (quantityByVariant.get(line.variantId) || 0) + line.quantity);
+    }
+  }
 
   // orderNumber çakışması (çok düşük ihtimal) durumunda birkaç kez yeniden dener.
   let lastError: unknown;
@@ -193,7 +219,7 @@ export async function createOrderFromCart(
             items: { create: items },
           },
           include: {
-            items: { include: { productVariant: { include: { product: true } } } },
+            items: { include: { productVariant: { include: { product: true } }, subscriptionPlan: true } },
           },
         });
       });

@@ -158,6 +158,9 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  crossSellSubscriptionPlanId String?
+  crossSellSubscriptionPlan   SubscriptionPlan? @relation("ProductBundle", fields: [crossSellSubscriptionPlanId], references: [id])
+
   variants ProductVariant[]
 
   @@map("products")
@@ -199,8 +202,9 @@ model SubscriptionPlan {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
-  orderItems    OrderItem[]
-  subscriptions Subscription[]
+  orderItems      OrderItem[]
+  subscriptions   Subscription[]
+  crossSellProducts Product[] @relation("ProductBundle")
 
   @@map("subscription_plans")
 }

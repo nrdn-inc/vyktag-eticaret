@@ -11,7 +11,8 @@ export interface CartPersonalization {
 }
 
 export interface CartItem {
-  variantId: string;
+  variantId?: string;
+  subscriptionPlanId?: string;
   productSlug: string;
   productName: string;
   variantName: string;
@@ -25,7 +26,8 @@ export interface CartItem {
  * eklendiğinde ayrı satır olarak durması için kişiselleştirme de anahtara dahildir.
  */
 export function lineKey(item: CartItem): string {
-  return `${item.variantId}::${JSON.stringify(item.personalization ?? {})}`;
+  const id = item.variantId ?? item.subscriptionPlanId;
+  return `${id}::${JSON.stringify(item.personalization ?? {})}`;
 }
 
 /** Sepete kalem ekler; aynı anahtardaki kalem varsa adedini artırır. */

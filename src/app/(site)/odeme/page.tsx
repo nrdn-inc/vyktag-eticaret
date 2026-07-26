@@ -53,6 +53,7 @@ export default function CheckoutPage() {
             },
         lines: items.map((item) => ({
           variantId: item.variantId,
+          subscriptionPlanId: item.subscriptionPlanId,
           quantity: item.quantity,
           personalization: item.personalization,
         })),

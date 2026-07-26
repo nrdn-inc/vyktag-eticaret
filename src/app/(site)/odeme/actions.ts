@@ -6,7 +6,8 @@ import { initializeCheckoutForm } from "@/lib/iyzico";
 import type { CartPersonalization } from "@/lib/cart";
 
 export interface CheckoutCartLine {
-  variantId: string;
+  variantId?: string;
+  subscriptionPlanId?: string;
   quantity: number;
   personalization?: CartPersonalization;
 }
@@ -89,9 +90,11 @@ export async function startCheckout(input: CheckoutInput): Promise<CheckoutResul
         id: item.id,
         name: item.productVariant
           ? `${item.productVariant.product.name} - ${item.productVariant.name}`
+          : item.subscriptionPlan
+          ? item.subscriptionPlan.name
           : "VYKTag ürünü",
-        category1: "Dijital Kartvizit",
-        itemType: "PHYSICAL",
+        category1: item.subscriptionPlan ? "Yazılım Aboneliği" : "Dijital Kartvizit",
+        itemType: item.subscriptionPlan ? "VIRTUAL" : "PHYSICAL",
         priceKurus: item.totalKurus,
       })),
     });
