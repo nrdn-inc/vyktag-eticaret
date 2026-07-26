@@ -66,7 +66,16 @@ const nextConfig: NextConfig = {
   deploymentId: resolveDeploymentId(),
 
   async headers() {
-    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+    return [
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      {
+        source: "/(.*).csv",
+        headers: [
+          { key: "Content-Type", value: "text/csv; charset=utf-8" },
+          { key: "Content-Disposition", value: "attachment" },
+        ],
+      },
+    ];
   },
 };
 
