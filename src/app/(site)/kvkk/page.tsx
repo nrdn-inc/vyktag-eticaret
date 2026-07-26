@@ -115,7 +115,12 @@ export default function KvkkPage() {
             8. Başvuru Yöntemi
           </h2>
           <p>
-            Yukarıda sayılan haklarınıza ilişkin taleplerinizi <strong>{legalInfo.email}</strong>{" "}
+            Yukarıda sayılan haklarınıza ilişkin taleplerinizi{" "}
+            <strong>
+              <a href={`mailto:${legalInfo.email}`} className="hover:underline">
+                {legalInfo.email}
+              </a>
+            </strong>{" "}
             {`adresine e-posta göndererek veya ${legalInfo.address} adresine yazılı olarak başvurarak iletebilirsiniz.`}{" "}
             Talepleriniz, niteliğine göre en kısa sürede ve en geç 30 gün içinde ücretsiz olarak
             sonuçlandırılır.

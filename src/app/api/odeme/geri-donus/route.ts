@@ -48,8 +48,26 @@ export async function POST(request: Request): Promise<Response> {
     return Response.redirect(`${origin}/sepet?odeme=hata`, 303);
   }
 
-  const success = isPaymentSuccessful(result);
+  /**
+   * Idempotency kontrolü: Sipariş daha önce ödenmişse işlemi yoksayarak 
+   * mükerrer payment kaydı veya FAILED durumuna düşme riskini önleriz.
+   */
+  if (order.status === OrderStatus.PAID) {
+    console.warn(`[odeme/geri-donus] Mükerrer webhook engellendi. Sipariş zaten ödenmiş: ${order.id}`);
+    return Response.redirect(`${origin}/siparis/${order.orderNumber}`, 303);
+  }
+
+  let success = isPaymentSuccessful(result);
   const amountKurus = Math.round(Number(result.paidPrice ?? result.price ?? 0) * 100);
+
+  /**
+   * Tutar doğrulama: Ödenen tutar, sistemin beklediği tutardan az olamaz.
+   * Bu kontrol sepet tutarının istemcide manipüle edilmesini engeller.
+   */
+  if (success && amountKurus < order.totalKurus) {
+    console.error(`[odeme/geri-donus] Tutar manipülasyonu girişimi! Beklenen: ${order.totalKurus}, Ödenen: ${amountKurus}, Order: ${order.id}`);
+    success = false;
+  }
 
   const operations: Prisma.PrismaPromise<unknown>[] = [
     prisma.order.update({
