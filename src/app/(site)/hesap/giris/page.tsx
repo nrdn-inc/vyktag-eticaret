@@ -134,6 +134,12 @@ export default function GirisPage() {
           {loginPending ? "Giriş yapılıyor…" : "Giriş yap"}
         </button>
       </form>
+
+      <div className="mt-6 text-center">
+        <Link href="/admin/giris" className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+          Yönetici Girişi
+        </Link>
+      </div>
     </div>
   );
 }
