@@ -27,12 +27,14 @@ export interface LoginState {
   twoFactorToken?: string;
   /** twoFactorToken hangi doğrulama akışına gönderilecek (e-posta kodu mu, authenticator kodu mu). */
   twoFactorMethod?: "EMAIL" | "TOTP";
+  redirectUrl?: string;
 }
 
 export interface TwoFactorLoginState {
   error?: string;
   /** Yanlış kod sonrası aynı 2FA adımında kalabilmek için token geri döner. */
   token?: string;
+  redirectUrl?: string;
 }
 
 const GENERIC_ERROR = "Kullanıcı adı/e-posta veya şifre hatalı.";
@@ -40,12 +42,10 @@ const RATE_LIMIT_ERROR = "Çok fazla başarısız deneme yapıldı. Lütfen birk
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 /**
- * Oturum çerezini (ve admin ise ayrıca admin panelinin kendi oturum çerezini) yazar;
- * admin panelinin oturum kontrolü (bkz. admin-session.ts) müşteri çerezinden tamamen
- * ayrı olduğu için, admin hesapları hesabım girişinden sonra panele düzgün geçebilsin diye
- * iki çerez de aynı anda kurulur. Ardından role'e göre uygun sayfaya yönlendirir.
+ * Oturum çerezini yazar ve redirectUrl döner. redirect() sunucu tarafında
+ * RSC JSON bug'ına yol açabildiği için yönlendirmeyi istemciye bırakıyoruz.
  */
-async function establishSessionAndRedirect(user: { id: string; role: UserRole }): Promise<never> {
+async function establishSessionAndRedirect(user: { id: string; role: UserRole }): Promise<{ redirectUrl: string }> {
   const cookieStore = await cookies();
   const customerToken = createCustomerSessionToken(user.id);
   cookieStore.set(CUSTOMER_SESSION_COOKIE, customerToken, {
@@ -65,10 +65,10 @@ async function establishSessionAndRedirect(user: { id: string; role: UserRole })
       path: "/",
       maxAge: SESSION_MAX_AGE_SECONDS,
     });
-    redirect("/admin/siparisler");
+    return { redirectUrl: "/admin/siparisler" };
   }
 
-  redirect("/hesap");
+  return { redirectUrl: "/hesap" };
 }
 
 export async function loginCustomer(_prevState: LoginState, formData: FormData): Promise<LoginState> {
@@ -225,11 +225,11 @@ export async function verifyTotpLogin(
   return establishSessionAndRedirect(user);
 }
 
-export async function logoutCustomer(): Promise<void> {
+export async function logoutCustomer(): Promise<{ redirectUrl: string }> {
   const cookieStore = await cookies();
   cookieStore.delete(CUSTOMER_SESSION_COOKIE);
   // Admin hesapları için hesabım girişinde admin çerezi de kurulduğundan (bkz.
   // establishSessionAndRedirect), tek çıkış işleminin her iki oturumu da kapatması gerekir.
   cookieStore.delete(ADMIN_SESSION_COOKIE);
-  redirect("/hesap/giris");
+  return { redirectUrl: "/hesap/giris" };
 }

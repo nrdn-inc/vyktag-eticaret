@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import Link from "next/link";
 import {
   loginCustomer,
@@ -24,6 +24,13 @@ export default function GirisPage() {
     initialTwoFactorState,
   );
   const [totpState, totpAction, totpPending] = useActionState(verifyTotpLogin, initialTotpState);
+
+  useEffect(() => {
+    const url = loginState.redirectUrl || twoFactorState.redirectUrl || totpState.redirectUrl;
+    if (url) {
+      window.location.href = url;
+    }
+  }, [loginState.redirectUrl, twoFactorState.redirectUrl, totpState.redirectUrl]);
 
   // Şifre doğrulandıktan sonra 2FA kodu istenmişse (ilk kez ya da yanlış kod sonrası tekrar),
   // aynı adımda kalırız. Yöntem yalnızca ilk giriş isteğinde belirlenir ve değişmez.

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
 import { verifyCustomerSession } from "@/lib/customer-session";
-import { logoutCustomer } from "./giris/actions";
 import { deleteAddress, deleteBillingProfile, setDefaultAddress, setDefaultBillingProfile } from "./actions";
+import { LogoutForm } from "./LogoutForm";
 import { AddAddressForm } from "./AddAddressForm";
 import { AddBillingProfileForm } from "./AddBillingProfileForm";
 import { TwoFactorToggleForm } from "./TwoFactorToggleForm";
@@ -59,14 +59,7 @@ export default async function HesapPage({
               Yönetim Paneli
             </Link>
           )}
-          <form action={logoutCustomer}>
-            <button
-              type="submit"
-              className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
-            >
-              Çıkış yap
-            </button>
-          </form>
+          <LogoutForm />
         </div>
       </header>
 

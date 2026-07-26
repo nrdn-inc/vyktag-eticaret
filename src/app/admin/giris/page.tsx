@@ -1,12 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { loginAdmin, type LoginState } from "./actions";
 
 const initialState: LoginState = {};
 
 export default function AdminLoginPage() {
   const [state, action, pending] = useActionState(loginAdmin, initialState);
+  
+  useEffect(() => {
+    if (state.redirectUrl) {
+      window.location.href = state.redirectUrl;
+    }
+  }, [state.redirectUrl]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">

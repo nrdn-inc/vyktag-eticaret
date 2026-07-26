@@ -9,6 +9,7 @@ import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
 
 export interface LoginState {
   error?: string;
+  redirectUrl?: string;
 }
 
 const GENERIC_ERROR = "Kullanıcı adı/e-posta veya şifre hatalı.";
@@ -54,14 +55,14 @@ export async function loginAdmin(_prevState: LoginState, formData: FormData): Pr
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
 
-  redirect("/admin/siparisler");
+  return { redirectUrl: "/admin/siparisler" };
 }
 
-export async function logoutAdmin(): Promise<void> {
+export async function logoutAdmin(): Promise<{ redirectUrl: string }> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_SESSION_COOKIE);
   // Hesabım girişinde admin hesapları için müşteri çerezi de kurulduğundan (bkz.
   // hesap/giris/actions.ts), buradan çıkışın da o oturumu kapatması gerekir.
   cookieStore.delete(CUSTOMER_SESSION_COOKIE);
-  redirect("/admin/giris");
+  return { redirectUrl: "/admin/giris" };
 }

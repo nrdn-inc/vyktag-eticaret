@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { verifyAdminSession } from "@/lib/admin-session";
-import { logoutAdmin } from "@/app/admin/giris/actions";
+import { AdminLogoutForm } from "./AdminLogoutForm";
 
 export default async function AdminLayout({
   children,
@@ -28,11 +28,7 @@ export default async function AdminLayout({
           </div>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-zinc-500">{user.fullName}</span>
-            <form action={logoutAdmin}>
-              <button type="submit" className="font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
-                Çıkış yap
-              </button>
-            </form>
+            <AdminLogoutForm />
           </div>
         </div>
       </header>
