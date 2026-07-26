@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { NfcCard } from "@/components/visuals/NfcCard";
+import { NfcCard, NfcCardBack } from "@/components/visuals/NfcCard";
 import { parseVariantAttributes, resolveVariantVisual } from "@/lib/product-variant-attributes";
 import { describeCardPhoto, getCardPhoto } from "@/lib/product-photos";
 
@@ -69,15 +69,26 @@ export function CardPreview({
               ))}
             </div>
 
-            <div className="tilt-card relative w-full max-w-[20rem]">
-              <NfcCard
-                variant={cardVariant}
-                accent={accent}
-                fullName={fullName}
-                title={title}
-                logoDataUrl={logoDataUrl}
-                shine
-              />
+            {/* Gerçek ürün fotoğraflarındaki gibi ön ve arka yüz birlikte, hafif kaydırılmış/döndürülmüş. */}
+            <div className="tilt-card relative w-full max-w-[18rem]">
+              <div className="absolute inset-0 z-0 rotate-[-5deg] translate-x-3 translate-y-3 opacity-95">
+                <NfcCardBack
+                  variant={cardVariant}
+                  accent={accent}
+                  customDesign={attributes?.customDesign}
+                  logoDataUrl={logoDataUrl}
+                />
+              </div>
+              <div className="relative z-10 -rotate-2">
+                <NfcCard
+                  variant={cardVariant}
+                  accent={accent}
+                  fullName={fullName}
+                  title={title}
+                  logoDataUrl={logoDataUrl}
+                  shine
+                />
+              </div>
             </div>
           </>
         )}

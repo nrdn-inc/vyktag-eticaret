@@ -121,6 +121,71 @@ function QrGlyph({ theme }: { theme: SurfaceTheme }) {
   );
 }
 
+interface NfcCardBackProps {
+  variant?: CardVariant;
+  accent?: CardAccent;
+  /** true ise arka yüzde marka etiketi yerine kullanıcının logosu/yer tutucusu gösterilir. */
+  customDesign?: boolean;
+  logoDataUrl?: string;
+  className?: string;
+  style?: CSSProperties;
+}
+
+/**
+ * Kartın arka yüzünün görsel temsili — gerçek ürün fotoğraflarındaki gibi NFC simgesi,
+ * "Temassız Erişim / Dijital Kimlik" markası (özel tasarımda kullanıcının logosu) ve QR koduyla.
+ */
+export function NfcCardBack({
+  variant = "özel",
+  accent = "altin",
+  customDesign = false,
+  logoDataUrl,
+  className = "",
+  style,
+}: NfcCardBackProps) {
+  const surface = SURFACE_THEMES[variant];
+  const accentTheme = ACCENT_THEMES[accent];
+
+  return (
+    <div
+      style={style}
+      className={`relative isolate flex aspect-[1.586/1] w-full flex-col justify-between overflow-hidden rounded-2xl p-4 shadow-xl transition-colors duration-300 sm:p-5 ${surface.surface} ${className}`}
+    >
+      <NfcWaves className={`h-6 w-6 sm:h-7 sm:w-7 ${surface.wave}`} />
+
+      <div className="flex items-end justify-between gap-3">
+        {customDesign ? (
+          <div className="flex min-w-0 items-center gap-2">
+            {logoDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL, next/image optimizasyonuna uygun değil.
+              <img
+                src={logoDataUrl}
+                alt="Logo"
+                className="h-8 w-8 shrink-0 rounded-md bg-white/90 object-contain p-0.5 sm:h-9 sm:w-9"
+              />
+            ) : (
+              <p className={`text-[11px] font-bold uppercase tracking-wide sm:text-xs ${surface.primaryText}`}>
+                Logonuz
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="min-w-0">
+            <p className={`text-xs font-bold sm:text-sm ${surface.primaryText}`}>Temassız Erişim</p>
+            <p className={`text-[10px] sm:text-xs ${surface.mutedText}`}>Dijital Kimlik</p>
+          </div>
+        )}
+        <QrGlyph theme={surface} />
+      </div>
+
+      {/* Yonga, arka yüzde de hafif bir marka tutarlılığı için soluk şekilde tekrarlanır. */}
+      <div aria-hidden className="absolute -bottom-3 -right-3 opacity-20">
+        <Chip theme={accentTheme} />
+      </div>
+    </div>
+  );
+}
+
 /**
  * Fiziksel VYKTag kartının görsel temsili. Ürün fotoğrafı yerine kullanılır;
  * kart rengine (variant) ve baskı rengine (accent) göre renk değiştirir, isteğe
