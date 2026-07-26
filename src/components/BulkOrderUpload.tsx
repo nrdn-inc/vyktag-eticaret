@@ -130,7 +130,7 @@ export function BulkOrderUpload({
       <h2 className="text-lg font-semibold tracking-tight mb-2">1. Personel Listenizi Yükleyin</h2>
       <p className="text-sm text-zinc-500 mb-6">
         Hazırladığınız CSV dosyasını seçerek tüm personelinizi tek seferde yükleyebilirsiniz.{" "}
-        <a href="/vyktag-toplu-siparis-sablonu.csv" download className="text-brand hover:underline">
+        <a href="/api/sablon-indir" download className="text-brand hover:underline">
           Örnek Şablonu İndir
         </a>
       </p>
