@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getActiveProductSlugs, getProductBySlug } from "@/lib/catalog";
+import { getProductBySlug } from "@/lib/catalog";
 import { ProductDetailInteractive } from "@/components/ProductDetailInteractive";
-
-// ISR: katalog güncellemeleri en geç bu süre içinde yansır.
-export const revalidate = 300;
-
-/** Build anında tüm ürün detay sayfalarını statik üret; yeni sluglar istek anında oluşturulur. */
-export async function generateStaticParams() {
-  const slugs = await getActiveProductSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({
   params,

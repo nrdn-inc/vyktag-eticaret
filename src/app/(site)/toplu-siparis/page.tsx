@@ -7,8 +7,6 @@ export const metadata: Metadata = {
   description: "VYKTag NFC dijital kartvizitleri ile şirket personellerinize toplu olarak sipariş verin. CSV ile kolay yükleme imkanı.",
 };
 
-export const revalidate = 300; // 5 dakika
-
 export default async function TopluSiparisPage() {
   const products = await getActiveProducts();
 

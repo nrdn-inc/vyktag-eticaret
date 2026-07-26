@@ -3,6 +3,15 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site";
 
+// Statik/ISR sayfalar CDN'de (Hostinger hcdn) uzun süre önbelleğe alınabiliyor; sık art
+// arda deploy'larda eski build'in JS/RSC parçaları sunucudan silindiğinden, önbellekteki
+// eski bir sayfa artık var olmayan parçalara işaret edip ham RSC akış verisini ekrana
+// basabiliyor veya "This page couldn't load" hatası verebiliyor (bkz. Next.js "Version
+// Skew" ve "CDN Caching" dokümantasyonu — CDN'in _rsc sorgu parametresini önbellek
+// anahtarına dahil etmemesi durumunda oluşur). Her sayfayı istek anında render ederek
+// (Cache-Control: private, no-store) bu hata sınıfını tamamen ortadan kaldırıyoruz.
+export const dynamic = "force-dynamic";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin", "latin-ext"],

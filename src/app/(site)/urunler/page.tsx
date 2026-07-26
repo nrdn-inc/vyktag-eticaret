@@ -10,9 +10,6 @@ import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
 import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
-// ISR: katalog güncellemeleri en geç bu süre içinde yansır.
-export const revalidate = 300;
-
 export const metadata: Metadata = {
   title: "Ürünler",
   description: "VYKTag NFC kartları, etiketleri ve telefon kartları. Renk ve tasarım seçenekleriyle.",

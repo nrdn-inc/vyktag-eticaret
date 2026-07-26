@@ -15,10 +15,6 @@ import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/visuals/Icon";
 import { ProfilePagePhoto } from "@/components/visuals/ProfilePagePhoto";
 
-// ISR: sayfa statik üretilir, en fazla bu süre kadar önbellekte tutulur;
-// süre dolduğunda arka planda yeniden oluşturulur (katalog güncellemeleri yansır).
-export const revalidate = 300;
-
 /** Bölüm başlıklarında tekrar eden üst etiket + başlık + açıklama düzeni. */
 function SectionHeading({
   eyebrow,
