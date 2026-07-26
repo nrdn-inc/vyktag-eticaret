@@ -35,9 +35,12 @@ describe("resolvePrintAccent", () => {
     expect(resolvePrintAccent("Altın")).toBe("altin");
   });
 
-  it("maps Gümüş and Siyah to the gumus accent", () => {
+  it("maps Gümüş to the gumus accent", () => {
     expect(resolvePrintAccent("Gümüş")).toBe("gumus");
-    expect(resolvePrintAccent("Siyah")).toBe("gumus");
+  });
+
+  it("maps Siyah to the siyah accent", () => {
+    expect(resolvePrintAccent("Siyah")).toBe("siyah");
   });
 });
 

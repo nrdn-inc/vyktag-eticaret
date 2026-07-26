@@ -26,9 +26,11 @@ export function parseVariantAttributes(value: unknown): VariantAttributes | null
   return null;
 }
 
-/** Bir baskı rengini NfcCard'ın metalik "accent" temasına eşler (yalnızca altın gerçekten altın görünür). */
+/** Bir baskı rengini NfcCard'ın metalik "accent" temasına birebir eşler. */
 export function resolvePrintAccent(printColor: PrintColor): CardAccent {
-  return printColor === "Altın" ? "altin" : "gumus";
+  if (printColor === "Altın") return "altin";
+  if (printColor === "Gümüş") return "gumus";
+  return "siyah";
 }
 
 /**

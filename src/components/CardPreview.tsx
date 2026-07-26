@@ -69,9 +69,9 @@ export function CardPreview({
               ))}
             </div>
 
-            {/* Gerçek ürün fotoğraflarındaki gibi ön ve arka yüz birlikte, hafif kaydırılmış/döndürülmüş. */}
-            <div className="tilt-card relative w-full max-w-[18rem]">
-              <div className="absolute inset-0 z-0 rotate-[-5deg] translate-x-3 translate-y-3 opacity-95">
+            {/* Gerçek ürün fotoğraflarındaki gibi ön ve arka yüz belirgin şekilde ayrık ve döndürülmüş. */}
+            <div className="tilt-card relative w-full max-w-[14rem]">
+              <div className="absolute inset-0 z-0 -rotate-[9deg] translate-x-7 translate-y-7 opacity-90 drop-shadow-lg">
                 <NfcCardBack
                   variant={cardVariant}
                   accent={accent}
@@ -79,7 +79,7 @@ export function CardPreview({
                   logoDataUrl={logoDataUrl}
                 />
               </div>
-              <div className="relative z-10 -rotate-2">
+              <div className="relative z-10 -rotate-1 drop-shadow-2xl">
                 <NfcCard
                   variant={cardVariant}
                   accent={accent}
