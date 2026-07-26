@@ -1,7 +1,6 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
 import { ADMIN_SESSION_COOKIE, CUSTOMER_SESSION_COOKIE, createAdminSessionToken, verifyPassword } from "@/lib/auth";

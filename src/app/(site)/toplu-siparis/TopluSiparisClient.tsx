@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { BulkOrderUpload, type SelectedProductVariant } from "@/components/BulkOrderUpload";
 import { formatPriceTRY } from "@/lib/format";
@@ -100,7 +99,7 @@ export function TopluSiparisClient({ products }: { products: ProductWithVariants
           <h3 className="font-semibold mb-2 text-sm">Toplu Sipariş Nasıl Çalışır?</h3>
           <ul className="text-sm text-zinc-600 dark:text-zinc-400 space-y-2 list-disc pl-4">
             <li>Önce yukarıdan sipariş vermek istediğiniz VYKTag ürününü seçin.</li>
-            <li>Excel'de hazırladığınız veya indirdiğiniz şablonu doldurup CSV olarak kaydedin.</li>
+            <li>Excel&apos;de hazırladığınız veya indirdiğiniz şablonu doldurup CSV olarak kaydedin.</li>
             <li>Dosyayı yüklediğinizde sistem personelinizi otomatik okur.</li>
             <li>Hatalı kayıtları düzeltip tüm geçerli personeli tek tıkla sepetinize ekleyebilirsiniz.</li>
             <li>Sepetinizdeki ürünler için şirket logonuz tek bir e-posta ile bizden talep edilecektir.</li>

@@ -1,6 +1,6 @@
 {
   "name": "4_vyktag_eticaret",
-  "version": "0.33.2",
+  "version": "0.34.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.9.0",
     "@prisma/client": "^7.9.0",
+    "exceljs": "^4.4.0",
     "iyzipay": "^2.0.69",
     "next": "16.2.12",
     "nodemailer": "^9.0.3",
@@ -22,7 +23,8 @@
     "prisma": "^7.9.0",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Papa from "papaparse";
+import * as XLSX from "xlsx";
 import { useCart } from "@/components/CartProvider";
 import type { CartItem, CartPersonalization } from "@/lib/cart";
 
@@ -20,6 +21,38 @@ interface ParsedRow {
   note: string;
   isValid: boolean;
   error?: string;
+}
+
+/**
+ * Ham satırları (CSV veya Excel'den gelen, anahtarları serbest başlık adları olan nesneler)
+ * standart ParsedRow biçimine çevirir. Başlık eşleştirmesi büyük/küçük harf ve boşluktan
+ * bağımsızdır; Excel'den gelen sayısal/tarih tipi hücreler de String()'e zorlanır — SheetJS
+ * telefon gibi tamamen sayısal görünen hücreleri number olarak döndürebilir.
+ */
+export function parseBulkOrderRows(rawRows: Record<string, unknown>[]): ParsedRow[] {
+  return rawRows.map((row) => {
+    const keys = Object.keys(row);
+    const getVal = (possibleKeys: string[]) => {
+      const key = keys.find((k) => possibleKeys.includes(k.trim().toLowerCase()));
+      const value = key ? row[key] : undefined;
+      return value === null || value === undefined ? "" : String(value).trim();
+    };
+
+    const fullName = getVal(["ad soyad", "ad", "isim soyisim", "isim", "name", "fullname"]);
+    const title = getVal(["unvan", "ünvan", "pozisyon", "title"]);
+    const phone = getVal(["telefon", "cep telefonu", "phone"]);
+    const note = getVal(["not", "notlar", "note"]);
+
+    const isValid = Boolean(fullName);
+    return {
+      fullName,
+      title,
+      phone,
+      note,
+      isValid,
+      error: isValid ? undefined : "Ad Soyad alanı zorunludur.",
+    };
+  });
 }
 
 export function BulkOrderUpload({
@@ -41,44 +74,34 @@ export function BulkOrderUpload({
     setSuccessMsg("");
     setRows([]);
 
-    Papa.parse(file, {
+    const isExcel = /\.xlsx?$/i.test(file.name);
+
+    if (isExcel) {
+      // Gerçek, tipli sütunlu hücreler — CSV'nin aksine ayraç (virgül/noktalı virgül)
+      // belirsizliği yoktur, bu yüzden Türkçe Excel'den kaynaklanan "her şey tek hücrede"
+      // sorunu burada oluşmaz.
+      file
+        .arrayBuffer()
+        .then((buffer) => {
+          const workbook = XLSX.read(buffer, { type: "array" });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(firstSheet, { defval: "" });
+          setRows(parseBulkOrderRows(rawRows));
+          setIsParsing(false);
+        })
+        .catch((error) => {
+          console.error("Excel okuma hatası:", error);
+          alert("Dosya okunurken bir hata oluştu. Lütfen şablonu bozmadan doldurduğunuz .xlsx dosyasını yükleyin.");
+          setIsParsing(false);
+        });
+      return;
+    }
+
+    Papa.parse<Record<string, unknown>>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const parsedData: ParsedRow[] = [];
-        
-        results.data.forEach((row: any, index) => {
-          // Desteklenen başlıklar (Büyük/küçük harf veya boşluk duyarlılığını azaltmak için trim kullanıyoruz)
-          const keys = Object.keys(row);
-          const getVal = (possibleKeys: string[]) => {
-            const key = keys.find(k => possibleKeys.includes(k.trim().toLowerCase()));
-            return key ? row[key]?.trim() : "";
-          };
-
-          const fullName = getVal(["ad soyad", "ad", "isim soyisim", "isim", "name", "fullname"]);
-          const title = getVal(["unvan", "ünvan", "pozisyon", "title"]);
-          const phone = getVal(["telefon", "cep telefonu", "phone"]);
-          const note = getVal(["not", "notlar", "note"]);
-
-          let isValid = true;
-          let error = "";
-
-          if (!fullName) {
-            isValid = false;
-            error = "Ad Soyad alanı zorunludur.";
-          }
-
-          parsedData.push({
-            fullName,
-            title,
-            phone,
-            note,
-            isValid,
-            error
-          });
-        });
-
-        setRows(parsedData);
+        setRows(parseBulkOrderRows(results.data));
         setIsParsing(false);
       },
       error: (error) => {
@@ -129,7 +152,8 @@ export function BulkOrderUpload({
     <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
       <h2 className="text-lg font-semibold tracking-tight mb-2">1. Personel Listenizi Yükleyin</h2>
       <p className="text-sm text-zinc-500 mb-6">
-        Hazırladığınız CSV dosyasını seçerek tüm personelinizi tek seferde yükleyebilirsiniz.{" "}
+        İndirdiğiniz Excel şablonunu doldurup yükleyerek tüm personelinizi tek seferde
+        ekleyebilirsiniz.{" "}
         <a href="/api/sablon-indir" download className="text-brand hover:underline">
           Örnek Şablonu İndir
         </a>
@@ -138,15 +162,15 @@ export function BulkOrderUpload({
       <div className="mb-6">
         <label className="block w-full cursor-pointer rounded-lg border-2 border-dashed border-zinc-300 p-8 text-center transition-colors hover:border-brand dark:border-zinc-700 dark:hover:border-brand">
           <span className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {isParsing ? "Okunuyor..." : "CSV Dosyasını Seçmek İçin Tıklayın"}
+            {isParsing ? "Okunuyor..." : "Excel (.xlsx) Dosyasını Seçmek İçin Tıklayın"}
           </span>
           <span className="mt-1 block text-xs text-zinc-500">
-            .csv veya Excel'den dışa aktarılmış CSV dosyaları (Maks 1000 satır)
+            .xlsx şablonu (önerilen) veya .csv dosyası — Maks 1000 satır
           </span>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv, application/csv, text/csv"
+            accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/csv,text/csv"
             className="hidden"
             onChange={handleFileUpload}
             disabled={!selectedVariant || isParsing}

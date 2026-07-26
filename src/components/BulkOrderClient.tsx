@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { BulkOrderUpload, type SelectedProductVariant } from "@/components/BulkOrderUpload";
@@ -62,7 +61,7 @@ export function BulkOrderClient({ products }: { products: ProductWithVariants[] 
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
-                      {p.name} ({formatPriceTRY(p.minPriceKurus)}'den başlayan fiyatlarla)
+                      {p.name} ({formatPriceTRY(p.minPriceKurus)}&apos;den başlayan fiyatlarla)
                     </option>
                   ))}
                 </select>

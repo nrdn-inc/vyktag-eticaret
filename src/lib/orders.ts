@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, Prisma, UserRole } from "@/generated/prisma/client";
 import type { CartPersonalization } from "@/lib/cart";
-import { InsufficientStockError, aggregateQuantitiesByVariant, isStockReleasedStatus } from "@/lib/stock";
+import { InsufficientStockError, isStockReleasedStatus } from "@/lib/stock";
 import { isValidLogoDataUrl } from "@/lib/logo-upload";
 
 export interface CheckoutLine {
