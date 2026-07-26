@@ -1,12 +1,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  CARD_VARIANT_PHOTOS,
-  CUSTOMIZATION_SAMPLE_PHOTOS,
-  describeCardPhoto,
-  getCardPhoto,
-} from "@/lib/product-photos";
+import { CARD_VARIANT_PHOTOS, describeCardPhoto, getCardPhoto } from "@/lib/product-photos";
 import type { CardColor, PrintColor, VariantAttributes } from "@/lib/product-variant-attributes";
 
 /** Veritabanındaki VYKTag Kart varyantlarının tamamı (kart rengi × baskı rengi × özel tasarım). */
@@ -54,7 +49,6 @@ describe("fotoğraf dosyaları", () => {
     const referenced = [
       ...ALL_COMBINATIONS.map((attributes) => getCardPhoto(attributes)!),
       ...Object.values(CARD_VARIANT_PHOTOS),
-      ...CUSTOMIZATION_SAMPLE_PHOTOS,
     ];
     for (const src of new Set(referenced)) {
       expect(existsSync(publicPath(src)), src).toBe(true);

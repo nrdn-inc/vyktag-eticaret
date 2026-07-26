@@ -52,12 +52,5 @@ export const CARD_VARIANT_PHOTOS: Record<CardVariant, string> = {
   özel: "/images/kart-siyah-altin-ozel.jpg",
 };
 
-/** Kişiselleştirme örnekleri: farklı renk/bitiş kombinasyonlarında "LOGONUZ" yer tutuculu kartlar. */
-export const CUSTOMIZATION_SAMPLE_PHOTOS: string[] = [
-  "/images/kart-beyaz-altin-ozel.jpg",
-  "/images/kart-siyah-gumus-ozel.jpg",
-  "/images/kart-beyaz-siyah-ozel.jpg",
-];
-
 /** Gerçek fotoğrafı bulunan ürünlerin slug'ları. */
 export const PRODUCTS_WITH_REAL_PHOTOS = new Set(["vyktag-kart"]);

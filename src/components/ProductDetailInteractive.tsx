@@ -5,8 +5,6 @@ import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { CardPreview } from "@/components/CardPreview";
 import { AddToCartForm } from "@/components/AddToCartForm";
-import { ProductPhotoGallery } from "@/components/ProductPhotoGallery";
-import { PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
 
 /** Ürün detay sayfasının etkileşimli kısmı: kart önizlemesi ile formun aynı state'i paylaşmasını sağlar. */
 export function ProductDetailInteractive({ product }: { product: ProductWithVariants }) {
@@ -53,8 +51,6 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
           </div>
         </div>
       </div>
-
-      {PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) && <ProductPhotoGallery />}
     </div>
   );
 }
