@@ -16,7 +16,7 @@ const RATE_LIMIT_ERROR = "Çok fazla başarısız deneme yapıldı. Lütfen birk
 const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 export async function loginAdmin(_prevState: LoginState, formData: FormData): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {

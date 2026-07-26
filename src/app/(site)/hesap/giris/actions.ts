@@ -72,7 +72,7 @@ async function establishSessionAndRedirect(user: { id: string; role: UserRole })
 }
 
 export async function loginCustomer(_prevState: LoginState, formData: FormData): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const email = String(formData.get("username") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {

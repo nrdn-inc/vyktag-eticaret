@@ -93,10 +93,10 @@ export default function GirisPage() {
 
       <form action={loginAction} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label htmlFor="username" className="block text-sm font-medium">
             E-posta veya kullanıcı adı
           </label>
-          <input id="email" name="email" type="text" required autoComplete="username" className={inputClass} />
+          <input id="username" name="username" type="text" required autoComplete="username" className={inputClass} />
         </div>
         <div>
           <div className="flex items-center justify-between">
