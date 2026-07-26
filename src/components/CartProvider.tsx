@@ -77,6 +77,7 @@ interface CartActions {
   /** İstemcide sepet localStorage'dan yüklendi mi (ilk render'da false). */
   ready: boolean;
   addItem: (item: CartItem) => void;
+  addItems: (itemsToAdd: CartItem[]) => void;
   updateQuantity: (key: string, quantity: number) => void;
   removeItem: (key: string) => void;
   clear: () => void;
@@ -94,6 +95,13 @@ export function useCart(): CartActions {
     totalKurus: cartTotalKurus(current),
     ready,
     addItem: (item) => setItems(addItemFn(items, item)),
+    addItems: (itemsToAdd) => {
+      let currentItems = items;
+      for (const item of itemsToAdd) {
+        currentItems = addItemFn(currentItems, item);
+      }
+      setItems(currentItems);
+    },
     updateQuantity: (key, quantity) => setItems(updateQuantityFn(items, key, quantity)),
     removeItem: (key) => setItems(removeItemFn(items, key)),
     clear: () => setItems([]),
