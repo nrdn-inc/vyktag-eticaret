@@ -50,7 +50,7 @@ const SURFACE_THEMES: Record<CardVariant, SurfaceTheme> = {
 // Gerçek varak baskıyı taklit eder: kart yüzeyinden bağımsız olarak seçilen baskı rengine
 // göre karttaki TÜM yazı/simge/QR aynı tonda boyanır (yalnızca vurgu rengi değil).
 const ACCENT_THEMES: Record<CardAccent, AccentTheme> = {
-  altin: { primary: "text-amber-500", muted: "text-amber-500/75", qr: "bg-amber-500" },
+  altin: { primary: "text-[#EFBF04]", muted: "text-[#EFBF04]/75", qr: "bg-[#EFBF04]" },
   gumus: { primary: "text-zinc-200", muted: "text-zinc-200/75", qr: "bg-zinc-200" },
   siyah: { primary: "text-zinc-900", muted: "text-zinc-900/75", qr: "bg-zinc-900" },
 };
