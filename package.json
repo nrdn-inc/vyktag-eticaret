@@ -1,6 +1,6 @@
 {
   "name": "4_vyktag_eticaret",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -31,6 +31,7 @@
     "@types/iyzipay": "^2.0.3",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.1",
+    "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
