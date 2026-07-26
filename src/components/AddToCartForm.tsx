@@ -13,9 +13,14 @@ import { CardOptionSelector } from "@/components/CardOptionSelector";
 // Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
 const LOW_STOCK_THRESHOLD = 10;
 
-// Sunucu tarafındaki sınırla eşleşir (bkz. lib/orders.ts PERSONALIZATION_FIELD_MAX_LENGTH);
+// Sunucu tarafındaki üst sınırla eşleşir (bkz. lib/orders.ts PERSONALIZATION_FIELD_MAX_LENGTH);
 // burada yalnızca kullanıcıya anında geri bildirim vermek için tekrarlanır.
 const PERSONALIZATION_FIELD_MAX_LENGTH = 200;
+
+// Ad/unvan doğrudan kartın üzerinde basılır; fiziksel kart genişliğinde okunaklı kalması
+// için yukarıdaki genel sınırdan çok daha dar tutulur (telefon/not alanları etkilenmez).
+const FULL_NAME_MAX_LENGTH = 30;
+const TITLE_MAX_LENGTH = 35;
 
 interface AddToCartFormProps {
   product: ProductWithVariants;
@@ -142,22 +147,32 @@ export function AddToCartForm({
           </p>
         )}
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <input
-            type="text"
-            placeholder="Ad Soyad"
-            value={fullName}
-            onChange={(e) => onFullNameChange(e.target.value)}
-            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
-          />
-          <input
-            type="text"
-            placeholder="Unvan"
-            value={title}
-            onChange={(e) => onTitleChange(e.target.value)}
-            maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
-          />
+          <div>
+            <input
+              type="text"
+              placeholder="Ad Soyad"
+              value={fullName}
+              onChange={(e) => onFullNameChange(e.target.value.slice(0, FULL_NAME_MAX_LENGTH))}
+              maxLength={FULL_NAME_MAX_LENGTH}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <p className="mt-1 text-right text-[11px] text-zinc-400">
+              {fullName.length}/{FULL_NAME_MAX_LENGTH}
+            </p>
+          </div>
+          <div>
+            <input
+              type="text"
+              placeholder="Unvan"
+              value={title}
+              onChange={(e) => onTitleChange(e.target.value.slice(0, TITLE_MAX_LENGTH))}
+              maxLength={TITLE_MAX_LENGTH}
+              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <p className="mt-1 text-right text-[11px] text-zinc-400">
+              {title.length}/{TITLE_MAX_LENGTH}
+            </p>
+          </div>
           <input
             type="tel"
             placeholder="Telefon"

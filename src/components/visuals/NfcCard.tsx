@@ -186,31 +186,33 @@ export function NfcCard({
         />
       )}
 
-      <div className="flex items-start justify-end">
-        <NfcWaves className={`h-6 w-6 sm:h-7 sm:w-7 ${accentTheme.primary}`} />
+      {/* Gerçek ürün fotoğraflarındaki gibi: logo (varsa) sol üstte, NFC simgesi sağ üstte;
+          ad/unvan kendi köşesinde, logoyla aynı satırı paylaşmadığı için sıkışmaz. QR yalnızca
+          arka yüzde bulunur — gerçek kartlarda da ön yüzde QR yoktur. */}
+      <div className="flex items-start justify-between">
+        {logoDataUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL, next/image optimizasyonuna uygun değil.
+          <img
+            src={logoDataUrl}
+            alt="Logo"
+            className="h-8 w-8 shrink-0 rounded-md bg-white/90 object-contain p-0.5 sm:h-10 sm:w-10"
+          />
+        ) : (
+          <span />
+        )}
+        <NfcWaves className={`h-6 w-6 shrink-0 sm:h-7 sm:w-7 ${accentTheme.primary}`} />
       </div>
 
-      <div className="flex items-end justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          {logoDataUrl && (
-            // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL, next/image optimizasyonuna uygun değil.
-            <img
-              src={logoDataUrl}
-              alt="Logo"
-              className="h-8 w-8 shrink-0 rounded-md bg-white/90 object-contain p-0.5 sm:h-9 sm:w-9"
-            />
-          )}
-          <div className="min-w-0">
-            <p className={`truncate text-sm font-bold sm:text-base ${accentTheme.primary}`}>
-              {fullName?.trim() || "Ad Soyad"}
-            </p>
-            <p className={`truncate text-[11px] sm:text-xs ${accentTheme.muted}`}>{title?.trim() || "Unvan"}</p>
-            <p className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${accentTheme.muted}`}>
-              VYKTag
-            </p>
-          </div>
-        </div>
-        <QrGlyph accentTheme={accentTheme} className="h-9 w-9 sm:h-11 sm:w-11" />
+      <div className="text-right">
+        <p className={`truncate text-sm font-bold sm:text-base ${accentTheme.primary}`}>
+          {fullName?.trim() || "Ad Soyad"}
+        </p>
+        <p className={`truncate text-[11px] sm:text-xs ${accentTheme.muted}`}>{title?.trim() || "Unvan"}</p>
+        {!logoDataUrl && (
+          <p className={`mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] sm:text-[10px] ${accentTheme.muted}`}>
+            VYKTag
+          </p>
+        )}
       </div>
     </div>
   );
