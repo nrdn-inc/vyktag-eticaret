@@ -8,6 +8,8 @@ import { verifyCustomerSession } from "@/lib/customer-session";
 import { verifyPassword } from "@/lib/auth";
 import { isValidNationalId, isValidTaxNumber } from "@/lib/billing-profiles";
 import { buildOtpAuthUrl, generateTotpSecret, verifyTotpCode } from "@/lib/totp";
+import { decryptTotpSecret, encryptTotpSecret } from "@/lib/totp-secret-crypto";
+import { consumeRateLimit } from "@/lib/rate-limit";
 
 export interface AddressFormState {
   error?: string;
@@ -187,7 +189,7 @@ export async function enableTwoFactor(
   // Daha önce yarım kalmış bir TOTP eşleştirmesinden kalan sır varsa temizlenir.
   await prisma.user.update({
     where: { id: user.id },
-    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null },
+    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null, twoFactorLastStep: null },
   });
   revalidatePath("/hesap");
   return { success: true };
@@ -208,7 +210,7 @@ export async function disableTwoFactor(
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { twoFactorEnabled: false, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null },
+    data: { twoFactorEnabled: false, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null, twoFactorLastStep: null },
   });
   revalidatePath("/hesap");
   return { success: true };
@@ -239,7 +241,9 @@ export async function startTotpEnrollment(
   }
 
   const secret = generateTotpSecret();
-  await prisma.user.update({ where: { id: user.id }, data: { twoFactorSecret: secret } });
+  // Sır veritabanında şifreli tutulur (bkz. totp-secret-crypto.ts); düz hali yalnızca
+  // QR/manuel giriş için bu yanıtla istemciye döner.
+  await prisma.user.update({ where: { id: user.id }, data: { twoFactorSecret: encryptTotpSecret(secret) } });
 
   const otpAuthUrl = buildOtpAuthUrl(secret, user.email);
   const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
@@ -260,12 +264,17 @@ export async function confirmTotpEnrollment(
   const user = await verifyCustomerSession();
   const code = String(formData.get("code") ?? "").trim();
 
+  if (!consumeRateLimit(`totp-confirm:${user.id}`, { max: 5, windowMs: 10 * 60 * 1000 })) {
+    return { error: "Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin." };
+  }
+
   const fresh = await prisma.user.findUnique({ where: { id: user.id } });
-  if (!fresh?.twoFactorSecret) {
+  const secret = decryptTotpSecret(fresh?.twoFactorSecret);
+  if (!secret) {
     return { error: "Önce authenticator uygulamasıyla eşleştirmeyi başlatın." };
   }
 
-  if (!verifyTotpCode(fresh.twoFactorSecret, code)) {
+  if (!verifyTotpCode(secret, code)) {
     return { error: "Kod hatalı veya süresi dolmuş." };
   }
 

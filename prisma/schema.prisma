@@ -74,9 +74,13 @@ model User {
   passwordChangedAt DateTime?
   twoFactorEnabled  Boolean   @default(false)
   twoFactorMethod   TwoFactorMethod @default(EMAIL)
-  // Yalnızca twoFactorMethod=TOTP iken doludur (Base32 paylaşılan sır). E-posta yöntemine
-  // geçildiğinde veya 2FA kapatıldığında temizlenir — bkz. hesap/actions.ts.
+  // Yalnızca twoFactorMethod=TOTP iken doludur. Base32 sır, veritabanı sızıntısında 2FA'nın
+  // etkisiz kalmaması için AES-256-GCM ile şifrelenmiş saklanır (bkz. lib/totp-secret-crypto.ts).
+  // E-posta yöntemine geçildiğinde veya 2FA kapatıldığında temizlenir — bkz. hesap/actions.ts.
   twoFactorSecret   String?
+  // Son başarılı TOTP girişinin 30 saniyelik zaman dilimi (RFC 6238 §5.2: aynı kodun
+  // tekrar kullanımını engeller). Yalnızca giriş doğrulamasında güncellenir.
+  twoFactorLastStep Int?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

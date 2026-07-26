@@ -44,4 +44,19 @@ describe("computePeriodEnd", () => {
     const start = new Date("2026-01-15T00:00:00Z");
     expect(computePeriodEnd(start, "YEARLY").toISOString()).toBe("2027-01-15T00:00:00.000Z");
   });
+
+  it("clamps month-end overflow instead of spilling into the next month (31 Jan + 1 month = 28 Feb, not 3 Mar)", () => {
+    const start = new Date(2026, 0, 31, 12, 0, 0); // 31 Ocak (yerel saat)
+    const end = computePeriodEnd(start, "MONTHLY");
+    expect(end.getMonth()).toBe(1); // Şubat
+    expect(end.getDate()).toBe(28);
+  });
+
+  it("clamps 29 Feb + 1 year to 28 Feb on non-leap years", () => {
+    const start = new Date(2028, 1, 29, 12, 0, 0); // 29 Şubat 2028 (artık yıl)
+    const end = computePeriodEnd(start, "YEARLY");
+    expect(end.getFullYear()).toBe(2029);
+    expect(end.getMonth()).toBe(1);
+    expect(end.getDate()).toBe(28);
+  });
 });

@@ -18,6 +18,7 @@ import {
 import { sendTwoFactorCode, sendVerificationEmail } from "@/lib/customer-auth";
 import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
 import { verifyTotpCode } from "@/lib/totp";
+import { decryptTotpSecret } from "@/lib/totp-secret-crypto";
 
 export interface LoginState {
   error?: string;
@@ -98,6 +99,11 @@ export async function loginCustomer(_prevState: LoginState, formData: FormData):
   if (!user.emailVerifiedAt) {
     // Doğrulanmamış hesapların şifresi henüz yok (bkz. hesap/dogrula) — şifreyi burada
     // kontrol etmeye çalışmak yerine doğrulama bağlantısını yeniden gönderiyoruz.
+    // Bu gönderim IP'den bağımsız, hesap başına da sınırlanır: yukarıdaki acct limitinin
+    // anahtarı IP içerdiğinden, IP değiştiren bir saldırgan onu aşıp e-posta bombalayabilirdi.
+    if (!consumeRateLimit(`verify-send:${user.id}`, { max: 3, windowMs: 60 * 60 * 1000 })) {
+      return { error: RATE_LIMIT_ERROR };
+    }
     try {
       await sendVerificationEmail(user.id, user.email, user.fullName);
     } catch (error) {
@@ -158,6 +164,13 @@ export async function verifyTwoFactorLogin(
     return { error: RATE_LIMIT_ERROR, token };
   }
 
+  // IP limiti dağıtık (çok IP'li) tahmin denemesini durdurmaz; her challenge token'ı için
+  // toplam deneme sayısı da ayrıca sınırlanır. Kod kontrolü token doğrulamasının içinde
+  // olduğundan anahtar userId yerine token'ın kendisinden (son 32 karakter = imza) türetilir.
+  if (!consumeRateLimit(`2fa-verify:token:${token.slice(-32)}`, { max: 5, windowMs: 10 * 60 * 1000 })) {
+    return { error: RATE_LIMIT_ERROR, token };
+  }
+
   const userId = verifyTwoFactorChallengeToken(token, code);
   if (!userId) {
     return { error: "Kod hatalı veya süresi dolmuş.", token };
@@ -190,10 +203,24 @@ export async function verifyTotpLogin(
     return { error: "Kod hatalı veya süresi dolmuş.", token };
   }
 
+  // IP limiti dağıtık (çok IP'li) tahmin denemesini durdurmaz; hesap başına da sınırlanır.
+  if (!consumeRateLimit(`2fa-verify:acct:${userId}`, { max: 5, windowMs: 10 * 60 * 1000 })) {
+    return { error: RATE_LIMIT_ERROR, token };
+  }
+
   const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user?.twoFactorSecret || !verifyTotpCode(user.twoFactorSecret, code)) {
+  const secret = decryptTotpSecret(user?.twoFactorSecret);
+  if (!user || !secret || !verifyTotpCode(secret, code)) {
     return { error: "Kod hatalı veya süresi dolmuş.", token };
   }
+
+  // RFC 6238 §5.2: aynı (veya daha eski bir dilime ait) kodun ikinci kez kullanımı reddedilir —
+  // araya giren biri kodu yakalasa bile pencere süresi içinde yeniden kullanamaz.
+  const step = Math.floor(Date.now() / 1000 / 30);
+  if (user.twoFactorLastStep !== null && step <= user.twoFactorLastStep) {
+    return { error: "Kod hatalı veya süresi dolmuş.", token };
+  }
+  await prisma.user.update({ where: { id: user.id }, data: { twoFactorLastStep: step } });
 
   return establishSessionAndRedirect(user);
 }

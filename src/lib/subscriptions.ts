@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, SubscriptionStatus } from "@/generated/prisma/client";
 import type { Prisma, SubscriptionInterval } from "@/generated/prisma/client";
@@ -13,7 +14,7 @@ const CONVERSATION_ID_PREFIX = "sub";
  * üzerinden yapılır — sipariş akışındaki gibi önceden oluşturulmuş bir kayda değil.
  */
 export function encodeSubscriptionConversationId(userId: string, planId: string): string {
-  const nonce = Math.random().toString(36).slice(2, 10);
+  const nonce = randomBytes(6).toString("hex");
   return [CONVERSATION_ID_PREFIX, userId, planId, nonce].join(CONVERSATION_ID_SEPARATOR);
 }
 
@@ -43,11 +44,16 @@ export function decodeSubscriptionConversationId(
 /** Abonelik periyoduna göre bir sonraki yenileme tarihini hesaplar (iyzico'nun kendi faturalama takvimi asıldır; bu yalnızca yerel görüntüleme içindir). */
 export function computePeriodEnd(start: Date, interval: SubscriptionInterval): Date {
   const end = new Date(start);
+  // setMonth/setFullYear ay sonlarında taşar (31 Oca + 1 ay → 3 Mar); günü hedef ayın
+  // son gününe sıkıştırarak taşmayı önlüyoruz.
+  const day = end.getDate();
+  end.setDate(1);
   if (interval === "MONTHLY") {
     end.setMonth(end.getMonth() + 1);
   } else {
     end.setFullYear(end.getFullYear() + 1);
   }
+  end.setDate(Math.min(day, new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate()));
   return end;
 }
 
@@ -64,6 +70,12 @@ export async function activateSubscriptionFromCheckout(
   const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
   if (!plan) {
     throw new Error(`Abonelik planı bulunamadı: ${planId}`);
+  }
+  // Derinlemesine savunma: conversationId'den çözülen plan, iyzico'nun bu ödeme için
+  // döndürdüğü Fiyatlandırma Planı ile birebir eşleşmeli — uyuşmazlık, karışmış/yeniden
+  // kullanılmış bir geri dönüş demektir ve abonelik kaydı oluşturulmaz.
+  if (plan.iyzicoPricingPlanRef !== data.pricingPlanReferenceCode) {
+    throw new Error("Abonelik planı iyzico dönüşüyle eşleşmiyor.");
   }
 
   const now = new Date();
