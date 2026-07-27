@@ -61,6 +61,15 @@ export default function TeslimatVeIadePage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            Abonelik İptali
+          </h2>
+          <p>
+            {`Vyktag Premium abonelikleri dilediğiniz zaman, cezai şart olmaksızın iptal edilebilir. İptal için ${legalInfo.email} adresine yazabilir veya hesabınız üzerinden iyzico Abonelik altyapısını kullanabilirsiniz. İptal sonrası mevcut ödenmiş dönem sonuna kadar hizmet kullanılmaya devam eder, bir sonraki dönem için tekrar ücretlendirme yapılmaz.`}
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             İletişim
           </h2>
           <p>

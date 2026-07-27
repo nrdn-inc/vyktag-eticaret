@@ -106,7 +106,27 @@ export default function MesafeliSatisSozlesmesiPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            7. Genel Hükümler
+            7. Hizmet (Abonelik) Satışlarında Cayma ve İptal
+          </h2>
+          <p>
+            Vyktag Premium gibi tekrarlayan (aylık/yıllık) abonelik hizmetlerinde cayma hakkı süresi,
+            fiziksel üründen farklı olarak sözleşmenin kurulduğu tarihten itibaren işlemeye başlar
+            (teslimat beklenmez). Alıcı, hizmetin ifasına onayı ile cayma süresi dolmadan
+            başlanmasını talep etmişse, Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15/1-a maddesi
+            uyarınca hizmet tamamen ifa edildikten sonra cayma hakkını kullanamaz.
+          </p>
+          <p className="mt-3">
+            Abonelik, herhangi bir cezai şart olmaksızın Alıcı tarafından dilediği zaman iptal
+            edilebilir. İptal, {legalInfo.email} adresine bildirim veya iyzico Abonelik altyapısı
+            üzerinden yapılır; iptal talebinden sonra mevcut ödenmiş dönem sonuna kadar hizmet
+            kullanılmaya devam edilir ve bir sonraki dönem için tekrar ücretlendirme yapılmaz.
+            Dönem içinde kullanılan süreye ilişkin kısmi iade yapılmaz.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            8. Genel Hükümler
           </h2>
           <p>
             Alıcı, sipariş onayı öncesinde ürünün temel niteliklerini, satış fiyatını, ödeme şeklini
@@ -118,7 +138,7 @@ export default function MesafeliSatisSozlesmesiPage() {
 
         <section>
           <h2 className="mb-2 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            8. Yürürlük
+            9. Yürürlük
           </h2>
           <p>
             Alıcı, sipariş sırasında bu sözleşmeyi elektronik ortamda onaylayarak içeriğini okuduğunu

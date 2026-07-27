@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/CartProvider";
 import { lineKey } from "@/lib/cart";
@@ -196,6 +197,13 @@ export default function CheckoutPage() {
           >
             {isPending ? "İşleniyor…" : `Siparişi Onayla ve Öde · ${formatPriceTRY(totalKurus)}`}
           </button>
+          <Image
+            src="/iyzico-ile-ode.svg"
+            alt="iyzico ile Öde"
+            width={180}
+            height={30}
+            className="mx-auto h-6 w-auto"
+          />
         </form>
 
         {/* Sipariş özeti */}
