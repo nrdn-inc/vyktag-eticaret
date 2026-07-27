@@ -41,7 +41,7 @@ export const VALUE_PROPS: ValueProp[] = [
   {
     icon: "shield",
     title: "Kurumsal güvenlik",
-    text: "İki adımlı doğrulama (2FA) korumalı yönetim paneli, güvenli oturum altyapısı ve kaba kuvvet saldırı engelleme ile verileriniz korunur.",
+    text: "İki adımlı doğrulama (2FA), güvenli oturum altyapısı, kurumsal SSO (SAML 2.0) desteği ve \"Kartı Kaybettim\" bildirimiyle tek tıkla devre dışı bırakma ile verileriniz korunur.",
   },
 ];
 
@@ -70,15 +70,19 @@ export const HOW_IT_WORKS: HowItWorksStep[] = [
   },
 ];
 
-/** Dijital kartvizit sayfasının ziyaretçiye sunduğu özellikler (broşür sayfa 4). */
+/** Dijital kartvizit sayfasının ziyaretçiye sunduğu özellikler (broşür sayfa 6). */
 export const CARD_FEATURES: string[] = [
   "Profil fotoğrafı, unvan ve kısa tanıtım metni",
   "Tek dokunuşla “Rehbere Ekle” — otomatik kişi kaydı",
-  "Ara, WhatsApp, E-posta, Konum, Web, Instagram kısayolları",
+  "Ara, WhatsApp, E-posta, Konum, Web, Instagram, Katalog, Portfolyo, Randevu Al kısayolları",
+  "Katalog ve portfolyo belgeleri PDF olarak veya Drive/Dropbox bağlantısı şeklinde eklenir",
   "Kart üzerinde “Bana Ulaşın” formu",
   "IBAN ve fatura bilgileri — tek dokunuşla kopyalanır",
   "İndirilebilir QR kod (PNG/SVG) ve kişisel link",
-  "Doküman/katalog paylaşımı ve randevu bağlantısı",
+  "İkinci GSM, WhatsApp numarası ve sabit hat desteği",
+  "Tek dokunuşla paylaşım menüsü — WhatsApp, Telegram, e-posta, sosyal medya",
+  "Outlook/Gmail/Apple Mail uyumlu, panelden tek tıkla oluşturulan HTML e-posta imzası",
+  "“Ürün Kartı” modu — kartı ürün görseli, teknik özellik tablosu ve “Teklif İste” formuyla dijital katalog vitrinine dönüştürün",
   "Kurumsal renk ve yazı tipi uyarlaması",
 ];
 
@@ -87,7 +91,7 @@ export interface Audience {
   text: string;
 }
 
-/** "Kimler için ideal?" bölümü (broşür sayfa 3). */
+/** "Kimler için ideal?" bölümü (broşür sayfa 5). */
 export const AUDIENCES: Audience[] = [
   {
     title: "Satış ekipleri",
@@ -109,6 +113,10 @@ export const AUDIENCES: Audience[] = [
     title: "Saha ve teknik servis",
     text: "Müşteri ziyaretlerinde iletişim, konum ve randevu bilgilerini anında sunar.",
   },
+  {
+    title: "Ürün ve perakende ekipleri",
+    text: "Kartı “Ürün Kartı” moduna alarak büyük ürün görseli, teknik özellik tablosu ve “Teklif İste” formuyla dijital ürün kataloğuna dönüştürür.",
+  },
 ];
 
 export interface ComparisonRow {
@@ -117,7 +125,7 @@ export interface ComparisonRow {
   digital: string;
 }
 
-/** Basılı kartvizit ile karşılaştırma tablosu (broşür sayfa 9). */
+/** Basılı kartvizit ile karşılaştırma tablosu (broşür sayfa 11). */
 export const COMPARISON: ComparisonRow[] = [
   {
     feature: "Bilgi güncelleme",
@@ -166,7 +174,7 @@ export interface FaqItem {
   a: string;
 }
 
-/** Ürün ve platform hakkında sık sorulan sorular (mağaza + broşür sayfa 10). */
+/** Ürün ve platform hakkında sık sorulan sorular (mağaza + broşür sayfa 12). */
 export const FAQ: FaqItem[] = [
   {
     q: "VYKTag kart nasıl çalışır?",
@@ -195,6 +203,30 @@ export const FAQ: FaqItem[] = [
   {
     q: "Basılı kartvizitlerimizi tamamen bırakmamız mı gerekiyor?",
     a: "Hayır. Dijital kartvizit, mevcut basılı kartvizitlerinizle birlikte kullanılabilir; geçiş sürecinde herhangi bir risk almazsınız.",
+  },
+  {
+    q: "Kullanım süresi dolarsa ne olur?",
+    a: "Süre dolmadan önce şirketinize otomatik hatırlatma e-postaları gönderilir (1 hafta ve 1 gün kala); süresi dolan kartlarda ziyaretçiye kırık link yerine düzgün bir bilgilendirme sayfası gösterilir.",
+  },
+  {
+    q: "Kartımı kaybedersem veya çalınırsa ne olur?",
+    a: "Panelden “Kartı Kaybettim” seçeneğiyle kart anında pasif hale getirilir ve tarafınıza e-posta bildirimi gönderilir; kart bulunduğunda tek tıkla yeniden aktifleştirilebilir.",
+  },
+  {
+    q: "Mevcut CRM sistemimize entegre olabilir mi?",
+    a: "Evet. Şirket ayarlarınızdan tanımlayacağınız bir webhook adresi sayesinde, kartvizit üzerinden gelen her yeni talep otomatik olarak CRM sisteminize iletilir.",
+  },
+  {
+    q: "Personel e-posta imzalarını da bu sistemden mi yönetebiliriz?",
+    a: "Evet. Her personel için Outlook, Gmail ve Apple Mail ile uyumlu, hazır tasarlanmış bir HTML e-posta imzası panelden tek tıkla oluşturulur ve kopyalanabilir.",
+  },
+  {
+    q: "Kurumsal kimlik doğrulama sistemimizle (SSO) çalışır mı?",
+    a: "Evet. SAML 2.0 destekli kurumsal SSO ile şirketinizin mevcut kimlik doğrulama altyapısı üzerinden giriş yapılabilir; bu yapılandırma sizin adınıza tarafımızca tanımlanır.",
+  },
+  {
+    q: "Kartı sadece personel için değil, ürün tanıtımı için de kullanabilir miyiz?",
+    a: "Evet. Her kartı “Ürün Kartı” moduna alarak büyük ürün görseli, teknik özellik tablosu ve “Teklif İste” formuyla dijital ürün kataloğuna dönüştürebilirsiniz.",
   },
   {
     q: "Abonelik almak zorunda mıyım?",
