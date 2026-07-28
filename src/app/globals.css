@@ -103,6 +103,27 @@ body {
   }
 }
 
+/* Modal: arka plan solma + panel ölçek+kayma girişi */
+@keyframes vyk-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vyk-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .animate-fade-up {
   animation: vyk-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -121,6 +142,14 @@ body {
 
 .animate-marquee {
   animation: vyk-marquee 32s linear infinite;
+}
+
+.animate-vyk-overlay-in {
+  animation: vyk-overlay-in 0.2s ease-out both;
+}
+
+.animate-vyk-modal-in {
+  animation: vyk-modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Kaydırınca beliren bölümler: Reveal bileşeni görünür olunca is-visible ekler. */
@@ -162,7 +191,9 @@ body {
   .animate-float,
   .animate-ripple,
   .animate-sheen,
-  .animate-marquee {
+  .animate-marquee,
+  .animate-vyk-overlay-in,
+  .animate-vyk-modal-in {
     animation: none;
   }
 
