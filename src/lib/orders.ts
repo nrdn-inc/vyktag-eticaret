@@ -113,7 +113,9 @@ export async function createOrderFromCart(
     variantIds.length > 0
       ? prisma.productVariant.findMany({
           where: { id: { in: variantIds }, isActive: true },
-          include: { product: true },
+          // Yalnızca fiyatlandırma + hata mesajı için kullanılan alanlar seçilir — tam
+          // Product satırını (açıklama, zaman damgaları, ...) her checkout'ta taşımaya gerek yok.
+          select: { id: true, name: true, priceKurus: true, product: { select: { name: true } } },
         })
       : [],
     planIds.length > 0
@@ -216,10 +218,22 @@ export async function createOrderFromCart(
             totalKurus,
             shippingAddressId: shippingAddress.id,
             billingAddressId: billingAddress.id,
-            items: { create: items },
+            // `createMany`, MySQL/MariaDB'de tek bir çok satırlı INSERT'e derlenir. Toplu
+            // sipariş akışı (bkz. toplu-siparis) tek seferde yüzlerce satır gönderebiliyor;
+            // eskiden burası `create` ile satır başına bir INSERT çalıştırıyordu — bu da bir
+            // transaction'ı (dolayısıyla tek bir DB bağlantısını) gereksiz yere uzun süre
+            // meşgul tutuyordu.
+            items: { createMany: { data: items } },
           },
           include: {
-            items: { include: { productVariant: { include: { product: true } }, subscriptionPlan: true } },
+            items: {
+              // basketItems (iyzico) için yalnızca ürün/plan adı gerekiyor — tam
+              // ProductVariant/Product/SubscriptionPlan satırlarını taşımaya gerek yok.
+              include: {
+                productVariant: { select: { name: true, product: { select: { name: true } } } },
+                subscriptionPlan: { select: { name: true } },
+              },
+            },
           },
         });
       });

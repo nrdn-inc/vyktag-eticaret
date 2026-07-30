@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getActiveProducts } from "@/lib/catalog";
+import { getActiveProductsCached } from "@/lib/catalog";
 import { BulkOrderClient } from "@/components/BulkOrderClient";
 
 export const metadata: Metadata = {
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TopluSiparisPage() {
-  const products = await getActiveProducts();
+  const products = await getActiveProductsCached();
 
   return (
     <div className="bg-zinc-50 dark:bg-zinc-950 min-h-screen">

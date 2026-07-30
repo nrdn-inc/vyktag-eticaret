@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProductBySlug } from "@/lib/catalog";
+import { getProductBySlugCached } from "@/lib/catalog";
 import { ProductDetailInteractive } from "@/components/ProductDetailInteractive";
 
 export async function generateMetadata({
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlugCached(slug);
   if (!product) {
     return { title: "Ürün bulunamadı" };
   }
@@ -26,7 +26,7 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const product = await getProductBySlugCached(slug);
 
   if (!product) {
     notFound();

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getActiveProducts } from "@/lib/catalog";
+import { getActiveProductsCached } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/stock";
 import { PRODUCT_BADGES, VALUE_PROPS } from "@/lib/marketing";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await getActiveProducts();
+  const products = await getActiveProductsCached();
 
   return (
     <div>

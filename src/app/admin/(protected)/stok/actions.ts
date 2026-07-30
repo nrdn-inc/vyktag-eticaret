@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminSession } from "@/lib/admin-session";
+import { CATALOG_CACHE_TAG } from "@/lib/catalog";
 import { REVALIDATE_PATHS } from "@/lib/revalidate";
 
 export interface StockActionState {
@@ -39,10 +40,16 @@ export async function setVariantStock(
 
   revalidatePath("/admin/stok");
   // Vitrindeki "tükendi" durumunun anında yansıması için katalog sayfalarını da yenile.
+  // `force-dynamic` altında bu route'ların kendisinde artık bir Full Route Cache girdisi
+  // yok (revalidatePath'in burada yapacak bir şeyi yok) — asıl önbellek `getActiveProducts*
+  // Cached`in Data Cache girdisidir. Bu bir Server Action olduğundan (ve admin kendi
+  // değişikliğini hemen görmeli — "read-your-own-writes") `updateTag` kullanılır: sonraki
+  // istek önbelleği beklemeden taze veriyi getirir (bkz. Next.js updateTag dokümantasyonu).
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
   revalidatePath(`/urunler/${variant.product.slug}`);
+  updateTag(CATALOG_CACHE_TAG);
 
   return { ok: true };
 }

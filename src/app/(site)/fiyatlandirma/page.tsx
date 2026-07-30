@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getActiveProducts, getActiveSubscriptionPlans } from "@/lib/catalog";
+import { getActiveProductsCached, getActiveSubscriptionPlansCached } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { FAQ } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
@@ -19,8 +19,8 @@ function intervalSuffix(interval: "MONTHLY" | "YEARLY"): string {
 
 export default async function PricingPage() {
   const [products, plans] = await Promise.all([
-    getActiveProducts(),
-    getActiveSubscriptionPlans(),
+    getActiveProductsCached(),
+    getActiveSubscriptionPlansCached(),
   ]);
 
   // En pahalı plan "önerilen" olarak vurgulanır; planlar fiyata göre artan sıralı gelir.

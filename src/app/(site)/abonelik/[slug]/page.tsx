@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { verifyCustomerSession } from "@/lib/customer-session";
-import { getActiveSubscriptionPlans } from "@/lib/catalog";
+import { getActiveSubscriptionPlansCached } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { SubscribeForm } from "./SubscribeForm";
 
@@ -24,7 +24,7 @@ export default async function SubscribePage({
   const { slug } = await params;
   const user = await verifyCustomerSession();
 
-  const plans = await getActiveSubscriptionPlans();
+  const plans = await getActiveSubscriptionPlansCached();
   const plan = plans.find((p) => p.slug === slug);
 
   // Plan bulunamadıysa ya da iyzico tarafında henüz satışa açılmadıysa (purchasable: false)

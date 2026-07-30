@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getActiveProducts } from "@/lib/catalog";
+import { getActiveProductsCached } from "@/lib/catalog";
 import {
   AUDIENCES,
   CARD_FEATURES,
@@ -37,7 +37,7 @@ function SectionHeading({
 }
 
 export default async function Home() {
-  const products = await getActiveProducts();
+  const products = await getActiveProductsCached();
 
   return (
     <div>

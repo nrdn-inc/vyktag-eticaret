@@ -1,4 +1,5 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { CATALOG_CACHE_TAG } from "@/lib/catalog";
 import { REVALIDATE_PATHS, isRevalidateAuthorized } from "@/lib/revalidate";
 
 // On-demand yenileme endpoint'i: seed/katalog güncellemesi sonrası ISR sayfalarını
@@ -18,6 +19,10 @@ export async function POST(request: Request): Promise<Response> {
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
+  // Route Handler içinde updateTag kullanılamaz (yalnızca Server Action'larda çalışır) —
+  // bu uç noktanın amacı zaten "beklemeden yenile" olduğundan { expire: 0 } ile anında
+  // geçersiz kılıyoruz (bkz. Next.js revalidateTag dokümantasyonu).
+  revalidateTag(CATALOG_CACHE_TAG, { expire: 0 });
 
   return Response.json({
     ok: true,

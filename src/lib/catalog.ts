@@ -1,4 +1,20 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+
+/**
+ * Kök layout `dynamic = "force-dynamic"` taşıdığından (CDN'in bozuk/eski RSC yanıtı sunmasını
+ * kalıcı olarak engellemek için — bkz. layout.tsx yorumu) her sayfa isteği artık bu dosyadaki
+ * sorguları TAZE çalıştırıyor; hiçbir HTML/RSC önbelleği bunları örtmüyor. Trafik arttıkça bu,
+ * her sayfa görüntülemesi başına en az bir Prisma sorgusu demek — ve Hostinger hesabının saatte
+ * yalnızca 500 yeni bağlantıya izin vermesi (bkz. prisma-pool.ts) bunu somut bir darboğaza
+ * çevirir. Çözüm HTML'i değil, YALNIZCA VERİYİ önbelleklemek: `unstable_cache` (Next'in "Data
+ * Cache"i) route'un `force-dynamic` olmasından bağımsız çalışır — sayfa yine her istekte taze
+ * render edilir, ama aynı sorgu sonucu `CATALOG_CACHE_REVALIDATE_SECONDS` boyunca process
+ * genelinde tekrar kullanılır. Böylece "her render taze olsun" garantisi (fatal hata sınıfını
+ * önleyen) korunurken, art arda gelen istekler DB'ye tekrar tekrar gitmez.
+ */
+export const CATALOG_CACHE_TAG = "catalog";
+const CATALOG_CACHE_REVALIDATE_SECONDS = 60;
 
 export interface ProductWithVariants {
   id: string;
@@ -20,7 +36,20 @@ export interface ProductWithVariants {
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
   const products = await prisma.product.findMany({
     where: { isActive: true },
-    include: { variants: { where: { isActive: true }, orderBy: { priceKurus: "asc" } } },
+    // `include` yerine `select`: tam Product/ProductVariant satırı (images, zaman damgaları,
+    // cross-sell FK'si...) değil, yalnızca vitrinin gerçekten kullandığı alanlar taşınır —
+    // bu sorgu artık `force-dynamic` nedeniyle her sayfa görüntülemesinde çalışıyor.
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      variants: {
+        where: { isActive: true },
+        orderBy: { priceKurus: "asc" },
+        select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+      },
+    },
     orderBy: { createdAt: "asc" },
   });
 
@@ -36,6 +65,12 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
     }));
 }
 
+/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
+export const getActiveProductsCached = unstable_cache(getActiveProducts, ["catalog:active-products"], {
+  tags: [CATALOG_CACHE_TAG],
+  revalidate: CATALOG_CACHE_REVALIDATE_SECONDS,
+});
+
 /** generateStaticParams için tüm aktif ürün slug'larını döner. */
 export async function getActiveProductSlugs(): Promise<string[]> {
   const products = await prisma.product.findMany({
@@ -49,7 +84,17 @@ export async function getActiveProductSlugs(): Promise<string[]> {
 export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
   const product = await prisma.product.findFirst({
     where: { slug, isActive: true },
-    include: { variants: { where: { isActive: true }, orderBy: { priceKurus: "asc" } } },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      variants: {
+        where: { isActive: true },
+        orderBy: { priceKurus: "asc" },
+        select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+      },
+    },
   });
 
   if (!product || product.variants.length === 0) {
@@ -65,6 +110,12 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
     variants: product.variants,
   };
 }
+
+/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
+export const getProductBySlugCached = unstable_cache(getProductBySlug, ["catalog:product-by-slug"], {
+  tags: [CATALOG_CACHE_TAG],
+  revalidate: CATALOG_CACHE_REVALIDATE_SECONDS,
+});
 
 export interface SubscriptionPlanSummary {
   id: string;
@@ -82,6 +133,16 @@ export interface SubscriptionPlanSummary {
 export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlanSummary[]> {
   const plans = await prisma.subscriptionPlan.findMany({
     where: { isActive: true },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      description: true,
+      priceKurus: true,
+      interval: true,
+      features: true,
+      iyzicoPricingPlanRef: true,
+    },
     orderBy: { priceKurus: "asc" },
   });
 
@@ -97,6 +158,13 @@ export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlanSumm
   }));
 }
 
+/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
+export const getActiveSubscriptionPlansCached = unstable_cache(
+  getActiveSubscriptionPlans,
+  ["catalog:active-subscription-plans"],
+  { tags: [CATALOG_CACHE_TAG], revalidate: CATALOG_CACHE_REVALIDATE_SECONDS },
+);
+
 export interface PurchasableSubscriptionPlan {
   id: string;
   slug: string;
@@ -111,6 +179,13 @@ export interface PurchasableSubscriptionPlan {
  * Fiyatlandırma Planı tanımlı değilse (satın alınamaz durumdaysa) null döner — çağıran taraf bunu
  * "satışa kapalı" olarak ele almalıdır. iyzicoPricingPlanRef yalnızca sunucu tarafında kullanılmalı,
  * istemciye gönderilmemelidir.
+ *
+ * BİLİNÇLİ OLARAK önbelleklenmiş bir sürümü YOK: bu fonksiyon abonelik başlatma server action'ında
+ * (`abonelik/[slug]/actions.ts`) ödeme akışını başlatıp başlatmayacağına karar vermek için
+ * kullanılıyor — burada `CATALOG_CACHE_REVALIDATE_SECONDS` kadar bayat bir "satın alınabilir"
+ * durumu, deaktive edilmiş bir plan için kısa süreliğine ödeme akışının başlamasına izin
+ * verebilirdi. Diğer katalog okumaları (ürün/plan listeleme) yalnızca vitrin amaçlı olduğu için
+ * güvenle önbelleklenebiliyor; bu fonksiyon bir işlemi tetiklediği için her zaman taze kalmalı.
  */
 export async function getPurchasableSubscriptionPlanBySlug(
   slug: string,

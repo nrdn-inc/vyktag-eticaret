@@ -8,37 +8,59 @@ import { formatPriceTRY } from "@/lib/format";
 type BundlePlan = NonNullable<Awaited<ReturnType<typeof getCrossSellSubscriptionPlan>>>;
 
 export function BundleUpsell() {
-  const [bundlePlan, setBundlePlan] = useState<BundlePlan | null>(null);
-  const [loading, setLoading] = useState(true);
+  // `result.key`, en son fetch edilen slug anahtarını taşır. Render sırasında mevcut
+  // `hardwareProductSlugsKey` ile karşılaştırılarak "bu sonuç güncel mi" türetilir — ayrı bir
+  // `loading` state'i ve onu effect içinde senkron `setState` ile açıp kapatmak gerekmez
+  // (bkz. react-hooks/set-state-in-effect: bir effect'in gövdesinde senkron setState render
+  // basamaklanmasına yol açar; "yükleniyor" durumunu burada olduğu gibi render'da türetmek,
+  // effect'i yalnızca gerçek asenkron sonucu (bir .then callback'i içinde) yazacak şekilde
+  // sadeleştirir).
+  const [result, setResult] = useState<{ key: string; plan: BundlePlan | null } | null>(null);
   const { items, addItem } = useCart();
 
+  // Sepetteki donanım ürünü slug'larının kümesi. `items` dizisinin kendisi her sepet
+  // mutasyonunda (miktar +/-, kişiselleştirme, ilgisiz bir satırın eklenmesi...) yeni bir
+  // referans olarak gelir (bkz. CartProvider), bu yüzden doğrudan `items`'a bağımlı bir efekt
+  // slug kümesi değişmese bile her etkileşimde yeniden tetiklenir — bu da bu server action'ı
+  // (canlı bir Prisma sorgusu) gereksiz yere art arda çalıştırırdı. Bunun yerine türetilmiş,
+  // string olarak karşılaştırılan bu anahtara bağımlıyız; değer aynıysa efekt tekrar çalışmaz.
+  const hardwareProductSlugs = Array.from(
+    new Set(items.filter((item) => item.variantId).map((item) => item.productSlug)),
+  );
+  const hardwareProductSlugsKey = hardwareProductSlugs.join(",");
+  const hasHardwareProducts = hardwareProductSlugsKey.length > 0;
+  const isStale = result === null || result.key !== hardwareProductSlugsKey;
+  const bundlePlan = isStale ? null : result.plan;
+
   useEffect(() => {
-    async function loadItem() {
-      // Hardware product slugs currently in cart
-      const productSlugs = items
-        .filter((item) => item.variantId)
-        .map((item) => item.productSlug);
-
-      if (productSlugs.length === 0) {
-        setBundlePlan(null);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const plan = await getCrossSellSubscriptionPlan(productSlugs);
-        setBundlePlan(plan);
-      } catch (error) {
-        console.error("Bundle upsell yüklenemedi:", error);
-      } finally {
-        setLoading(false);
-      }
+    if (!hasHardwareProducts) {
+      return;
     }
-    loadItem();
-  }, [items]);
 
-  if (loading || !bundlePlan) {
-    return null; // Yüklenirken veya plan yoksa UI'ı meşgul etme.
+    let cancelled = false;
+    getCrossSellSubscriptionPlan(hardwareProductSlugs)
+      .then((plan) => {
+        if (!cancelled) {
+          setResult({ key: hardwareProductSlugsKey, plan });
+        }
+      })
+      .catch((error) => {
+        console.error("Bundle upsell yüklenemedi:", error);
+      });
+
+    // Sepet, bu istek yanıt vermeden önce tekrar değişirse (hızlı ardışık düzenlemeler),
+    // gereksiz bir setState'i engeller — yukarıdaki `key` karşılaştırması zaten yanlış
+    // anahtara ait bir sonucun gösterilmesini engelliyor, bu yalnızca ek bir önlemdir.
+    return () => {
+      cancelled = true;
+    };
+    // `hardwareProductSlugs`/`hasHardwareProducts` kasıtlı olarak bağımlılık listesinde değil —
+    // ikisi de yalnızca `hardwareProductSlugsKey`'den türetiliyor (yukarıdaki yorum).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hardwareProductSlugsKey]);
+
+  if (!hasHardwareProducts || isStale || !bundlePlan) {
+    return null; // Donanım ürünü yoksa, sonuç güncel değilse ya da plan yoksa UI'ı meşgul etme.
   }
 
   // Eğer bu plan zaten sepette varsa gösterme.
