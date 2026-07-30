@@ -19,11 +19,17 @@ src/components/ui/
 ├── Input.tsx          # + fieldVariants (Textarea/Select bunu paylaşır)
 ├── Textarea.tsx
 ├── Select.tsx
-├── Modal.tsx           # "use client" — tek client-only bileşen
+├── Checkbox.tsx
+├── RadioGroup.tsx
+├── Switch.tsx
+├── Modal.tsx           # "use client"
+├── Tabs.tsx            # "use client" — Tabs/TabList/Tab/TabPanel
 ├── Skeleton.tsx        # + SkeletonText
 ├── Badge.tsx
 ├── Alert.tsx
 ├── EmptyState.tsx
+├── Pagination.tsx      # + getPaginationRange (saf fonksiyon)
+├── Table.tsx            # Table/TableHeader/TableBody/TableRow/TableHead/TableCell/TableCaption
 └── index.ts             # tek barrel export
 ```
 
@@ -37,15 +43,23 @@ Kararlar:
   paylaşılan tek parça: label↔input eşlemesi, `aria-describedby`, hata varken açıklamanın
   gizlenmesi kuralı tek yerde yaşar. Yeni bir form alanı eklerken (ör. bir `DatePicker`)
   bunu yeniden yazmayın, `useFieldIds` + `FieldShell`'i kullanın.
-- **Modal dışında hiçbir bileşen `"use client"` gerektirmez.** Button/Input/Textarea/Select/
-  Badge/Alert/Skeleton/EmptyState hiç hook kullanmaz ya da yalnızca `useId` kullanır (React
-  Server Component ağacında da çalışır) — bir Server Component sayfası bunları hiç client JS
-  göndermeden render edebilir. Modal; `useEffect`, `createPortal`, klavye dinleyicileri
-  kullandığı için istisnadır.
+- **`"use client"` yalnızca gerçekten kaçınılmaz olduğunda.** Button/Input/Textarea/Select/
+  Checkbox/RadioGroup/Switch/Badge/Alert/Skeleton/EmptyState/Pagination/Table hiç hook
+  kullanmaz ya da yalnızca `useId` kullanır (React Server Component ağacında da çalışır) — bir
+  Server Component sayfası bunları hiç client JS göndermeden render edebilir. `Pagination` ve
+  `TableHead`'in `onPageChange`/`onSort` callback'leri bile bunu bozmaz: fonksiyon zaten bir
+  Client Component'ten prop olarak geliyorsa, aradaki Server Component onu yalnızca ilgili DOM
+  elemanına iletir. Yalnızca **Modal** (`useEffect`, `createPortal`, klavye dinleyicileri) ve
+  **Tabs** (seçili sekme durumu + ok tuşu gezinmesi) gerçek istemci etkileşimi gerektirir ve
+  `"use client"` taşır.
 - **Native elemanlar tercih edilir.** `Select` özel bir listbox değil, stillenmiş bir
-  `<select>`'tir; `Modal` özel bir portal/focus-trap kütüphanesi (Radix vb.) değil, elle
-  yazılmış ~130 satırlık bir uygulamadır. Bağımlılık yüzeyini küçük tutar, platformun
-  yıllarca test edilmiş klavye/ekran okuyucu davranışından yararlanır.
+  `<select>`'tir; `Checkbox`/`RadioGroup`/`Switch` özel bir görsel katman içermez, native
+  `<input type="checkbox"|"radio">` + `accent-color` (Tailwind `accent-brand`) ile temaya
+  bağlanır; `RadioGroup`'ta ok tuşu gezinmesi hiç JS yazılmadan, aynı `name`'e sahip native
+  radio'ların tarayıcı davranışından gelir; `Table`, özel bir "DataTable" bileşeni değil, native
+  `<table>` üzerine ince bir stil katmanıdır; `Modal` özel bir portal/focus-trap kütüphanesi
+  (Radix vb.) değil, elle yazılmış ~130 satırlık bir uygulamadır. Bağımlılık yüzeyini küçük
+  tutar, platformun yıllarca test edilmiş klavye/ekran okuyucu davranışından yararlanır.
 - **Renkler tema token'larına dayanır** (`brand`, `brand-dark`, `accent`, `surface`,
   `border-soft`, `background`) — bunlar `globals.css`'te `prefers-color-scheme` ile otomatik
   değişir, çoğu yerde elle `dark:` yazmanıza gerek kalmaz. Form alanları ve metin renkleri gibi
@@ -121,6 +135,65 @@ hata yokken görünür (ikisi aynı anda gösterilmez, dikey yer kaplamaz).
 edilen bileşenlerde (ör. bir liste içindeki her satırda tekrar eden bir input) bile
 çakışmaz. `id`'yi yalnızca dışarıdan bir `<label htmlFor>` ile elle eşlemeniz gerektiğinde
 verin.
+
+### Checkbox / RadioGroup / Switch
+
+Üçü de anlamsal olarak farklı bir eylemi temsil eder — birbirinin yerine kullanılmamalı:
+`Checkbox` bir formun parçası olarak gönderilecek bağımsız bir açık/kapalı değer (ör. "şartları
+kabul ediyorum"), `RadioGroup` bir küme içinden **tek** seçim (`Select` ile aynı `options`/
+`value`/`onChange` şekli), `Switch` bir formun gönderimini beklemeden **anında** uygulanan bir
+ayar (ör. "iki adımlı doğrulamayı aç").
+
+```tsx
+<Checkbox
+  label="Kampanya e-postalarını almak istiyorum"
+  checked={optIn}
+  onChange={(e) => setOptIn(e.target.checked)}
+/>
+
+<RadioGroup
+  name="kart-rengi"
+  label="Kart rengi"
+  options={[{ value: "siyah", label: "Siyah" }, { value: "beyaz", label: "Beyaz" }]}
+  value={color}
+  onChange={setColor}
+/>
+
+<Switch
+  label="İki adımlı doğrulama"
+  description="Girişte SMS veya kimlik doğrulama uygulaması ister."
+  checked={twoFactorEnabled}
+  onChange={(e) => setTwoFactorEnabled(e.target.checked)}
+/>
+```
+
+**Dikkat (indeterminate):** `Checkbox` üç durumlu (ör. bir tablodaki "tümünü seç" satırı) bir
+prop **almaz** — bu, bileşeni bir Effect eklemeye (dolayısıyla `"use client"`e) zorlardı. Bunun
+yerine `ref` üzerinden doğrudan atayın: `checkboxRef.current.indeterminate = true`.
+
+### Tabs
+
+```tsx
+// Tabs.tsx zaten "use client" taşır — bunu kullanan sayfa bir Server Component olarak kalabilir,
+// Tabs'ı çocuk olarak render etmek onu client yapmaya zorlamaz.
+<Tabs defaultValue="genel">
+  <TabList aria-label="Ürün bilgisi">
+    <Tab value="genel">Genel</Tab>
+    <Tab value="teknik">Teknik özellikler</Tab>
+    <Tab value="stok" disabled>Stok (yakında)</Tab>
+  </TabList>
+  <TabPanel value="genel">...</TabPanel>
+  <TabPanel value="teknik">...</TabPanel>
+  <TabPanel value="stok">...</TabPanel>
+</Tabs>
+```
+
+WAI-ARIA "Tabs" desenini (otomatik aktivasyon) uygular: ok tuşlarıyla gezinme (yatayda ←/→,
+`orientation="vertical"` ile ↑/↓), Home/End ile ilk/son sekmeye atlama, devre dışı sekmelerin
+gezinmede atlanması, roving tabindex. Kontrolsüz (`defaultValue`) veya kontrollü (`value` +
+`onValueChange`) kullanılabilir. `TabPanel`, varsayılan olarak seçili değilken `hidden` ile
+gizlenir ama DOM'da kalır (sekmeler arası state, ör. doldurulmuş bir form, korunur); pahalı/veri
+çeken bir panel için `unmountOnHide` verin.
 
 ### Modal
 
@@ -203,6 +276,83 @@ duyurulması ayrıdır — bkz. aşağıdaki "Yükleme durumları" pratiği.
   description="Ürün eklemek için mağazaya göz atın."
   action={<Button onClick={() => router.push("/urunler")}>Ürünleri keşfet</Button>}
 />
+```
+
+### Pagination
+
+```tsx
+// Bağlantı modu — SEO-dostu, JS gerekmeden çalışır (ör. /urunler?sayfa=2)
+<Pagination page={page} totalPages={totalPages} hrefFor={(p) => `/urunler?sayfa=${p}`} />
+
+// next/link ile istemci taraflı gezinme/prefetch isteniyorsa:
+<Pagination
+  page={page}
+  totalPages={totalPages}
+  hrefFor={(p) => `/urunler?sayfa=${p}`}
+  renderLink={({ href, className, children, "aria-current": ariaCurrent, "aria-label": ariaLabel }) => (
+    <Link href={href} className={className} aria-current={ariaCurrent} aria-label={ariaLabel}>
+      {children}
+    </Link>
+  )}
+/>
+
+// Buton modu — bir tablo/liste durumunu client'ta kontrol ediyorsanız
+<Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+```
+
+`totalPages <= 1` iken hiçbir şey render etmez. Sayfa numaraları arasındaki `…` (ellipsis)
+mantığı `getPaginationRange(page, totalPages, { siblingCount })` adlı saf bir fonksiyonla
+hesaplanır — bağımsız test edilebilir, farklı bir görünüm gerekirse doğrudan içe aktarılabilir.
+
+### Table
+
+```tsx
+<Table>
+  <TableCaption>Son 30 günün siparişleri</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Sipariş no</TableHead>
+      <TableHead align="right" sortDirection={sort === "tutar" ? sortDir : false} onSort={() => toggleSort("tutar")}>
+        Tutar
+      </TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {orders.map((order) => (
+      <TableRow key={order.id} selected={selectedIds.has(order.id)}>
+        <TableCell>{order.code}</TableCell>
+        <TableCell align="right">{formatPriceTRY(order.totalKurus)}</TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+```
+
+Bilinçli olarak bir "DataTable" mega-bileşeni **değil** — `Select`in native `<select>`'i tercih
+etmesi gibi, `Table` da native `<table>` üzerine ince bir stil katmanıdır; sıralama/sayfalama/
+seçim durumu çağıran tarafta tutulur, `TableHead`'in `onSort`'u ve ayrı `Pagination` bileşeniyle
+birleştirilir. Yatayda taşan geniş tablolar otomatik olarak yalnızca kendi içinde kayar (sayfa
+değil). Yükleniyor durumu için satır hücrelerinin içine `Skeleton` koyun; boş durum için
+`colSpan` veren tek bir satır içine `EmptyState` yerleştirin:
+
+```tsx
+<TableBody>
+  {isLoading ? (
+    Array.from({ length: 3 }).map((_, i) => (
+      <TableRow key={i}>
+        <TableCell colSpan={2}><SkeletonText lines={1} /></TableCell>
+      </TableRow>
+    ))
+  ) : orders.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={2}>
+        <EmptyState title="Henüz sipariş yok" description="İlk sipariş geldiğinde burada görünecek." />
+      </TableCell>
+    </TableRow>
+  ) : (
+    orders.map((order) => /* ... */)
+  )}
+</TableBody>
 ```
 
 ## 3. En iyi pratikler
