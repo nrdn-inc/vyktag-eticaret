@@ -18,8 +18,8 @@ interface ProductSeed {
   variants: ProductVariantSeed[];
 }
 
-const BASE_PRICE_KURUS = 59990;
-const CUSTOM_DESIGN_PRICE_KURUS = 79990; // BASE_PRICE_KURUS + özel tasarım/logo ücreti
+const BASE_PRICE_KURUS = 34999;
+const CUSTOM_DESIGN_PRICE_KURUS = 49999; // özel tasarım/logo ücretiyle birlikte
 
 export const CARD_PRODUCTS: ProductSeed[] = [
   {
@@ -114,36 +114,30 @@ interface SubscriptionPlanSeed {
   name: string;
   description: string;
   priceKurus: number;
-  interval: "MONTHLY" | "YEARLY";
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
   features: string[];
 }
 
+// VYKTag Kart özelliğidir: fiziksel kart alımı (tek seferlik) süresiz/ömür boyu kullanım hakkı
+// verir; abonelik ise belirli bir süre için (6 ay veya 1 yıl) sınırlı kullanım hakkı sunan
+// alternatif bir seçenektir. "Premium" adı ve ek-özellik çerçevesi bilinçli olarak kullanılmıyor
+// — vitrinde farklı özellik seviyeleri varmış izlenimi vermemek için tek fark süredir.
 export const SUBSCRIPTION_PLANS: SubscriptionPlanSeed[] = [
   {
-    slug: "vyktag-premium-aylik",
-    name: "VYKTag Premium (Aylık)",
-    description: "Dijital profilinizi bir üst seviyeye taşıyan aylık premium abonelik.",
-    priceKurus: 4990,
-    interval: "MONTHLY",
-    features: [
-      "Gelişmiş profil görüntülenme analitiği",
-      "Sınırsız bağlantı/link ekleme",
-      "Özel profil temaları",
-      "Öncelikli müşteri desteği",
-    ],
+    slug: "vyktag-abonelik-6ay",
+    name: "VYKTag Abonelik (6 Ay)",
+    description: "VYKTag dijital profilinizi 6 ay boyunca tam yetkiyle kullanın.",
+    priceKurus: 14999,
+    interval: "SIX_MONTHS",
+    features: ["6 ay boyunca tam kullanım hakkı", "Süre sonunda dilerseniz yenileyebilirsiniz"],
   },
   {
-    slug: "vyktag-premium-yillik",
-    name: "VYKTag Premium (Yıllık)",
-    description: "Yıllık ödemede iki ay bedava — aynı premium özellikler, daha uygun fiyat.",
-    priceKurus: 49900,
+    slug: "vyktag-abonelik-yillik",
+    name: "VYKTag Abonelik (Yıllık)",
+    description: "VYKTag dijital profilinizi 12 ay boyunca tam yetkiyle kullanın.",
+    priceKurus: 19999,
     interval: "YEARLY",
-    features: [
-      "Gelişmiş profil görüntülenme analitiği",
-      "Sınırsız bağlantı/link ekleme",
-      "Özel profil temaları",
-      "Öncelikli müşteri desteği",
-    ],
+    features: ["12 ay boyunca tam kullanım hakkı", "6 aylık plana göre daha uygun aylık maliyet"],
   },
 ];
 

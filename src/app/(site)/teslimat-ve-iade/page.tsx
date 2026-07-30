@@ -64,7 +64,7 @@ export default function TeslimatVeIadePage() {
             Abonelik İptali
           </h2>
           <p>
-            {`Vyktag Premium abonelikleri dilediğiniz zaman, cezai şart olmaksızın iptal edilebilir. İptal için ${legalInfo.email} adresine yazabilir veya hesabınız üzerinden iyzico Abonelik altyapısını kullanabilirsiniz. İptal sonrası mevcut ödenmiş dönem sonuna kadar hizmet kullanılmaya devam eder, bir sonraki dönem için tekrar ücretlendirme yapılmaz.`}
+            {`VYKTag abonelikleri dilediğiniz zaman, cezai şart olmaksızın iptal edilebilir. İptal için ${legalInfo.email} adresine yazabilir veya hesabınız üzerinden iyzico Abonelik altyapısını kullanabilirsiniz. İptal sonrası mevcut ödenmiş dönem sonuna kadar hizmet kullanılmaya devam eder, bir sonraki dönem için tekrar ücretlendirme yapılmaz.`}
           </p>
         </section>
 

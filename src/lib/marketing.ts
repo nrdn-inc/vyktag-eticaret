@@ -230,7 +230,7 @@ export const FAQ: FaqItem[] = [
   },
   {
     q: "Abonelik almak zorunda mıyım?",
-    a: "Hayır. Fiziksel kart tek seferlik bir alımdır ve temel dijital profil ücretsizdir. Premium abonelik yalnızca gelişmiş analitik, sınırsız bağlantı ve özel temalar gibi ek özellikler isterseniz gereklidir.",
+    a: "Hayır. Fiziksel kartı bir kez satın alarak süresiz kullanım hakkına sahip olursunuz. Abonelik, kartı almadan belirli bir süre (6 ay veya 1 yıl) için kullanım hakkı isteyenlere sunulan alternatif bir seçenektir.",
   },
   {
     q: "Kargo ne kadar sürer?",

@@ -109,7 +109,7 @@ export default function MesafeliSatisSozlesmesiPage() {
             7. Hizmet (Abonelik) Satışlarında Cayma ve İptal
           </h2>
           <p>
-            Vyktag Premium gibi tekrarlayan (aylık/yıllık) abonelik hizmetlerinde cayma hakkı süresi,
+            VYKTag Abonelik gibi tekrarlayan (6 aylık/yıllık) abonelik hizmetlerinde cayma hakkı süresi,
             fiziksel üründen farklı olarak sözleşmenin kurulduğu tarihten itibaren işlemeye başlar
             (teslimat beklenmez). Alıcı, hizmetin ifasına onayı ile cayma süresi dolmadan
             başlanmasını talep etmişse, Mesafeli Sözleşmeler Yönetmeliği&apos;nin 15/1-a maddesi

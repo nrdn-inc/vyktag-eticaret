@@ -4,7 +4,7 @@ export const siteConfig = {
   company: "VYK Teknoloji",
   tagline: "Tek dokunuşla dijital kartvizit",
   description:
-    "VYKTag NFC dijital kartvizitleri ile iletişim bilgilerinizi tek dokunuşla paylaşın. Fiziksel kartlar, telefon etiketleri ve premium dijital profil.",
+    "VYKTag NFC dijital kartvizitleri ile iletişim bilgilerinizi tek dokunuşla paylaşın. Fiziksel kartlar, telefon etiketleri ve dijital profil aboneliği.",
 } as const;
 
 export const mainNav = [

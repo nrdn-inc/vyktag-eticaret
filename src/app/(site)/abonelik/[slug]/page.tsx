@@ -12,8 +12,10 @@ export const metadata: Metadata = {
   title: "Abone Ol",
 };
 
-function intervalSuffix(interval: "MONTHLY" | "YEARLY"): string {
-  return interval === "MONTHLY" ? "/ay" : "/yıl";
+function intervalSuffix(interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY"): string {
+  if (interval === "MONTHLY") return "/ay";
+  if (interval === "SIX_MONTHS") return "/6 ay";
+  return "/yıl";
 }
 
 export default async function SubscribePage({

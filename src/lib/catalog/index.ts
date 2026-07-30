@@ -123,7 +123,7 @@ export interface SubscriptionPlanSummary {
   name: string;
   description: string;
   priceKurus: number;
-  interval: "MONTHLY" | "YEARLY";
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
   features: string[];
   /** iyzico tarafında bir Fiyatlandırma Planı tanımlıysa true — yalnızca bu durumda satın alınabilir. */
   purchasable: boolean;
@@ -170,7 +170,7 @@ export interface PurchasableSubscriptionPlan {
   slug: string;
   name: string;
   priceKurus: number;
-  interval: "MONTHLY" | "YEARLY";
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
   iyzicoPricingPlanRef: string;
 }
 

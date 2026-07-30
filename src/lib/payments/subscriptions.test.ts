@@ -45,6 +45,11 @@ describe("computePeriodEnd", () => {
     expect(computePeriodEnd(start, "YEARLY").toISOString()).toBe("2027-01-15T00:00:00.000Z");
   });
 
+  it("adds six months for SIX_MONTHS", () => {
+    const start = new Date("2026-01-15T00:00:00Z");
+    expect(computePeriodEnd(start, "SIX_MONTHS").toISOString()).toBe("2026-07-15T00:00:00.000Z");
+  });
+
   it("clamps month-end overflow instead of spilling into the next month (31 Jan + 1 month = 28 Feb, not 3 Mar)", () => {
     const start = new Date(2026, 0, 31, 12, 0, 0); // 31 Ocak (yerel saat)
     const end = computePeriodEnd(start, "MONTHLY");

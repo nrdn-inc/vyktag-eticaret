@@ -50,6 +50,8 @@ export function computePeriodEnd(start: Date, interval: SubscriptionInterval): D
   end.setDate(1);
   if (interval === "MONTHLY") {
     end.setMonth(end.getMonth() + 1);
+  } else if (interval === "SIX_MONTHS") {
+    end.setMonth(end.getMonth() + 6);
   } else {
     end.setFullYear(end.getFullYear() + 1);
   }

@@ -10,12 +10,14 @@ import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
 
 export const metadata: Metadata = {
   title: "Fiyatlandırma",
-  description: "VYKTag kart fiyatları ve premium abonelik planları. Tek seferlik alım veya aylık/yıllık abonelik.",
+  description: "VYKTag kart fiyatları ve abonelik planları. Tek seferlik alım (süresiz kullanım) veya 6 aylık/yıllık abonelik.",
 };
 
 /** Abonelik periyodunu Türkçe kısa eke çevirir. */
-function intervalSuffix(interval: "MONTHLY" | "YEARLY"): string {
-  return interval === "MONTHLY" ? "/ay" : "/yıl";
+function intervalSuffix(interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY"): string {
+  if (interval === "MONTHLY") return "/ay";
+  if (interval === "SIX_MONTHS") return "/6 ay";
+  return "/yıl";
 }
 
 export default async function PricingPage() {
@@ -39,8 +41,8 @@ export default async function PricingPage() {
             Tek seferlik yatırım, ömür boyu kullanım
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-zinc-600 dark:text-zinc-400">
-            Fiziksel kartı bir kez satın alın; temel dijital profil ücretsizdir. Dilerseniz premium
-            abonelikle profilinizi güçlendirin.
+            Fiziksel kartı bir kez satın alın, süresiz kullanım hakkına sahip olun. Dilerseniz
+            kartı almadan, belirli bir süre için abonelikle de kullanabilirsiniz.
           </p>
         </div>
       </section>
@@ -99,9 +101,9 @@ export default async function PricingPage() {
           <section className="mt-24">
             <Reveal>
               <div className="text-center">
-                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Premium abonelik</h2>
+                <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Abonelik</h2>
                 <p className="mt-2 text-sm text-zinc-500">
-                  İsteğe bağlı · Dilediğiniz zaman iptal edebilirsiniz
+                  Kartı almadan, süreli kullanım hakkı · Dilediğiniz zaman iptal edebilirsiniz
                 </p>
               </div>
             </Reveal>
