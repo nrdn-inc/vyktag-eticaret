@@ -16,6 +16,14 @@ import { prisma } from "@/lib/prisma";
 export const CATALOG_CACHE_TAG = "catalog";
 const CATALOG_CACHE_REVALIDATE_SECONDS = 60;
 
+export interface ProductDurationOption {
+  subscriptionPlanId: string;
+  slug: string;
+  name: string;
+  priceKurus: number;
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
+}
+
 export interface ProductWithVariants {
   id: string;
   slug: string;
@@ -30,28 +38,58 @@ export interface ProductWithVariants {
     stock: number;
     attributes: unknown;
   }[];
+  /**
+   * Fiziksel kart almadan, süreli kullanım hakkı sunan alternatif seçenekler (bkz.
+   * SubscriptionPlan). Şu an tek bir vitrin ürünü (VYKTag Kart) aktif olduğundan tüm aktif
+   * planlar her ürüne aynı şekilde iliştirilir — birden çok ürün aktif edildiğinde bu,
+   * ürüne özgü bir ilişkiye (ör. Product.crossSellSubscriptionPlanId'ye benzer) taşınmalı.
+   */
+  durationOptions: ProductDurationOption[];
+}
+
+async function getActiveDurationOptions(): Promise<ProductDurationOption[]> {
+  const plans = await prisma.subscriptionPlan.findMany({
+    where: { isActive: true },
+    select: { id: true, slug: true, name: true, priceKurus: true, interval: true },
+    orderBy: { priceKurus: "asc" },
+  });
+  return plans.map((plan) => ({
+    subscriptionPlanId: plan.id,
+    slug: plan.slug,
+    name: plan.name,
+    priceKurus: plan.priceKurus,
+    interval: plan.interval,
+  }));
+}
+
+function computeMinPriceKurus(variantPrices: number[], durationOptions: ProductDurationOption[]): number {
+  const prices = [...variantPrices, ...durationOptions.map((o) => o.priceKurus)];
+  return Math.min(...prices);
 }
 
 /** Vitrin/katalog sayfaları için aktif ürünleri, varyantlarıyla birlikte en düşük fiyata göre sıralı döner. */
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    // `include` yerine `select`: tam Product/ProductVariant satırı (images, zaman damgaları,
-    // cross-sell FK'si...) değil, yalnızca vitrinin gerçekten kullandığı alanlar taşınır —
-    // bu sorgu artık `force-dynamic` nedeniyle her sayfa görüntülemesinde çalışıyor.
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      variants: {
-        where: { isActive: true },
-        orderBy: { priceKurus: "asc" },
-        select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+  const [products, durationOptions] = await Promise.all([
+    prisma.product.findMany({
+      where: { isActive: true },
+      // `include` yerine `select`: tam Product/ProductVariant satırı (images, zaman damgaları,
+      // cross-sell FK'si...) değil, yalnızca vitrinin gerçekten kullandığı alanlar taşınır —
+      // bu sorgu artık `force-dynamic` nedeniyle her sayfa görüntülemesinde çalışıyor.
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { priceKurus: "asc" },
+          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+        },
       },
-    },
-    orderBy: { createdAt: "asc" },
-  });
+      orderBy: { createdAt: "asc" },
+    }),
+    getActiveDurationOptions(),
+  ]);
 
   return products
     .filter((product) => product.variants.length > 0)
@@ -60,8 +98,9 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
       slug: product.slug,
       name: product.name,
       description: product.description,
-      minPriceKurus: product.variants[0].priceKurus,
+      minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
       variants: product.variants,
+      durationOptions,
     }));
 }
 
@@ -82,20 +121,23 @@ export async function getActiveProductSlugs(): Promise<string[]> {
 
 /** Ürün detay sayfası için tek bir ürünü slug'a göre getirir. */
 export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
-  const product = await prisma.product.findFirst({
-    where: { slug, isActive: true },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      description: true,
-      variants: {
-        where: { isActive: true },
-        orderBy: { priceKurus: "asc" },
-        select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+  const [product, durationOptions] = await Promise.all([
+    prisma.product.findFirst({
+      where: { slug, isActive: true },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        description: true,
+        variants: {
+          where: { isActive: true },
+          orderBy: { priceKurus: "asc" },
+          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+        },
       },
-    },
-  });
+    }),
+    getActiveDurationOptions(),
+  ]);
 
   if (!product || product.variants.length === 0) {
     return null;
@@ -106,8 +148,9 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
     slug: product.slug,
     name: product.name,
     description: product.description,
-    minPriceKurus: product.variants[0].priceKurus,
+    minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
     variants: product.variants,
+    durationOptions,
   };
 }
 

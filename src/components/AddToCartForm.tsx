@@ -26,6 +26,9 @@ interface AddToCartFormProps {
   product: ProductWithVariants;
   variantId: string;
   onVariantChange: (variantId: string) => void;
+  /** null = "Sınırsız" (fiziksel kart, varyant seçimiyle); doluysa seçili süreli kullanım hakkı planı. */
+  durationPlanId: string | null;
+  onDurationPlanChange: (planId: string | null) => void;
   fullName: string;
   onFullNameChange: (value: string) => void;
   title: string;
@@ -34,11 +37,19 @@ interface AddToCartFormProps {
   onLogoChange: (dataUrl: string | undefined) => void;
 }
 
-/** Ürün detay sayfasında varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
+function durationLabel(interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY"): string {
+  if (interval === "MONTHLY") return "Aylık";
+  if (interval === "SIX_MONTHS") return "6 Ay";
+  return "1 Yıl";
+}
+
+/** Ürün detay sayfasında süre/varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
 export function AddToCartForm({
   product,
   variantId,
   onVariantChange,
+  durationPlanId,
+  onDurationPlanChange,
   fullName,
   onFullNameChange,
   title,
@@ -55,6 +66,7 @@ export function AddToCartForm({
 
   const selectedVariant =
     product.variants.find((v) => v.id === variantId) ?? product.variants[0];
+  const selectedDurationPlan = product.durationOptions.find((p) => p.subscriptionPlanId === durationPlanId) ?? null;
 
   // Tüm varyantlar yapılandırılmış attributes taşıyorsa (VYKTag Kart), kart rengi + baskı
   // rengi + özel tasarım seçicisi gösterilir; aksi halde (Tag/Phonecard gibi tek boyutlu
@@ -62,9 +74,16 @@ export function AddToCartForm({
   const hasStructuredOptions = product.variants.every((v) => parseVariantAttributes(v.attributes) !== null);
   const selectedAttrs = parseVariantAttributes(selectedVariant.attributes);
 
-  const inStock = isVariantPurchasable(selectedVariant.stock);
-  const atMaxQuantity = quantity >= selectedVariant.stock;
-  const isLowStock = inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
+  // Süreli kullanım hakkı planlarının stok kavramı yok — her zaman satın alınabilir.
+  const inStock = selectedDurationPlan ? true : isVariantPurchasable(selectedVariant.stock);
+  const atMaxQuantity = selectedDurationPlan ? false : quantity >= selectedVariant.stock;
+  const isLowStock = !selectedDurationPlan && inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
+  const unitPriceKurus = selectedDurationPlan ? selectedDurationPlan.priceKurus : selectedVariant.priceKurus;
+
+  function resetSelectionState() {
+    setQuantity(1);
+    setAdded(false);
+  }
 
   function handleAdd() {
     if (!inStock) return;
@@ -74,17 +93,27 @@ export function AddToCartForm({
     if (title.trim()) personalization.title = title.trim();
     if (phone.trim()) personalization.phone = phone.trim();
     if (note.trim()) personalization.note = note.trim();
-    if (logoDataUrl) personalization.logo = logoDataUrl;
+    if (logoDataUrl && !selectedDurationPlan) personalization.logo = logoDataUrl;
 
-    const item: CartItem = {
-      variantId: selectedVariant.id,
-      productSlug: product.slug,
-      productName: product.name,
-      variantName: selectedVariant.name,
-      unitPriceKurus: selectedVariant.priceKurus,
-      quantity,
-      ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
-    };
+    const item: CartItem = selectedDurationPlan
+      ? {
+          subscriptionPlanId: selectedDurationPlan.subscriptionPlanId,
+          productSlug: product.slug,
+          productName: product.name,
+          variantName: selectedDurationPlan.name,
+          unitPriceKurus: selectedDurationPlan.priceKurus,
+          quantity,
+          ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
+        }
+      : {
+          variantId: selectedVariant.id,
+          productSlug: product.slug,
+          productName: product.name,
+          variantName: selectedVariant.name,
+          unitPriceKurus: selectedVariant.priceKurus,
+          quantity,
+          ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
+        };
 
     addItem(item);
     setAdded(true);
@@ -92,8 +121,53 @@ export function AddToCartForm({
 
   return (
     <div className="space-y-6">
-      {/* Varyant seçimi */}
-      {hasStructuredOptions ? (
+      {/* Kullanım süresi: fiziksel kart (sınırsız) veya süreli kullanım hakkı */}
+      {product.durationOptions.length > 0 && (
+        <div>
+          <label className="text-sm font-semibold">Kullanım süresi</label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                onDurationPlanChange(null);
+                resetSelectionState();
+              }}
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                !selectedDurationPlan
+                  ? "border-brand bg-brand text-white"
+                  : "border-zinc-300 hover:border-brand dark:border-zinc-700"
+              }`}
+            >
+              Sınırsız (fiziksel kart)
+            </button>
+            {product.durationOptions.map((plan) => (
+              <button
+                key={plan.subscriptionPlanId}
+                type="button"
+                onClick={() => {
+                  onDurationPlanChange(plan.subscriptionPlanId);
+                  resetSelectionState();
+                }}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                  selectedDurationPlan?.subscriptionPlanId === plan.subscriptionPlanId
+                    ? "border-brand bg-brand text-white"
+                    : "border-zinc-300 hover:border-brand dark:border-zinc-700"
+                }`}
+              >
+                {durationLabel(plan.interval)} · {formatPriceTRY(plan.priceKurus)}
+              </button>
+            ))}
+          </div>
+          {selectedDurationPlan && (
+            <p className="mt-2 text-xs text-zinc-500">
+              Bu seçenekte fiziksel kart gönderilmez, yalnızca dijital profilinize {durationLabel(selectedDurationPlan.interval).toLowerCase()} boyunca kullanım hakkı verilir.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Varyant seçimi — yalnızca "Sınırsız" (fiziksel kart) seçiliyken anlamlı */}
+      {!selectedDurationPlan && (hasStructuredOptions ? (
         <CardOptionSelector
           variants={product.variants}
           selectedVariantId={selectedVariant.id}
@@ -136,12 +210,14 @@ export function AddToCartForm({
             </div>
           </div>
         )
-      )}
+      ))}
 
       {/* Kişiselleştirme */}
       <div>
-        <h3 className="text-sm font-semibold">Kart üzerindeki bilgiler (isteğe bağlı)</h3>
-        {!selectedAttrs?.customDesign && (
+        <h3 className="text-sm font-semibold">
+          {selectedDurationPlan ? "Dijital profil bilgileri (isteğe bağlı)" : "Kart üzerindeki bilgiler (isteğe bağlı)"}
+        </h3>
+        {!selectedDurationPlan && !selectedAttrs?.customDesign && (
           <p className="mt-1 text-xs text-zinc-500">
             Logonuzu siparişiniz sonrası sizden ayrıca rica edeceğiz.
           </p>
@@ -221,7 +297,7 @@ export function AddToCartForm({
             type="button"
             disabled={!inStock || atMaxQuantity}
             onClick={() => {
-              setQuantity((q) => Math.min(selectedVariant.stock, q + 1));
+              setQuantity((q) => (selectedDurationPlan ? q + 1 : Math.min(selectedVariant.stock, q + 1)));
               setAdded(false);
             }}
             className="px-4 py-2 text-lg disabled:cursor-not-allowed disabled:opacity-50"
@@ -237,7 +313,7 @@ export function AddToCartForm({
           disabled={!inStock}
           className="rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {inStock ? `Sepete ekle · ${formatPriceTRY(selectedVariant.priceKurus * quantity)}` : "Tükendi"}
+          {inStock ? `Sepete ekle · ${formatPriceTRY(unitPriceKurus * quantity)}` : "Tükendi"}
         </button>
       </div>
 

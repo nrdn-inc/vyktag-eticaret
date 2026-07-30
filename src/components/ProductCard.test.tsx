@@ -13,6 +13,7 @@ const singleVariant: ProductWithVariants = {
   variants: [
     { id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10, attributes: null },
   ],
+  durationOptions: [],
 };
 
 const multiVariant: ProductWithVariants = {
@@ -25,6 +26,7 @@ const multiVariant: ProductWithVariants = {
     { id: "v2", name: "Siyah", sku: "VYK-KART-SIYAH", priceKurus: 59990, stock: 10, attributes: null },
     { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5, attributes: null },
   ],
+  durationOptions: [],
 };
 
 const outOfStock: ProductWithVariants = {

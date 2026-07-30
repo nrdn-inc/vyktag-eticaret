@@ -145,26 +145,16 @@ export default async function PricingPage() {
                           </li>
                         ))}
                       </ul>
-                      {plan.purchasable ? (
-                        <Link
-                          href={`/abonelik/${plan.slug}`}
-                          className={`mt-8 rounded-full px-6 py-3 text-center text-sm font-semibold transition-colors ${
-                            featured
-                              ? "bg-brand text-white hover:bg-brand-dark"
-                              : "border border-brand text-brand hover:bg-brand hover:text-white"
-                          }`}
-                        >
-                          Başla
-                        </Link>
-                      ) : (
-                        <span
-                          className="mt-8 cursor-not-allowed rounded-full border border-zinc-300 px-6 py-3 text-center text-sm font-semibold text-zinc-400 dark:border-zinc-700 dark:text-zinc-500"
-                          aria-disabled
-                          title="Bu plan yakında satışa sunulacak"
-                        >
-                          Yakında
-                        </span>
-                      )}
+                      <Link
+                        href="/urunler/vyktag-kart"
+                        className={`mt-8 rounded-full px-6 py-3 text-center text-sm font-semibold transition-colors ${
+                          featured
+                            ? "bg-brand text-white hover:bg-brand-dark"
+                            : "border border-brand text-brand hover:bg-brand hover:text-white"
+                        }`}
+                      >
+                        Başla
+                      </Link>
                     </div>
                   </Reveal>
                 );

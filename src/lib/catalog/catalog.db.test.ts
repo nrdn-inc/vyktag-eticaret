@@ -4,14 +4,18 @@ import { getActiveProducts, getActiveSubscriptionPlans, getProductBySlug } from 
 // Katalog seed'i (bkz. catalog-seed.test.ts) canlı veritabanına zaten işlenmiş durumda;
 // burada yalnızca okuma tarafını (mağaza/pazarlama sayfalarının kullandığı sorguları) doğruluyoruz.
 describe("getActiveProducts", () => {
-  it("returns every active product with a computed minimum price", async () => {
+  it("returns every active product with a computed minimum price (varyantlar ve süreli kullanım hakkı planları arasından)", async () => {
     const products = await getActiveProducts();
 
     expect(products.length).toBeGreaterThan(0);
     const kart = products.find((p) => p.slug === "vyktag-kart");
     expect(kart).toBeDefined();
     expect(kart?.variants.length).toBeGreaterThan(0);
-    expect(kart?.minPriceKurus).toBe(Math.min(...(kart?.variants.map((v) => v.priceKurus) ?? [])));
+    const allPrices = [
+      ...(kart?.variants.map((v) => v.priceKurus) ?? []),
+      ...(kart?.durationOptions.map((o) => o.priceKurus) ?? []),
+    ];
+    expect(kart?.minPriceKurus).toBe(Math.min(...allPrices));
   });
 
   it("excludes temporarily hidden products (VYKTag Tag/Phonecard)", async () => {
