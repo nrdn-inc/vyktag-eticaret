@@ -2,8 +2,8 @@
 
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/customer-auth";
-import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
+import { sendPasswordResetEmail } from "@/lib/auth/customer-auth";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
 
 export interface ForgotPasswordState {
   error?: string;

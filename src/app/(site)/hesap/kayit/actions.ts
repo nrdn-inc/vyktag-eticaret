@@ -4,8 +4,8 @@ import { randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
-import { EMAIL_REGEX, sendVerificationEmail } from "@/lib/customer-auth";
-import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
+import { EMAIL_REGEX, sendVerificationEmail } from "@/lib/auth/customer-auth";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
 
 export interface RegisterState {
   error?: string;

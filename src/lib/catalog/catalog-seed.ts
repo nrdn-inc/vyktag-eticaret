@@ -1,5 +1,5 @@
 import type { PrismaClient, Prisma } from "@/generated/prisma/client";
-import type { VariantAttributes } from "@/lib/product-variant-attributes";
+import type { VariantAttributes } from "@/lib/catalog/product-variant-attributes";
 
 interface ProductVariantSeed {
   sku: string;

@@ -1,7 +1,5 @@
 import type { CSSProperties } from "react";
-
-export type CardVariant = "siyah" | "beyaz" | "özel";
-export type CardAccent = "altin" | "gumus" | "siyah";
+import type { CardAccent, CardVariant } from "@/lib/catalog/product-variant-attributes";
 
 interface NfcCardProps {
   /** Kartın üzerinde görünen ad; boşsa yer tutucu gösterilir. */
@@ -31,14 +29,6 @@ interface AccentTheme {
   muted: string;
   /** QR deseninin dolu hücreleri. */
   qr: string;
-}
-
-/** Ürün varyant adını (ör. "Siyah · Altın Baskı") kart temasına eşler. */
-export function resolveCardVariant(variantName: string | undefined): CardVariant {
-  const normalized = (variantName ?? "").trim().toLocaleLowerCase("tr-TR");
-  if (normalized.startsWith("siyah")) return "siyah";
-  if (normalized.startsWith("beyaz")) return "beyaz";
-  return "özel";
 }
 
 const SURFACE_THEMES: Record<CardVariant, SurfaceTheme> = {

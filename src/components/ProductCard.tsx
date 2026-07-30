@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
-import { isVariantPurchasable } from "@/lib/stock";
+import { isVariantPurchasable } from "@/lib/orders/stock";
 import { PRODUCT_BADGES } from "@/lib/marketing";
-import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
-import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
+import { NfcCard } from "@/components/visuals/NfcCard";
+import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
+import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/catalog/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
 /** Katalog/anasayfa listelerinde tek bir ürünü özet olarak gösteren kart. */

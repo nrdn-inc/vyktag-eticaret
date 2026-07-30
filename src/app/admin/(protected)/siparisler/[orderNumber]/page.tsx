@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { HandoffStatus, PaymentStatus } from "@/generated/prisma/client";
 import { formatPriceTRY } from "@/lib/format";
-import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/order-status";
+import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/orders/order-status";
 import { StatusForm } from "./StatusForm";
 import { TrackingForm } from "./TrackingForm";
 import { HandoffForm } from "./HandoffForm";

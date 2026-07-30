@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
 import { PaymentStatus, SubscriptionStatus } from "@/generated/prisma/client";
 import type { Prisma, SubscriptionInterval } from "@/generated/prisma/client";
-import type { SubscriptionCheckoutFormData } from "@/lib/iyzico";
+import type { SubscriptionCheckoutFormData } from "@/lib/payments/iyzico";
 
 const CONVERSATION_ID_SEPARATOR = "__";
 const CONVERSATION_ID_PREFIX = "sub";

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getCrossSellProduct } from "@/app/actions/cross-sell";
 import { useCart } from "@/components/CartProvider";
 import { formatPriceTRY } from "@/lib/format";
-import type { CartItem } from "@/lib/cart";
+import type { CartItem } from "@/lib/orders/cart";
 
 /**
  * Checkout Order Bump bileşeni: Kullanıcının sepete eklemiş olduğu ana ürünün yanına

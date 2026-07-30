@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyEmailVerificationToken, createCustomerSessionToken, CUSTOMER_SESSION_COOKIE } from "@/lib/auth";
-import { MIN_PASSWORD_LENGTH } from "@/lib/customer-auth";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/customer-auth";
 
 export interface CompleteVerificationState {
   error?: string;

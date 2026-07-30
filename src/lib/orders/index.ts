@@ -1,8 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { prisma } from "@/lib/prisma";
-import { OrderStatus, Prisma, UserRole } from "@/generated/prisma/client";
-import type { CartPersonalization } from "@/lib/cart";
-import { InsufficientStockError, isStockReleasedStatus } from "@/lib/stock";
+import { OrderStatus, PaymentStatus, Prisma, UserRole } from "@/generated/prisma/client";
+import type { CartPersonalization } from "@/lib/orders/cart";
+import { InsufficientStockError, isStockReleasedStatus } from "@/lib/orders/stock";
 import { isValidLogoDataUrl } from "@/lib/logo-upload";
 
 export interface CheckoutLine {
@@ -333,4 +333,69 @@ export async function releaseStockIfPaymentFailed(orderId: string, paymentSuccee
     }
     await tx.order.update({ where: { id: order.id }, data: { stockRestored: true } });
   });
+}
+
+/** iyzico ödeme geri dönüş callback'i için sonlandırma kararı verilecek siparişi getirir. */
+export async function findOrderForPaymentFinalization(orderId: string) {
+  return prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+}
+
+export interface FinalizePaymentParams {
+  success: boolean;
+  amountKurus: number;
+  providerRef: string;
+  rawResponse: unknown;
+}
+
+/**
+ * iyzico geri dönüşünden sonra bir siparişi ödeme sonucuna göre sonlandırır: durumu
+ * günceller, bir Payment kaydı oluşturur, başarılıysa fiziksel ürün satırları için
+ * dkartvizit hesap devri kaydını (PENDING) hazırlar — hepsi tek bir transaction'da. Ardından
+ * — BİLİNÇLİ OLARAK AYRI, kendi transaction'ını açan — `releaseStockIfPaymentFailed` çağrılır.
+ *
+ * İki ayrı transaction olması kasıtlıdır, birleştirilmemelidir: stok iadesi başarısız olsa
+ * bile ödeme/sipariş durumu kalıcı olarak yazılmış olmalı. Birleştirmek kilit süresini
+ * uzatır ve bu başarısızlık sınırını değiştirir (bkz. prisma-pool.ts — Hostinger'ın bağlantı
+ * kotası kısıtlı). Idempotency (sipariş zaten PAID mi) ve tutar-manipülasyonu kontrolü bu
+ * fonksiyona gelmeden önce, çağıran (webhook route'u) tarafından yapılmış olmalıdır.
+ */
+export async function finalizeOrderPayment(
+  order: { id: string; totalKurus: number; items: { id: string; productVariantId: string | null }[] },
+  params: FinalizePaymentParams,
+): Promise<void> {
+  const operations: Prisma.PrismaPromise<unknown>[] = [
+    prisma.order.update({
+      where: { id: order.id },
+      data: { status: params.success ? OrderStatus.PAID : OrderStatus.FAILED },
+    }),
+    prisma.payment.create({
+      data: {
+        orderId: order.id,
+        provider: "iyzico",
+        providerRef: params.providerRef,
+        status: params.success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED,
+        amountKurus: params.amountKurus,
+        rawResponse: params.rawResponse as Prisma.InputJsonValue,
+      },
+    }),
+  ];
+
+  // Ödeme başarılıysa, fiziksel ürün satırları için dkartvizit hesap devri kaydını (PENDING)
+  // hazırlar — admin bunu /admin/siparisler üzerinden manuel olarak "sağlandı" işaretler.
+  if (params.success) {
+    for (const item of order.items) {
+      if (item.productVariantId) {
+        operations.push(
+          prisma.dkartvizitHandoff.upsert({
+            where: { orderItemId: item.id },
+            update: {},
+            create: { orderItemId: item.id },
+          }),
+        );
+      }
+    }
+  }
+
+  await prisma.$transaction(operations);
+  await releaseStockIfPaymentFailed(order.id, params.success);
 }

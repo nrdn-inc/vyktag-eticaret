@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
 
 describe("consumeRateLimit", () => {
   it("allows requests up to the configured maximum", () => {

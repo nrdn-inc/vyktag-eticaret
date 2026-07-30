@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { lineKey } from "@/lib/cart";
+import { lineKey } from "@/lib/orders/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { useCart } from "@/components/CartProvider";
 import { CheckoutOrderBump } from "@/components/CheckoutOrderBump";

@@ -1,5 +1,4 @@
-import type { CardVariant } from "@/components/visuals/NfcCard";
-import type { CardColor, PrintColor, VariantAttributes } from "@/lib/product-variant-attributes";
+import type { CardColor, CardVariant, PrintColor, VariantAttributes } from "@/lib/catalog/product-variant-attributes";
 
 /**
  * Gerçek ürün stüdyo fotoğrafları. Her fotoğraf kartın ön ve arka yüzünü birlikte gösterir.

@@ -8,7 +8,7 @@ import {
   isPaymentSuccessful,
   isSubscriptionActive,
   kurusToTutarMetni,
-} from "@/lib/iyzico";
+} from "@/lib/payments/iyzico";
 
 describe("kurusToTutarMetni", () => {
   it("converts kurus to a two-decimal TL amount string", () => {
@@ -202,7 +202,7 @@ describe("getClient (indirectly via initializeCheckoutForm)", () => {
     vi.stubEnv("IYZICO_API_KEY", "");
     vi.stubEnv("IYZICO_SECRET_KEY", "");
     vi.stubEnv("IYZICO_BASE_URL", "");
-    const { initializeCheckoutForm } = await import("@/lib/iyzico");
+    const { initializeCheckoutForm } = await import("@/lib/payments/iyzico");
 
     await expect(initializeCheckoutForm(makeInput())).rejects.toThrow(/API bilgileri tanımlı değil/);
   });

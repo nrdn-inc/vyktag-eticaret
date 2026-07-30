@@ -1,9 +1,9 @@
 "use server";
 
-import { getCurrentCustomer } from "@/lib/customer-session";
+import { getCurrentCustomer } from "@/lib/auth/customer-session";
 import { getPurchasableSubscriptionPlanBySlug } from "@/lib/catalog";
-import { encodeSubscriptionConversationId } from "@/lib/subscriptions";
-import { initializeSubscriptionCheckoutForm } from "@/lib/iyzico";
+import { encodeSubscriptionConversationId } from "@/lib/payments/subscriptions";
+import { initializeSubscriptionCheckoutForm } from "@/lib/payments/iyzico";
 
 export interface SubscribeAddressInput {
   addressLine1: string;

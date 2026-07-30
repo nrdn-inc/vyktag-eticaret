@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { NfcCard, NfcCardBack } from "@/components/visuals/NfcCard";
-import { parseVariantAttributes, resolveVariantVisual } from "@/lib/product-variant-attributes";
-import { describeCardPhoto, getCardPhoto } from "@/lib/product-photos";
+import { parseVariantAttributes, resolveVariantVisual } from "@/lib/catalog/product-variant-attributes";
+import { describeCardPhoto, getCardPhoto } from "@/lib/catalog/product-photos";
 
 type PreviewMode = "photo" | "live";
 

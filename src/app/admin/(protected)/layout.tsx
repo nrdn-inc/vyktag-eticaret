@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { verifyAdminSession } from "@/lib/admin-session";
+import { verifyAdminSession } from "@/lib/auth/admin-session";
 import { AdminLogoutForm } from "./AdminLogoutForm";
 
 export default async function AdminLayout({

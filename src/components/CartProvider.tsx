@@ -8,7 +8,7 @@ import {
   cartTotalKurus,
   removeItem as removeItemFn,
   updateQuantity as updateQuantityFn,
-} from "@/lib/cart";
+} from "@/lib/orders/cart";
 
 const STORAGE_KEY = "vyktag-sepet";
 

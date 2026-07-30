@@ -7,7 +7,7 @@ import {
   lineKey,
   removeItem,
   updateQuantity,
-} from "@/lib/cart";
+} from "@/lib/orders/cart";
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {
   return {

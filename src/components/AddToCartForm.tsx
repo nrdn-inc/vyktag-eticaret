@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ProductWithVariants } from "@/lib/catalog";
-import type { CartItem, CartPersonalization } from "@/lib/cart";
+import type { CartItem, CartPersonalization } from "@/lib/orders/cart";
 import { formatPriceTRY } from "@/lib/format";
-import { isVariantPurchasable } from "@/lib/stock";
-import { parseVariantAttributes } from "@/lib/product-variant-attributes";
+import { isVariantPurchasable } from "@/lib/orders/stock";
+import { parseVariantAttributes } from "@/lib/catalog/product-variant-attributes";
 import { useCart } from "@/components/CartProvider";
 import { CardOptionSelector } from "@/components/CardOptionSelector";
 

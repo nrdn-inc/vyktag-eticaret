@@ -6,7 +6,7 @@ import {
   generateTotpSecret,
   hotp,
   verifyTotpCode,
-} from "@/lib/totp";
+} from "@/lib/auth/totp";
 
 describe("base32Encode / base32Decode", () => {
   it("round-trips arbitrary bytes", () => {

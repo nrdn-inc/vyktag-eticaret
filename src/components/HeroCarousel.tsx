@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HERO_SLIDES } from "@/lib/marketing";
-import { CARD_VARIANT_PHOTOS } from "@/lib/product-photos";
+import { CARD_VARIANT_PHOTOS } from "@/lib/catalog/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
 const AUTOPLAY_MS = 6000;

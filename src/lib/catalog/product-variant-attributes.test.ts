@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveCardVariant } from "@/components/visuals/NfcCard";
 import {
   parseVariantAttributes,
+  resolveCardVariant,
   resolvePrintAccent,
   resolveVariantVisual,
-} from "@/lib/product-variant-attributes";
+} from "@/lib/catalog/product-variant-attributes";
 
 describe("parseVariantAttributes", () => {
   it("parses a valid attributes object", () => {

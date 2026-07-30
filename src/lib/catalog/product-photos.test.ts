@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CARD_VARIANT_PHOTOS, describeCardPhoto, getCardPhoto } from "@/lib/product-photos";
-import type { CardColor, PrintColor, VariantAttributes } from "@/lib/product-variant-attributes";
+import { CARD_VARIANT_PHOTOS, describeCardPhoto, getCardPhoto } from "@/lib/catalog/product-photos";
+import type { CardColor, PrintColor, VariantAttributes } from "@/lib/catalog/product-variant-attributes";
 
 /** Veritabanındaki VYKTag Kart varyantlarının tamamı (kart rengi × baskı rengi × özel tasarım). */
 const ALL_COMBINATIONS: VariantAttributes[] = (

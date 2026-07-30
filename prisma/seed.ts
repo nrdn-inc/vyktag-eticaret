@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { prisma } from "../src/lib/prisma";
-import { seedCatalog } from "../src/lib/catalog-seed";
+import { seedCatalog } from "../src/lib/catalog/catalog-seed";
 
 async function main() {
   await seedCatalog(prisma);

@@ -9,7 +9,7 @@ import {
   hashPassword,
   verifyPasswordResetToken,
 } from "@/lib/auth";
-import { MIN_PASSWORD_LENGTH } from "@/lib/customer-auth";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/customer-auth";
 
 export interface ResetPasswordState {
   error?: string;

@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath, updateTag } from "next/cache";
-import { prisma } from "@/lib/prisma";
-import { verifyAdminSession } from "@/lib/admin-session";
+import { verifyAdminSession } from "@/lib/auth/admin-session";
 import { CATALOG_CACHE_TAG } from "@/lib/catalog";
+import { updateVariantStock } from "@/lib/orders/stock-admin";
 import { REVALIDATE_PATHS } from "@/lib/revalidate";
 
 export interface StockActionState {
@@ -25,18 +25,10 @@ export async function setVariantStock(
     return { error: "Stok 0 veya daha büyük bir tam sayı olmalı." };
   }
 
-  const variant = await prisma.productVariant.findUnique({
-    where: { id: variantId },
-    include: { product: true },
-  });
-  if (!variant) {
-    return { error: "Varyant bulunamadı." };
+  const result = await updateVariantStock(variantId, stock);
+  if ("error" in result) {
+    return { error: result.error };
   }
-
-  await prisma.productVariant.update({
-    where: { id: variantId },
-    data: { stock },
-  });
 
   revalidatePath("/admin/stok");
   // Vitrindeki "tükendi" durumunun anında yansıması için katalog sayfalarını da yenile.
@@ -48,7 +40,7 @@ export async function setVariantStock(
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
-  revalidatePath(`/urunler/${variant.product.slug}`);
+  revalidatePath(`/urunler/${result.productSlug}`);
   updateTag(CATALOG_CACHE_TAG);
 
   return { ok: true };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isValidNationalId, isValidTaxNumber } from "@/lib/billing-profiles";
+import { isValidNationalId, isValidTaxNumber } from "@/lib/account/billing-profiles";
 
 describe("isValidNationalId", () => {
   it("accepts a real, checksum-valid TC Kimlik No", () => {

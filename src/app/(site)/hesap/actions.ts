@@ -1,15 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import QRCode from "qrcode";
-import { prisma } from "@/lib/prisma";
-import { BillingProfileType, TwoFactorMethod } from "@/generated/prisma/client";
-import { verifyCustomerSession } from "@/lib/customer-session";
+import { BillingProfileType } from "@/generated/prisma/client";
+import { verifyCustomerSession } from "@/lib/auth/customer-session";
 import { verifyPassword } from "@/lib/auth";
-import { isValidNationalId, isValidTaxNumber } from "@/lib/billing-profiles";
-import { buildOtpAuthUrl, generateTotpSecret, verifyTotpCode } from "@/lib/totp";
-import { decryptTotpSecret, encryptTotpSecret } from "@/lib/totp-secret-crypto";
-import { consumeRateLimit } from "@/lib/rate-limit";
+import {
+  confirmTotpEnrollment as confirmTotpEnrollmentForUser,
+  disableTwoFactor as disableTwoFactorForUser,
+  enableEmailTwoFactor,
+  startTotpEnrollment as startTotpEnrollmentForUser,
+} from "@/lib/auth/two-factor";
+import { createAddress, deleteAddressForUser, setDefaultAddressForUser } from "@/lib/account/addresses";
+import {
+  createBillingProfile,
+  deleteBillingProfileForUser,
+  isValidNationalId,
+  isValidTaxNumber,
+  setDefaultBillingProfileForUser,
+} from "@/lib/account/billing-profiles";
 
 export interface AddressFormState {
   error?: string;
@@ -31,24 +39,7 @@ export async function addAddress(_prevState: AddressFormState, formData: FormDat
     return { error: "Ad soyad, telefon, adres, il, ilçe ve posta kodu zorunludur." };
   }
 
-  await prisma.$transaction(async (tx) => {
-    if (isDefault) {
-      await tx.address.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } });
-    }
-    await tx.address.create({
-      data: {
-        userId: user.id,
-        fullName,
-        phone,
-        addressLine1,
-        addressLine2: addressLine2 || null,
-        city,
-        district,
-        postalCode,
-        isDefault,
-      },
-    });
-  });
+  await createAddress(user.id, { fullName, phone, addressLine1, addressLine2, city, district, postalCode, isDefault });
 
   revalidatePath("/hesap");
   return {};
@@ -56,22 +47,13 @@ export async function addAddress(_prevState: AddressFormState, formData: FormDat
 
 export async function deleteAddress(addressId: string): Promise<void> {
   const user = await verifyCustomerSession();
-  await prisma.address.deleteMany({ where: { id: addressId, userId: user.id } });
+  await deleteAddressForUser(addressId, user.id);
   revalidatePath("/hesap");
 }
 
 export async function setDefaultAddress(addressId: string): Promise<void> {
   const user = await verifyCustomerSession();
-
-  await prisma.$transaction(async (tx) => {
-    const address = await tx.address.findFirst({ where: { id: addressId, userId: user.id } });
-    if (!address) {
-      return;
-    }
-    await tx.address.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } });
-    await tx.address.update({ where: { id: addressId }, data: { isDefault: true } });
-  });
-
+  await setDefaultAddressForUser(addressId, user.id);
   revalidatePath("/hesap");
 }
 
@@ -119,28 +101,20 @@ export async function addBillingProfile(
     }
   }
 
-  await prisma.$transaction(async (tx) => {
-    if (isDefault) {
-      await tx.billingProfile.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } });
-    }
-    await tx.billingProfile.create({
-      data: {
-        userId: user.id,
-        type,
-        title,
-        fullName,
-        nationalId,
-        companyName,
-        taxOffice,
-        taxNumber,
-        addressLine1,
-        addressLine2: addressLine2 || null,
-        city,
-        district,
-        postalCode,
-        isDefault,
-      },
-    });
+  await createBillingProfile(user.id, {
+    type,
+    title,
+    addressLine1,
+    addressLine2,
+    city,
+    district,
+    postalCode,
+    isDefault,
+    fullName,
+    nationalId,
+    companyName,
+    taxOffice,
+    taxNumber,
   });
 
   revalidatePath("/hesap");
@@ -149,22 +123,13 @@ export async function addBillingProfile(
 
 export async function deleteBillingProfile(billingProfileId: string): Promise<void> {
   const user = await verifyCustomerSession();
-  await prisma.billingProfile.deleteMany({ where: { id: billingProfileId, userId: user.id } });
+  await deleteBillingProfileForUser(billingProfileId, user.id);
   revalidatePath("/hesap");
 }
 
 export async function setDefaultBillingProfile(billingProfileId: string): Promise<void> {
   const user = await verifyCustomerSession();
-
-  await prisma.$transaction(async (tx) => {
-    const profile = await tx.billingProfile.findFirst({ where: { id: billingProfileId, userId: user.id } });
-    if (!profile) {
-      return;
-    }
-    await tx.billingProfile.updateMany({ where: { userId: user.id, isDefault: true }, data: { isDefault: false } });
-    await tx.billingProfile.update({ where: { id: billingProfileId }, data: { isDefault: true } });
-  });
-
+  await setDefaultBillingProfileForUser(billingProfileId, user.id);
   revalidatePath("/hesap");
 }
 
@@ -186,11 +151,7 @@ export async function enableTwoFactor(
     return { error: "Şifre hatalı." };
   }
 
-  // Daha önce yarım kalmış bir TOTP eşleştirmesinden kalan sır varsa temizlenir.
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null, twoFactorLastStep: null },
-  });
+  await enableEmailTwoFactor(user.id);
   revalidatePath("/hesap");
   return { success: true };
 }
@@ -208,10 +169,7 @@ export async function disableTwoFactor(
     return { error: "Şifre hatalı." };
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { twoFactorEnabled: false, twoFactorMethod: TwoFactorMethod.EMAIL, twoFactorSecret: null, twoFactorLastStep: null },
-  });
+  await disableTwoFactorForUser(user.id);
   revalidatePath("/hesap");
   return { success: true };
 }
@@ -240,15 +198,7 @@ export async function startTotpEnrollment(
     return { error: "Şifre hatalı." };
   }
 
-  const secret = generateTotpSecret();
-  // Sır veritabanında şifreli tutulur (bkz. totp-secret-crypto.ts); düz hali yalnızca
-  // QR/manuel giriş için bu yanıtla istemciye döner.
-  await prisma.user.update({ where: { id: user.id }, data: { twoFactorSecret: encryptTotpSecret(secret) } });
-
-  const otpAuthUrl = buildOtpAuthUrl(secret, user.email);
-  const qrDataUrl = await QRCode.toDataURL(otpAuthUrl);
-
-  return { secret, otpAuthUrl, qrDataUrl };
+  return startTotpEnrollmentForUser(user.id, user.email);
 }
 
 export interface TotpConfirmState {
@@ -264,24 +214,11 @@ export async function confirmTotpEnrollment(
   const user = await verifyCustomerSession();
   const code = String(formData.get("code") ?? "").trim();
 
-  if (!consumeRateLimit(`totp-confirm:${user.id}`, { max: 5, windowMs: 10 * 60 * 1000 })) {
-    return { error: "Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin." };
+  const result = await confirmTotpEnrollmentForUser(user.id, code);
+  if ("error" in result) {
+    return { error: result.error };
   }
 
-  const fresh = await prisma.user.findUnique({ where: { id: user.id } });
-  const secret = decryptTotpSecret(fresh?.twoFactorSecret);
-  if (!secret) {
-    return { error: "Önce authenticator uygulamasıyla eşleştirmeyi başlatın." };
-  }
-
-  if (!verifyTotpCode(secret, code)) {
-    return { error: "Kod hatalı veya süresi dolmuş." };
-  }
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { twoFactorEnabled: true, twoFactorMethod: TwoFactorMethod.TOTP },
-  });
   revalidatePath("/hesap");
   return { success: true };
 }

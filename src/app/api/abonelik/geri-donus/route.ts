@@ -2,8 +2,8 @@ import {
   extractSubscriptionCheckoutData,
   isSubscriptionActive,
   retrieveSubscriptionCheckoutForm,
-} from "@/lib/iyzico";
-import { activateSubscriptionFromCheckout, decodeSubscriptionConversationId } from "@/lib/subscriptions";
+} from "@/lib/payments/iyzico";
+import { activateSubscriptionFromCheckout, decodeSubscriptionConversationId } from "@/lib/payments/subscriptions";
 
 // iyzico'nun barındırdığı abonelik ödeme sayfası, müşterinin tarayıcısından bu adrese POST ile
 // yönlendirme yapar. Bu yüzden istek her zaman taze olmalı ve önbelleklenmemelidir.

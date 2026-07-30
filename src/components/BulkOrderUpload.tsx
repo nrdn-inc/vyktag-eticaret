@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { useCart } from "@/components/CartProvider";
-import type { CartItem, CartPersonalization } from "@/lib/cart";
+import type { CartItem, CartPersonalization } from "@/lib/orders/cart";
 
 export interface SelectedProductVariant {
   variantId: string;

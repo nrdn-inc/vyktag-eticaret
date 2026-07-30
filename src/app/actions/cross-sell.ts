@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import type { CartItem } from "@/lib/cart";
+import type { CartItem } from "@/lib/orders/cart";
 
 /**
  * Sepet veya ödeme sayfasında gösterilecek çapraz satış (cross-sell / order bump) ürününü getirir.

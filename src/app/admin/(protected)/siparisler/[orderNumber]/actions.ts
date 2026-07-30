@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, HandoffStatus } from "@/generated/prisma/client";
-import { verifyAdminSession } from "@/lib/admin-session";
+import { verifyAdminSession } from "@/lib/auth/admin-session";
 import { setOrderStatus } from "@/lib/orders";
-import { InsufficientStockError } from "@/lib/stock";
+import { InsufficientStockError } from "@/lib/orders/stock";
 
 export interface ActionState {
   error?: string;

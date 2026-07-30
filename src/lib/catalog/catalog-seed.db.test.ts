@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
-import { CARD_PRODUCTS, SUBSCRIPTION_PLANS, seedCatalog } from "@/lib/catalog-seed";
+import { CARD_PRODUCTS, SUBSCRIPTION_PLANS, seedCatalog } from "@/lib/catalog/catalog-seed";
 
 // Upsert tabanlı olduğu için gerçek veritabanına karşı güvenle tekrar çalıştırılabilir.
 describe("seedCatalog", () => {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { verifyCustomerSession } from "@/lib/customer-session";
+import { verifyCustomerSession } from "@/lib/auth/customer-session";
 import { getActiveSubscriptionPlansCached } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { SubscribeForm } from "./SubscribeForm";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
-import { verifyCustomerSession } from "@/lib/customer-session";
+import { verifyCustomerSession } from "@/lib/auth/customer-session";
 import { deleteAddress, deleteBillingProfile, setDefaultAddress, setDefaultBillingProfile } from "./actions";
 import { LogoutForm } from "./LogoutForm";
 import { AddAddressForm } from "./AddAddressForm";

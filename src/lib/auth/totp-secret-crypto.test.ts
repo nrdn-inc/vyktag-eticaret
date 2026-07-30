@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { decryptTotpSecret, encryptTotpSecret, resetTotpSecretKeyCache } from "@/lib/totp-secret-crypto";
+import { decryptTotpSecret, encryptTotpSecret, resetTotpSecretKeyCache } from "@/lib/auth/totp-secret-crypto";
 
 describe("encryptTotpSecret / decryptTotpSecret", () => {
   beforeEach(() => {

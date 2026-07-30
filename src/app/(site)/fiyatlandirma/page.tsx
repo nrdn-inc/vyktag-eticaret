@@ -5,7 +5,8 @@ import { formatPriceTRY } from "@/lib/format";
 import { FAQ } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
 import { ComparisonTable } from "@/components/ComparisonTable";
-import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
+import { NfcCard } from "@/components/visuals/NfcCard";
+import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
 
 export const metadata: Metadata = {
   title: "Fiyatlandırma",

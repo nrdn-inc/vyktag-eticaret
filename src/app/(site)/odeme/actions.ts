@@ -2,8 +2,8 @@
 
 import { headers } from "next/headers";
 import { createOrderFromCart, type CheckoutAddressInput, type CheckoutContact } from "@/lib/orders";
-import { initializeCheckoutForm } from "@/lib/iyzico";
-import type { CartPersonalization } from "@/lib/cart";
+import { initializeCheckoutForm } from "@/lib/payments/iyzico";
+import type { CartPersonalization } from "@/lib/orders/cart";
 
 export interface CheckoutCartLine {
   variantId?: string;

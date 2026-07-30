@@ -3,7 +3,7 @@ import {
   computePeriodEnd,
   decodeSubscriptionConversationId,
   encodeSubscriptionConversationId,
-} from "@/lib/subscriptions";
+} from "@/lib/payments/subscriptions";
 
 // Veritabanına yazan activateSubscriptionFromCheckout için bkz. subscriptions.db.test.ts
 // (npm run test:db). Bu dosya yalnızca saf mantığı test eder.

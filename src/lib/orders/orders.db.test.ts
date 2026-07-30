@@ -1,13 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/prisma";
-import { OrderStatus } from "@/generated/prisma/client";
+import { OrderStatus, PaymentStatus } from "@/generated/prisma/client";
 import {
   createOrderFromCart,
+  finalizeOrderPayment,
+  findOrderForPaymentFinalization,
   releaseStockIfPaymentFailed,
   setOrderStatus,
   type CheckoutContact,
 } from "@/lib/orders";
-import { InsufficientStockError } from "@/lib/stock";
+import { InsufficientStockError } from "@/lib/orders/stock";
 
 // Bu dosya CANLI Hostinger veritabanına bağlanır ve yazar; bu yüzden `.db.test.ts`
 // kalıbıyla işaretlenmiştir ve varsayılan `npm test` çalıştırmasının dışındadır.
@@ -180,5 +182,64 @@ describe("createOrderFromCart & stok yönetimi", () => {
     const paid = await createOrderFromCart([{ variantId, quantity: 2 }], contact, shipping, null);
     await releaseStockIfPaymentFailed(paid.id, true);
     expect(await getStock()).toBe(INITIAL_STOCK - 2);
+  });
+
+  describe("finalizeOrderPayment", () => {
+    it("başarılı ödemede siparişi PAID yapar, bir Payment(SUCCESS) ve dkartvizit devir kaydı oluşturur", async () => {
+      const created = await createOrderFromCart([{ variantId, quantity: 1 }], contact, shipping, null);
+      const order = await findOrderForPaymentFinalization(created.id);
+      if (!order) throw new Error("test siparişi bulunamadı");
+
+      await finalizeOrderPayment(order, {
+        success: true,
+        amountKurus: order.totalKurus,
+        providerRef: "test-provider-ref-success",
+        rawResponse: { ok: true },
+      });
+
+      const updated = await prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+      expect(updated.status).toBe(OrderStatus.PAID);
+
+      const payment = await prisma.payment.findFirstOrThrow({ where: { orderId: order.id } });
+      expect(payment.status).toBe(PaymentStatus.SUCCESS);
+      expect(payment.amountKurus).toBe(order.totalKurus);
+      expect(payment.providerRef).toBe("test-provider-ref-success");
+
+      const handoffCount = await prisma.dkartvizitHandoff.count({
+        where: { orderItem: { orderId: order.id } },
+      });
+      expect(handoffCount).toBe(order.items.length);
+
+      // Başarılı ödemede releaseStockIfPaymentFailed no-op'tur — stok düşülü kalmalı.
+      expect(await getStock()).toBe(INITIAL_STOCK - 1);
+    });
+
+    it("başarısız ödemede siparişi FAILED yapar, Payment(FAILED) oluşturur, devir kaydı oluşturmaz ve stoğu iade eder", async () => {
+      const created = await createOrderFromCart([{ variantId, quantity: 2 }], contact, shipping, null);
+      const order = await findOrderForPaymentFinalization(created.id);
+      if (!order) throw new Error("test siparişi bulunamadı");
+
+      await finalizeOrderPayment(order, {
+        success: false,
+        amountKurus: 0,
+        providerRef: "test-provider-ref-failed",
+        rawResponse: { ok: false },
+      });
+
+      const updated = await prisma.order.findUniqueOrThrow({ where: { id: order.id } });
+      expect(updated.status).toBe(OrderStatus.FAILED);
+      expect(updated.stockRestored).toBe(true);
+
+      const payment = await prisma.payment.findFirstOrThrow({ where: { orderId: order.id } });
+      expect(payment.status).toBe(PaymentStatus.FAILED);
+
+      const handoffCount = await prisma.dkartvizitHandoff.count({
+        where: { orderItem: { orderId: order.id } },
+      });
+      expect(handoffCount).toBe(0);
+
+      // Stok iade edilmiş olmalı (releaseStockIfPaymentFailed ayrı transaction'ında).
+      expect(await getStock()).toBe(INITIAL_STOCK);
+    });
   });
 });

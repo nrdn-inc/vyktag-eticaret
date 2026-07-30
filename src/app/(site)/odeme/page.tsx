@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/components/CartProvider";
-import { lineKey } from "@/lib/cart";
+import { lineKey } from "@/lib/orders/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { IyzicoCheckoutForm } from "@/components/IyzicoCheckoutForm";
 import { startCheckout, type CheckoutResult } from "./actions";

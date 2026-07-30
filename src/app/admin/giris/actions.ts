@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
 import { ADMIN_SESSION_COOKIE, CUSTOMER_SESSION_COOKIE, createAdminSessionToken, verifyPassword } from "@/lib/auth";
-import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
 
 export interface LoginState {
   error?: string;

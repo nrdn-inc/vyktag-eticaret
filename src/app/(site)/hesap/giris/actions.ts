@@ -14,10 +14,10 @@ import {
   verifyTotpChallengeToken,
   verifyTwoFactorChallengeToken,
 } from "@/lib/auth";
-import { sendTwoFactorCode, sendVerificationEmail } from "@/lib/customer-auth";
-import { clientIpFromHeaders, consumeRateLimit } from "@/lib/rate-limit";
-import { verifyTotpCode } from "@/lib/totp";
-import { decryptTotpSecret } from "@/lib/totp-secret-crypto";
+import { sendTwoFactorCode, sendVerificationEmail } from "@/lib/auth/customer-auth";
+import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
+import { verifyTotpCode } from "@/lib/auth/totp";
+import { decryptTotpSecret } from "@/lib/auth/totp-secret-crypto";
 
 export interface LoginState {
   error?: string;

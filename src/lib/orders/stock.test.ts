@@ -5,7 +5,7 @@ import {
   clampQuantityToStock,
   isStockReleasedStatus,
   isVariantPurchasable,
-} from "@/lib/stock";
+} from "@/lib/orders/stock";
 
 describe("isStockReleasedStatus", () => {
   it("is true for the stock-releasing statuses", () => {

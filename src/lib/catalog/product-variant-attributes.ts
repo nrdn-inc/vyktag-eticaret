@@ -1,7 +1,26 @@
-import { resolveCardVariant, type CardVariant, type CardAccent } from "@/components/visuals/NfcCard";
-
 export type CardColor = "Siyah" | "Beyaz";
 export type PrintColor = "Gümüş" | "Altın" | "Siyah";
+
+/** Kartın görsel teması (canlı önizleme + gerçek ürün fotoğrafı seçimi için). */
+export type CardVariant = "siyah" | "beyaz" | "özel";
+/** Baskı rengi teması — karttaki tüm yazı/simge/QR bu renkle boyanır. */
+export type CardAccent = "altin" | "gumus" | "siyah";
+
+/**
+ * Ürün varyant adını (ör. "Siyah · Altın Baskı") kart temasına eşler.
+ *
+ * Bilinçli olarak burada, `components/visuals/NfcCard.tsx`'te değil: bu saf bir domain
+ * fonksiyonu, server-render edilen sayfalardan (ör. `urunler/page.tsx`) doğrudan çağrılıyor.
+ * Bir UI bileşeninden export edilseydi, o bileşen ileride `"use client"` alırsa (görsel
+ * bileşenler için makul bir ihtimal) bu çağrı yerleri kırılırdı — düz bir fonksiyon "use
+ * client" modülünden Server Component'e opak bir client reference olarak geçer, çağrılamaz.
+ */
+export function resolveCardVariant(variantName: string | undefined): CardVariant {
+  const normalized = (variantName ?? "").trim().toLocaleLowerCase("tr-TR");
+  if (normalized.startsWith("siyah")) return "siyah";
+  if (normalized.startsWith("beyaz")) return "beyaz";
+  return "özel";
+}
 
 /** VYKTag Kart varyantlarının yapılandırılmış seçenekleri (ProductVariant.attributes). */
 export interface VariantAttributes {

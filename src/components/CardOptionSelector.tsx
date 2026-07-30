@@ -1,7 +1,7 @@
 import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
-import { isVariantPurchasable } from "@/lib/stock";
-import { parseVariantAttributes, type CardColor, type PrintColor } from "@/lib/product-variant-attributes";
+import { isVariantPurchasable } from "@/lib/orders/stock";
+import { parseVariantAttributes, type CardColor, type PrintColor } from "@/lib/catalog/product-variant-attributes";
 import { LogoUploadInput } from "@/components/LogoUploadInput";
 
 type Variant = ProductWithVariants["variants"][number];

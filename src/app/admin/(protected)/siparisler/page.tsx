@@ -3,7 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, Prisma } from "@/generated/prisma/client";
 import { formatPriceTRY } from "@/lib/format";
-import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/order-status";
+import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/orders/order-status";
 
 export const metadata: Metadata = {
   title: "Siparişler | VYKTag Yönetim",

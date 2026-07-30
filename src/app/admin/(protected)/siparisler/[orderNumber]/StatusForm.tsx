@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { OrderStatus } from "@/generated/prisma/client";
-import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import { ORDER_STATUS_LABELS } from "@/lib/orders/order-status";
 import { updateOrderStatus, type ActionState } from "./actions";
 
 const initialState: ActionState = {};

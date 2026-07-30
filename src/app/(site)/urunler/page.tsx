@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getActiveProductsCached } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
-import { isVariantPurchasable } from "@/lib/stock";
+import { isVariantPurchasable } from "@/lib/orders/stock";
 import { PRODUCT_BADGES, VALUE_PROPS } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
 import { Icon } from "@/components/visuals/Icon";
-import { NfcCard, resolveCardVariant } from "@/components/visuals/NfcCard";
-import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/product-photos";
+import { NfcCard } from "@/components/visuals/NfcCard";
+import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
+import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/catalog/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 
 export const metadata: Metadata = {
