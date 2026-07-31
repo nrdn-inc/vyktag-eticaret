@@ -1,0 +1,337 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { useCart } from "@/components/CartProvider";
+import { lineKey } from "@/lib/orders/cart";
+import { formatPriceTRY } from "@/lib/format";
+import { IyzicoCheckoutForm } from "@/components/IyzicoCheckoutForm";
+import { startCheckout, type CheckoutResult } from "./actions";
+
+const inputClass =
+  "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
+
+export interface SavedAddress {
+  id: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  district: string;
+  postalCode: string;
+  isDefault: boolean;
+}
+
+export interface CheckoutFormProps {
+  savedAddresses: SavedAddress[];
+  defaultContact: { firstName: string; lastName: string; email: string; phone: string } | null;
+}
+
+const NEW_ADDRESS_ID = "yeni-adres";
+
+function splitAddressFullName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length < 2) {
+    return { firstName: parts[0] ?? "", lastName: "" };
+  }
+  return { firstName: parts.slice(0, -1).join(" "), lastName: parts[parts.length - 1] };
+}
+
+export default function CheckoutForm({ savedAddresses, defaultContact }: CheckoutFormProps) {
+  const { items, totalKurus, ready } = useCart();
+
+  const initialAddress = savedAddresses.find((a) => a.isDefault) ?? savedAddresses[0] ?? null;
+
+  const [selectedAddressId, setSelectedAddressId] = useState(initialAddress?.id ?? NEW_ADDRESS_ID);
+  const [firstName, setFirstName] = useState(defaultContact?.firstName ?? "");
+  const [lastName, setLastName] = useState(defaultContact?.lastName ?? "");
+  const [email, setEmail] = useState(defaultContact?.email ?? "");
+  const [phone, setPhone] = useState(initialAddress?.phone ?? defaultContact?.phone ?? "");
+  const [identityNumber, setIdentityNumber] = useState("");
+  const [addressLine1, setAddressLine1] = useState(initialAddress?.addressLine1 ?? "");
+  const [addressLine2, setAddressLine2] = useState(initialAddress?.addressLine2 ?? "");
+  const [city, setCity] = useState(initialAddress?.city ?? "");
+  const [district, setDistrict] = useState(initialAddress?.district ?? "");
+  const [postalCode, setPostalCode] = useState(initialAddress?.postalCode ?? "");
+  const [contractAccepted, setContractAccepted] = useState(false);
+  const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
+  const [billingAddressLine1, setBillingAddressLine1] = useState("");
+  const [billingAddressLine2, setBillingAddressLine2] = useState("");
+  const [billingCity, setBillingCity] = useState("");
+  const [billingDistrict, setBillingDistrict] = useState("");
+  const [billingPostalCode, setBillingPostalCode] = useState("");
+
+  const [result, setResult] = useState<CheckoutResult | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function applyAddress(addressId: string) {
+    setSelectedAddressId(addressId);
+    if (addressId === NEW_ADDRESS_ID) {
+      setAddressLine1("");
+      setAddressLine2("");
+      setCity("");
+      setDistrict("");
+      setPostalCode("");
+      return;
+    }
+    const address = savedAddresses.find((a) => a.id === addressId);
+    if (!address) return;
+    const { firstName: addrFirstName, lastName: addrLastName } = splitAddressFullName(address.fullName);
+    setFirstName(addrFirstName);
+    setLastName(addrLastName);
+    setPhone(address.phone);
+    setAddressLine1(address.addressLine1);
+    setAddressLine2(address.addressLine2 ?? "");
+    setCity(address.city);
+    setDistrict(address.district);
+    setPostalCode(address.postalCode);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    startTransition(async () => {
+      const response = await startCheckout({
+        contact: { firstName, lastName, email, phone },
+        identityNumber,
+        shipping: { addressLine1, addressLine2, city, district, postalCode },
+        billing: billingSameAsShipping
+          ? null
+          : {
+              addressLine1: billingAddressLine1,
+              addressLine2: billingAddressLine2,
+              city: billingCity,
+              district: billingDistrict,
+              postalCode: billingPostalCode,
+            },
+        lines: items.map((item) => ({
+          variantId: item.variantId,
+          subscriptionPlanId: item.subscriptionPlanId,
+          quantity: item.quantity,
+          personalization: item.personalization,
+        })),
+        contractAccepted,
+      });
+      setResult(response);
+    });
+  }
+
+  if (!ready) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+        <p className="text-zinc-500">Yükleniyor…</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0 && !(result?.ok ?? false)) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-6">
+        <h1 className="text-3xl font-bold tracking-tight">Sepetiniz boş</h1>
+        <p className="mt-3 text-zinc-600 dark:text-zinc-400">
+          Ödeme adımına geçmek için önce sepetinize ürün ekleyin.
+        </p>
+        <Link
+          href="/urunler"
+          className="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        >
+          Ürünleri keşfet
+        </Link>
+      </div>
+    );
+  }
+
+  if (result?.ok) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+        <h1 className="mb-2 text-2xl font-bold tracking-tight">Ödemenizi tamamlayın</h1>
+        <p className="mb-8 text-sm text-zinc-500">
+          Sipariş No: <span className="font-medium">{result.orderNumber}</span> — kart bilgileriniz
+          iyzico&apos;nun güvenli sayfasında alınır.
+        </p>
+        <IyzicoCheckoutForm content={result.checkoutFormContent} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+      <h1 className="mb-8 text-3xl font-bold tracking-tight">Ödeme</h1>
+
+      <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {result && !result.ok && (
+            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+              {result.error}
+            </div>
+          )}
+
+          <section>
+            <h2 className="mb-3 text-lg font-semibold">İletişim bilgileri</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input required placeholder="Ad" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
+              <input required placeholder="Soyad" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
+              <input required type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              <input required type="tel" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
+              <input
+                required
+                placeholder="TC Kimlik No"
+                value={identityNumber}
+                onChange={(e) => setIdentityNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                className={inputClass}
+                inputMode="numeric"
+              />
+            </div>
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-lg font-semibold">Teslimat adresi</h2>
+
+            {savedAddresses.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {savedAddresses.map((address) => (
+                  <label
+                    key={address.id}
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                      selectedAddressId === address.id
+                        ? "border-brand bg-brand/5"
+                        : "border-zinc-300 dark:border-zinc-700"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="saved-address"
+                      className="mt-1"
+                      checked={selectedAddressId === address.id}
+                      onChange={() => applyAddress(address.id)}
+                    />
+                    <span>
+                      <span className="font-medium">
+                        {address.fullName}
+                        {address.isDefault && (
+                          <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                            Varsayılan
+                          </span>
+                        )}
+                      </span>
+                      <span className="block text-zinc-600 dark:text-zinc-400">
+                        {address.addressLine1}
+                        {address.addressLine2 ? `, ${address.addressLine2}` : ""} — {address.district} /{" "}
+                        {address.city} {address.postalCode}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+                <label
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors ${
+                    selectedAddressId === NEW_ADDRESS_ID
+                      ? "border-brand bg-brand/5"
+                      : "border-zinc-300 dark:border-zinc-700"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="saved-address"
+                    checked={selectedAddressId === NEW_ADDRESS_ID}
+                    onChange={() => applyAddress(NEW_ADDRESS_ID)}
+                  />
+                  Yeni adres gir
+                </label>
+              </div>
+            )}
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <input required placeholder="Adres" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+              <input placeholder="Adres (devamı, isteğe bağlı)" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+              <input required placeholder="İl" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
+              <input required placeholder="İlçe" value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} />
+              <input required placeholder="Posta Kodu" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className={inputClass} />
+            </div>
+          </section>
+
+          <section>
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={billingSameAsShipping}
+                onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+              />
+              Fatura adresi teslimat adresiyle aynı
+            </label>
+
+            {!billingSameAsShipping && (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <input required placeholder="Fatura adresi" value={billingAddressLine1} onChange={(e) => setBillingAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+                <input placeholder="Adres (devamı, isteğe bağlı)" value={billingAddressLine2} onChange={(e) => setBillingAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+                <input required placeholder="İl" value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className={inputClass} />
+                <input required placeholder="İlçe" value={billingDistrict} onChange={(e) => setBillingDistrict(e.target.value)} className={inputClass} />
+                <input required placeholder="Posta Kodu" value={billingPostalCode} onChange={(e) => setBillingPostalCode(e.target.value)} className={inputClass} />
+              </div>
+            )}
+          </section>
+
+          <section>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                required
+                type="checkbox"
+                checked={contractAccepted}
+                onChange={(e) => setContractAccepted(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                <Link
+                  href="/mesafeli-satis-sozlesmesi"
+                  target="_blank"
+                  className="font-medium text-brand hover:text-brand-dark"
+                >
+                  Mesafeli Satış Sözleşmesi
+                </Link>
+                &apos;ni ve{" "}
+                <Link href="/kvkk" target="_blank" className="font-medium text-brand hover:text-brand-dark">
+                  KVKK Aydınlatma Metni
+                </Link>
+                &apos;ni okudum, onaylıyorum.
+              </span>
+            </label>
+          </section>
+
+          <button
+            type="submit"
+            disabled={isPending || !contractAccepted}
+            className="w-full rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? "İşleniyor…" : `Siparişi Onayla ve Öde · ${formatPriceTRY(totalKurus)}`}
+          </button>
+          <Image
+            src="/iyzico-ile-ode.svg"
+            alt="iyzico ile Öde"
+            width={180}
+            height={30}
+            className="mx-auto h-6 w-auto"
+          />
+        </form>
+
+        {/* Sipariş özeti */}
+        <aside className="h-fit rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+          <h2 className="mb-4 text-lg font-semibold">Sipariş özeti</h2>
+          <ul className="space-y-3">
+            {items.map((item) => (
+              <li key={lineKey(item)} className="flex justify-between text-sm">
+                <span>
+                  {item.productName} <span className="text-zinc-500">({item.variantName})</span> ×{item.quantity}
+                </span>
+                <span className="font-medium">{formatPriceTRY(item.unitPriceKurus * item.quantity)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex justify-between border-t border-zinc-200 pt-4 text-base font-semibold dark:border-zinc-800">
+            <span>Toplam</span>
+            <span>{formatPriceTRY(totalKurus)}</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
