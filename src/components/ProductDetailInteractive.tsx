@@ -16,6 +16,11 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
 
   const selectedVariant = product.variants.find((v) => v.id === variantId) ?? product.variants[0];
   const selectedDurationPlan = product.durationOptions.find((p) => p.subscriptionPlanId === durationPlanId) ?? null;
+  // `product.minPriceKurus` süreli kullanım hakkı planlarını da kapsar (vitrindeki "başlangıç
+  // fiyatı" için doğru) — ama burada "Sınırsız" (fiziksel kart) seçiliyken gösterilecek fiyat
+  // yalnızca varyantlar arasından en düşüğü olmalı, aksi halde abonelik fiyatı yanlışlıkla
+  // kart fiyatıymış gibi görünür.
+  const minVariantPriceKurus = Math.min(...product.variants.map((v) => v.priceKurus));
 
   return (
     <div>
@@ -35,8 +40,8 @@ export function ProductDetailInteractive({ product }: { product: ProductWithVari
             {selectedDurationPlan
               ? formatPriceTRY(selectedDurationPlan.priceKurus)
               : product.variants.length > 1
-                ? `${formatPriceTRY(product.minPriceKurus)}'den başlayan`
-                : formatPriceTRY(product.minPriceKurus)}
+                ? `${formatPriceTRY(minVariantPriceKurus)}'den başlayan`
+                : formatPriceTRY(minVariantPriceKurus)}
           </p>
           <p className="mt-4 leading-relaxed text-zinc-600 dark:text-zinc-400">
             {selectedDurationPlan

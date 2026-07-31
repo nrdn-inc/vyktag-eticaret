@@ -45,3 +45,5 @@ next-env.d.ts
 
 # claude code local settings (machine-specific, not shared)
 .claude/settings.local.json
+# Added by code-review-graph
+.code-review-graph/
