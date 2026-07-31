@@ -13,7 +13,7 @@ export async function getCrossSellProduct(): Promise<Omit<CartItem, "quantity"> 
     include: { variants: true },
   });
 
-  if (!product || product.variants.length === 0) {
+  if (!product || !product.isActive || product.variants.length === 0) {
     return null;
   }
 

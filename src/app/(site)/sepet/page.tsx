@@ -56,10 +56,10 @@ export default function CartPage() {
           return (
             <div
               key={key}
-              className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
+              className="flex flex-col items-stretch gap-4 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between"
             >
               <div className="min-w-0 flex-1">
-                <h2 className="flex items-center gap-2 font-semibold">
+                <h2 className="flex flex-wrap items-center gap-2 font-semibold">
                   {personalization.logo && (
                     // eslint-disable-next-line @next/next/no-img-element -- kullanıcının yerelde yüklediği data URL.
                     <img
@@ -88,7 +88,7 @@ export default function CartPage() {
                 </button>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between gap-4 sm:justify-end">
                 <div className="flex items-center rounded-full border border-zinc-300 dark:border-zinc-700">
                   <button
                     type="button"

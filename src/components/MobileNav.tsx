@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { mainNav } from "@/lib/site";
+import { useIsMounted } from "@/lib/use-is-mounted";
 
 /**
  * Dar ekranlarda gezinme menüsü. Masaüstündeki yatay menü mobilde gizlendiği için
@@ -10,6 +12,11 @@ import { mainNav } from "@/lib/site";
  */
 export function MobileNav() {
   const [open, setOpen] = useState(false);
+  // `<header>` `backdrop-blur-md` taşıdığından `position: fixed` alt elemanlar için yeni bir
+  // containing block oluşturur (CSS spec'i gereği); overlay header'a taşınmadan `document.body`'ye
+  // portallanmazsa tam ekran yerine yalnızca header'ın 64px'lik kutusuna sıkışır (bkz. Modal.tsx
+  // ile aynı desen).
+  const mounted = useIsMounted();
 
   // Menü açıkken arka planın kaymasını engelle.
   useEffect(() => {
@@ -47,7 +54,7 @@ export function MobileNav() {
         </svg>
       </button>
 
-      {open && (
+      {open && mounted && createPortal(
         <div className="fixed inset-0 z-50">
           <button
             type="button"
@@ -123,7 +130,8 @@ export function MobileNav() {
               Mağaza
             </Link>
           </nav>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

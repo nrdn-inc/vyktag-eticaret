@@ -13,9 +13,9 @@ export interface ForgotPasswordState {
 const RATE_LIMIT_ERROR = "Çok fazla deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 
 /**
- * Kullanıcı numaralandırmasını (enumeration) önlemek için hesap var/yok ya da doğrulanmış
- * olup olmadığı fark etmeksizin her zaman aynı genel başarı durumunu döneriz; e-posta yalnızca
- * doğrulanmış bir hesap gerçekten varsa gönderilir.
+ * Not: kullanıcı numaralandırmasını (enumeration) önleyen "her zaman aynı genel başarı"
+ * yaklaşımı bilinçli olarak terk edildi — talep üzerine e-postanın sistemde kayıtlı olup
+ * olmadığı kullanıcıya doğrudan bildirilir.
  */
 export async function requestPasswordReset(
   _prevState: ForgotPasswordState,
@@ -34,12 +34,18 @@ export async function requestPasswordReset(
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (user?.emailVerifiedAt) {
-    try {
-      await sendPasswordResetEmail(user.id, user.email, user.fullName);
-    } catch (error) {
-      console.error("[hesap/sifremi-unuttum] e-posta gönderilemedi:", error);
-    }
+  if (!user) {
+    return { error: "Bu e-posta adresi sistemde kayıtlı değil." };
+  }
+  if (!user.emailVerifiedAt) {
+    return { error: "Bu e-posta adresi henüz doğrulanmamış. Önce e-postanızı doğrulamanız gerekir." };
+  }
+
+  try {
+    await sendPasswordResetEmail(user.id, user.email, user.fullName);
+  } catch (error) {
+    console.error("[hesap/sifremi-unuttum] e-posta gönderilemedi:", error);
+    return { error: "E-posta gönderilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin." };
   }
 
   return { success: true };

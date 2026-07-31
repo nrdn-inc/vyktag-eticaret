@@ -17,8 +17,7 @@ export default function SifremiUnuttumPage() {
       <div className="mx-auto max-w-md px-4 py-24 text-center sm:px-6">
         <h1 className="text-2xl font-bold tracking-tight">E-postanızı kontrol edin</h1>
         <p className="mt-4 text-zinc-600 dark:text-zinc-400">
-          Bu e-posta adresiyle doğrulanmış bir hesap varsa, şifre sıfırlama bağlantısını
-          içeren bir e-posta gönderdik. Bağlantı 1 saat geçerlidir.
+          Şifre sıfırlama bağlantısını içeren bir e-posta gönderdik. Bağlantı 1 saat geçerlidir.
         </p>
         <Link
           href="/hesap/giris"
