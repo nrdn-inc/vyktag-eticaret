@@ -22,15 +22,22 @@ export async function generateMetadata({
 
 export default async function ProductDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ varyant?: string }>;
 }) {
   const { slug } = await params;
+  const { varyant } = await searchParams;
   const product = await getProductBySlugCached(slug);
 
   if (!product) {
     notFound();
   }
+
+  // Ürün listesindeki "Seçenekler" bağlantılarından gelen ?varyant= parametresi geçerli bir
+  // varyant id'sine karşılık geliyorsa sayfa o varyant seçiliyken açılır; aksi halde ilk varyant.
+  const initialVariantId = product.variants.some((v) => v.id === varyant) ? varyant! : product.variants[0].id;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
@@ -42,7 +49,7 @@ export default async function ProductDetailPage({
         <span className="text-zinc-700 dark:text-zinc-300">{product.name}</span>
       </nav>
 
-      <ProductDetailInteractive product={product} />
+      <ProductDetailInteractive product={product} initialVariantId={initialVariantId} />
     </div>
   );
 }

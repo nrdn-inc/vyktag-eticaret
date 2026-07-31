@@ -6,9 +6,15 @@ import { formatPriceTRY } from "@/lib/format";
 import { CardPreview } from "@/components/CardPreview";
 import { AddToCartForm } from "@/components/AddToCartForm";
 
+interface ProductDetailInteractiveProps {
+  product: ProductWithVariants;
+  /** Ürün listesindeki "Seçenekler" bağlantısından (?varyant=) gelen ön seçili varyant; verilmezse ilk varyant kullanılır. */
+  initialVariantId?: string;
+}
+
 /** Ürün detay sayfasının etkileşimli kısmı: kart önizlemesi ile formun aynı state'i paylaşmasını sağlar. */
-export function ProductDetailInteractive({ product }: { product: ProductWithVariants }) {
-  const [variantId, setVariantId] = useState(product.variants[0].id);
+export function ProductDetailInteractive({ product, initialVariantId }: ProductDetailInteractiveProps) {
+  const [variantId, setVariantId] = useState(initialVariantId ?? product.variants[0].id);
   const [durationPlanId, setDurationPlanId] = useState<string | null>(null);
   const [fullName, setFullName] = useState("");
   const [title, setTitle] = useState("");

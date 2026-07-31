@@ -89,18 +89,20 @@ export default async function ProductsPage() {
                     </h3>
                     <ul className="mt-3 flex flex-wrap gap-2.5">
                       {product.variants.map((variant) => (
-                        <li
-                          key={variant.id}
-                          className="flex items-center gap-2 rounded-full border border-border-soft px-4 py-2 text-sm transition-colors hover:border-brand/50"
-                        >
-                          <span className="font-medium">{variant.name}</span>
-                          <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                          <span className="font-semibold text-brand-dark">
-                            {formatPriceTRY(variant.priceKurus)}
-                          </span>
-                          {!isVariantPurchasable(variant.stock) && (
-                            <span className="text-xs text-zinc-400">(tükendi)</span>
-                          )}
+                        <li key={variant.id}>
+                          <Link
+                            href={`/urunler/${product.slug}?varyant=${variant.id}`}
+                            className="flex items-center gap-2 rounded-full border border-border-soft px-4 py-2 text-sm transition-colors hover:border-brand/50 hover:bg-brand/5"
+                          >
+                            <span className="font-medium">{variant.name}</span>
+                            <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                            <span className="font-semibold text-brand-dark">
+                              {formatPriceTRY(variant.priceKurus)}
+                            </span>
+                            {!isVariantPurchasable(variant.stock) && (
+                              <span className="text-xs text-zinc-400">(tükendi)</span>
+                            )}
+                          </Link>
                         </li>
                       ))}
                     </ul>

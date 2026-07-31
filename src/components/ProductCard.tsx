@@ -17,10 +17,11 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
   const hasRealPhoto = PRODUCTS_WITH_REAL_PHOTOS.has(product.slug);
 
   return (
-    <Link
-      href={`/urunler/${product.slug}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border-soft bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-2xl hover:shadow-brand/10"
-    >
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border-soft bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-2xl hover:shadow-brand/10">
+      {/* Kartın tamamını kaplayan görünmez bağlantı — varyant seçenekleri (aşağıda, kendi
+          bağlantısıyla, daha yüksek z-index'te) bu genel bağlantının üzerine tıklanabilir. */}
+      <Link href={`/urunler/${product.slug}`} className="absolute inset-0 z-0" aria-label={product.name} />
+
       {/* Görsel alan */}
       <div className="relative overflow-hidden bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
         {badge && (
@@ -53,13 +54,15 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
         </p>
 
         {hasMultipleVariants && (
-          <ul className="mt-4 flex flex-wrap gap-1.5">
+          <ul className="relative z-10 mt-4 flex flex-wrap gap-1.5">
             {product.variants.slice(0, 3).map((variant) => (
-              <li
-                key={variant.id}
-                className="rounded-full border border-border-soft px-2.5 py-0.5 text-[11px] text-zinc-600 dark:text-zinc-400"
-              >
-                {variant.name}
+              <li key={variant.id}>
+                <Link
+                  href={`/urunler/${product.slug}?varyant=${variant.id}`}
+                  className="block rounded-full border border-border-soft px-2.5 py-0.5 text-[11px] text-zinc-600 transition-colors hover:border-brand hover:text-brand dark:text-zinc-400"
+                >
+                  {variant.name}
+                </Link>
               </li>
             ))}
           </ul>
@@ -89,6 +92,6 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
           </span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
