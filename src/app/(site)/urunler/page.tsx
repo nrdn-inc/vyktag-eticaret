@@ -49,7 +49,7 @@ export default async function ProductsPage() {
                 {/* Görsel */}
                 <div className="relative flex items-center justify-center bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
                   {badge && (
-                    <span className="absolute left-4 top-4 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                    <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
                       {badge}
                     </span>
                   )}
