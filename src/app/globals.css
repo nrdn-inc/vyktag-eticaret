@@ -45,6 +45,22 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
+/*
+ * Tarayıcı otomatik doldurma (ör. Chrome/Google Şifre Yöneticisi), doldurduğu input'lara
+ * kendi beyaz/sarı arka planını `-webkit-autofill` ile dayatır ve normal `background`
+ * kuralımızı geçersiz kılar — karanlık temada input aniden beyaza döner. `box-shadow`
+ * inset hilesiyle (arka plan yerine gölge olduğundan autofill motoru tarafından
+ * geçersiz kılınmaz) kendi yüzey rengimizi geri kazandırıyoruz.
+ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foreground);
+  -webkit-box-shadow: 0 0 0px 1000px var(--surface) inset;
+  box-shadow: 0 0 0px 1000px var(--surface) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* ---------------------------------------------------------------------------
    Animasyonlar
    Tümü `prefers-reduced-motion` altında devre dışı bırakılır (en altta).
