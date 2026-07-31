@@ -162,7 +162,9 @@ export async function createOrderFromCart(
     : shippingAddress;
 
   const items = lines.map((line) => {
-    const quantity = Math.max(1, Math.floor(line.quantity));
+    // Üst sınır yok sayılırsa (ör. istemciyi atlayıp doğrudan action'ı çağıran bir script)
+    // anlamsız derecede büyük bir sipariş/toplam tutar oluşturulabilir; makul bir tavan konur.
+    const quantity = Math.min(50, Math.max(1, Math.floor(line.quantity)));
     let unitPriceKurus = 0;
     
     if (line.variantId) {

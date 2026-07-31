@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { createOrderFromCart, type CheckoutAddressInput, type CheckoutContact } from "@/lib/orders";
 import { initializeCheckoutForm } from "@/lib/payments/iyzico";
 import type { CartPersonalization } from "@/lib/orders/cart";
+import { validateCheckoutInput } from "./validation";
 
 export interface CheckoutCartLine {
   variantId?: string;
@@ -26,8 +27,6 @@ export type CheckoutResult =
   | { ok: true; checkoutFormContent: string; orderNumber: string }
   | { ok: false; error: string };
 
-const TC_KIMLIK_REGEX = /^\d{11}$/;
-
 function formatAddressLine(address: CheckoutAddressInput): string {
   return [address.addressLine1, address.addressLine2, address.district].filter(Boolean).join(", ");
 }
@@ -38,8 +37,9 @@ function formatAddressLine(address: CheckoutAddressInput): string {
  */
 export async function startCheckout(input: CheckoutInput): Promise<CheckoutResult> {
   try {
-    if (!TC_KIMLIK_REGEX.test(input.identityNumber)) {
-      return { ok: false, error: "TC Kimlik No 11 haneli olmalıdır." };
+    const validationError = validateCheckoutInput(input);
+    if (validationError) {
+      return { ok: false, error: validationError };
     }
 
     if (!input.contractAccepted) {

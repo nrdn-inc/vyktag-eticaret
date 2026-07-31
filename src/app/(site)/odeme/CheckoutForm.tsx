@@ -170,10 +170,10 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
           <section>
             <h2 className="mb-3 text-lg font-semibold">İletişim bilgileri</h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input required placeholder="Ad" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
-              <input required placeholder="Soyad" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
-              <input required type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-              <input required type="tel" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
+              <input required maxLength={60} placeholder="Ad" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
+              <input required maxLength={60} placeholder="Soyad" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
+              <input required maxLength={190} type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              <input required maxLength={20} type="tel" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
               <input
                 required
                 placeholder="TC Kimlik No"
@@ -181,6 +181,7 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
                 onChange={(e) => setIdentityNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
                 className={inputClass}
                 inputMode="numeric"
+                maxLength={11}
               />
             </div>
           </section>
@@ -242,11 +243,19 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
             )}
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <input required placeholder="Adres" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-              <input placeholder="Adres (devamı, isteğe bağlı)" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-              <input required placeholder="İl" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
-              <input required placeholder="İlçe" value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} />
-              <input required placeholder="Posta Kodu" value={postalCode} onChange={(e) => setPostalCode(e.target.value)} className={inputClass} />
+              <input required maxLength={190} placeholder="Adres" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+              <input maxLength={190} placeholder="Adres (devamı, isteğe bağlı)" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+              <input required maxLength={100} placeholder="İl" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
+              <input required maxLength={100} placeholder="İlçe" value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} />
+              <input
+                required
+                placeholder="Posta Kodu"
+                value={postalCode}
+                onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                className={inputClass}
+                inputMode="numeric"
+                maxLength={5}
+              />
             </div>
           </section>
 
@@ -262,11 +271,19 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
 
             {!billingSameAsShipping && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input required placeholder="Fatura adresi" value={billingAddressLine1} onChange={(e) => setBillingAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-                <input placeholder="Adres (devamı, isteğe bağlı)" value={billingAddressLine2} onChange={(e) => setBillingAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-                <input required placeholder="İl" value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className={inputClass} />
-                <input required placeholder="İlçe" value={billingDistrict} onChange={(e) => setBillingDistrict(e.target.value)} className={inputClass} />
-                <input required placeholder="Posta Kodu" value={billingPostalCode} onChange={(e) => setBillingPostalCode(e.target.value)} className={inputClass} />
+                <input required maxLength={190} placeholder="Fatura adresi" value={billingAddressLine1} onChange={(e) => setBillingAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+                <input maxLength={190} placeholder="Adres (devamı, isteğe bağlı)" value={billingAddressLine2} onChange={(e) => setBillingAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
+                <input required maxLength={100} placeholder="İl" value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className={inputClass} />
+                <input required maxLength={100} placeholder="İlçe" value={billingDistrict} onChange={(e) => setBillingDistrict(e.target.value)} className={inputClass} />
+                <input
+                  required
+                  placeholder="Posta Kodu"
+                  value={billingPostalCode}
+                  onChange={(e) => setBillingPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
+                  className={inputClass}
+                  inputMode="numeric"
+                  maxLength={5}
+                />
               </div>
             )}
           </section>
