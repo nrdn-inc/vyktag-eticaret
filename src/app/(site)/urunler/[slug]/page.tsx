@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlugCached } from "@/lib/catalog";
 import { ProductDetailInteractive } from "@/components/ProductDetailInteractive";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd, productJsonLd } from "@/lib/seo/structured-data";
 
 export async function generateMetadata({
   params,
@@ -17,6 +19,13 @@ export async function generateMetadata({
   return {
     title: product.name,
     description: product.description,
+    alternates: { canonical: `/urunler/${slug}` },
+    openGraph: {
+      type: "website",
+      title: product.name,
+      description: product.description,
+      url: `/urunler/${slug}`,
+    },
   };
 }
 
@@ -41,6 +50,16 @@ export default async function ProductDetailPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
+      {/* Fiyat aralığı + stok durumu; Google ürün sonucunda bunları doğrudan gösterebilir. */}
+      <JsonLd data={productJsonLd(product)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Ana sayfa", path: "/" },
+          { name: "Ürünler", path: "/urunler" },
+          { name: product.name, path: `/urunler/${product.slug}` },
+        ])}
+      />
+
       <nav className="mb-8 text-sm text-zinc-500">
         <Link href="/urunler" className="hover:text-brand">
           Ürünler

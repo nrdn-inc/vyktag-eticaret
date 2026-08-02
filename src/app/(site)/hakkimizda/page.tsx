@@ -9,6 +9,7 @@ import { NfcCard } from "@/components/visuals/NfcCard";
 export const metadata: Metadata = {
   title: "Hakkımızda",
   description: "VYKTag, VYK Teknoloji'nin NFC dijital kartvizit markasıdır. Kim olduğumuzu ve ne yaptığımızı öğrenin.",
+  alternates: { canonical: "/hakkimizda" },
 };
 
 export default function HakkimizdaPage() {

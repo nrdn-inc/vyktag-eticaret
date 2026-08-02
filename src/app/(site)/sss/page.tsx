@@ -3,29 +3,28 @@ import Link from "next/link";
 import { FAQ } from "@/lib/marketing";
 import { legalInfo } from "@/lib/site";
 import { Reveal } from "@/components/Reveal";
+import { PageHero } from "@/components/PageHero";
+import { JsonLd } from "@/components/JsonLd";
+import { faqJsonLd } from "@/lib/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "Sıkça Sorulan Sorular",
   description: "VYKTag NFC dijital kartvizitler hakkında sık sorulan sorular ve yanıtları.",
+  alternates: { canonical: "/sss" },
 };
 
 export default function FaqPage() {
   return (
     <div>
-      {/* Başlık */}
-      <section className="border-b border-border-soft bg-gradient-to-b from-brand/10 to-transparent">
-        <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-            Yardım
-          </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Sıkça sorulan sorular
-          </h1>
-          <p className="mt-4 text-zinc-600 dark:text-zinc-400">
-            Aradığınız yanıt burada yoksa bize yazın; en kısa sürede dönüş yapalım.
-          </p>
-        </div>
-      </section>
+      {/* Tüm sorular sayfada görünür olduğundan tamamı işaretlenir (bkz. ana sayfadaki not). */}
+      <JsonLd data={faqJsonLd(FAQ)} />
+
+      <PageHero
+        eyebrow="Yardım"
+        title="Sıkça sorulan sorular"
+        description="Aradığınız yanıt burada yoksa bize yazın; en kısa sürede dönüş yapalım."
+        width="narrow"
+      />
 
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <div className="space-y-3">

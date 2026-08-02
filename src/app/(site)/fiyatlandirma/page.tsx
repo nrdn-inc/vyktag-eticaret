@@ -4,6 +4,7 @@ import { getActiveProductsCached, getActiveSubscriptionPlansCached } from "@/lib
 import { formatPriceTRY } from "@/lib/format";
 import { FAQ } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
+import { PageHero } from "@/components/PageHero";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { NfcCard } from "@/components/visuals/NfcCard";
 import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
@@ -11,6 +12,7 @@ import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
 export const metadata: Metadata = {
   title: "Fiyatlandırma",
   description: "VYKTag kart fiyatları ve abonelik planları. Tek seferlik alım (süresiz kullanım) veya 6 aylık/yıllık abonelik.",
+  alternates: { canonical: "/fiyatlandirma" },
 };
 
 /** Abonelik periyodunu Türkçe kısa eke çevirir. */
@@ -31,21 +33,11 @@ export default async function PricingPage() {
 
   return (
     <div>
-      {/* Başlık */}
-      <section className="border-b border-border-soft bg-gradient-to-b from-brand/10 to-transparent">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-            Fiyatlandırma
-          </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Tek seferlik yatırım, ömür boyu kullanım
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-zinc-600 dark:text-zinc-400">
-            Fiziksel kartı bir kez satın alın, süresiz kullanım hakkına sahip olun. Dilerseniz
-            kartı almadan, belirli bir süre için abonelikle de kullanabilirsiniz.
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Fiyatlandırma"
+        title="Tek seferlik yatırım, ömür boyu kullanım"
+        description="Fiziksel kartı bir kez satın alın, süresiz kullanım hakkına sahip olun. Dilerseniz kartı almadan, belirli bir süre için abonelikle de kullanabilirsiniz."
+      />
 
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         {/* Fiziksel ürünler */}

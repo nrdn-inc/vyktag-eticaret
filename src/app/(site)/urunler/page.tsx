@@ -5,6 +5,9 @@ import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/orders/stock";
 import { PRODUCT_BADGES, VALUE_PROPS } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
+import { PageHero } from "@/components/PageHero";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/seo/structured-data";
 import { Icon } from "@/components/visuals/Icon";
 import { NfcCard } from "@/components/visuals/NfcCard";
 import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
@@ -14,6 +17,7 @@ import { ProductPhoto } from "@/components/visuals/ProductPhoto";
 export const metadata: Metadata = {
   title: "Ürünler",
   description: "VYKTag NFC kartları, etiketleri ve telefon kartları. Renk ve tasarım seçenekleriyle.",
+  alternates: { canonical: "/urunler" },
 };
 
 export default async function ProductsPage() {
@@ -21,21 +25,18 @@ export default async function ProductsPage() {
 
   return (
     <div>
-      {/* Başlık */}
-      <section className="border-b border-border-soft bg-gradient-to-b from-brand/10 to-transparent">
-        <div className="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-            Ürünler
-          </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Size uygun kartı seçin
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-zinc-600 dark:text-zinc-400">
-            NFC ve QR teknolojisiyle çalışan dijital kartvizit ürünlerimiz. Tümü dkartvizit.com
-            profilinize bağlanır ve ömür boyu güncel kalır.
-          </p>
-        </div>
-      </section>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Ana sayfa", path: "/" },
+          { name: "Ürünler", path: "/urunler" },
+        ])}
+      />
+
+      <PageHero
+        eyebrow="Ürünler"
+        title="Size uygun kartı seçin"
+        description="NFC ve QR teknolojisiyle çalışan dijital kartvizit ürünlerimiz. Tümü dkartvizit.com profilinize bağlanır ve ömür boyu güncel kalır."
+      />
 
       {/* Ürün listesi */}
       <div className="mx-auto max-w-6xl space-y-10 px-4 py-16 sm:px-6">

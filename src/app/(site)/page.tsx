@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getActiveProductsCached } from "@/lib/catalog";
+import { siteConfig } from "@/lib/site";
 import {
   AUDIENCES,
   CARD_FEATURES,
@@ -12,29 +14,18 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { ComparisonTable } from "@/components/ComparisonTable";
 import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/SectionHeading";
+import { JsonLd } from "@/components/JsonLd";
+import { faqJsonLd } from "@/lib/seo/structured-data";
 import { Icon } from "@/components/visuals/Icon";
 import { ProfilePagePhoto } from "@/components/visuals/ProfilePagePhoto";
 
-/** Bölüm başlıklarında tekrar eden üst etiket + başlık + açıklama düzeni. */
-function SectionHeading({
-  eyebrow,
-  title,
-  text,
-  centered = true,
-}: {
-  eyebrow: string;
-  title: string;
-  text?: string;
-  centered?: boolean;
-}) {
-  return (
-    <div className={centered ? "mx-auto max-w-2xl text-center" : "max-w-2xl"}>
-      <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">{eyebrow}</span>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
-      {text && <p className="mt-4 text-zinc-600 dark:text-zinc-400">{text}</p>}
-    </div>
-  );
-}
+export const metadata: Metadata = {
+  // Kök layout'taki `template` yalnızca `title` verildiğinde uygulanır; ana sayfa markanın
+  // kendi adıyla (şablonsuz) görünmeli, bu yüzden `default` devrede bırakılır.
+  description: siteConfig.description,
+  alternates: { canonical: "/" },
+};
 
 export default async function Home() {
   const products = await getActiveProductsCached();
@@ -225,6 +216,12 @@ export default async function Home() {
 
       {/* SSS özeti */}
       <section className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-24">
+        {/*
+          Google, FAQ zengin sonucunu yalnızca işaretlenen soruların sayfada GÖRÜNÜR olması
+          durumunda gösterir — bu yüzden burada tüm SSS değil, aşağıda render edilen ilk 4
+          soru işaretlenir (tamamı /sss sayfasında işaretlidir).
+        */}
+        <JsonLd data={faqJsonLd(FAQ.slice(0, 4))} />
         <Reveal>
           <SectionHeading eyebrow="SSS" title="Merak edilenler" />
         </Reveal>

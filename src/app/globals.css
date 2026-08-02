@@ -46,6 +46,29 @@ body {
 }
 
 /*
+ * Klavye odağı görünürlüğü (WCAG 2.4.7).
+ *
+ * Sitedeki buton/bağlantı stilleri elle yazıldığından hiçbirinde `focus-visible` halkası
+ * yoktu: Tab ile gezen bir kullanıcı nerede olduğunu göremiyordu. Bunu her etkileşimli
+ * eleman için tek yerden veriyoruz — `:focus` değil `:focus-visible` kullanıldığı için
+ * fareyle tıklamada halka çıkmaz, yalnızca klavye/okuyucu gezinmesinde görünür.
+ * Bileşen kendi odak stilini tanımlıyorsa (ör. ui/Button) kendi kuralı bunu ezer.
+ */
+:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  /*
+   * Marka rengi burada `var(--brand)` yerine doğrudan yazılır: Chrome, `outline-color`
+   * içindeki var() referansını çözemeyip renge `currentColor` uyguluyor (halka o zaman
+   * bağlantının kendi rengini alıp marka vurgusunu kaybediyor). --brand açık ve koyu
+   * temada aynı değerde olduğundan bu sabitleme tema desteğinden ödün vermiyor;
+   * globals.css'teki --brand değiştirilirse burası da güncellenmeli.
+   */
+  outline-color: #06b6d4;
+  outline-offset: 2px;
+}
+
+/*
  * Tarayıcı otomatik doldurma (ör. Chrome/Google Şifre Yöneticisi), doldurduğu input'lara
  * kendi beyaz/sarı arka planını `-webkit-autofill` ile dayatır ve normal `background`
  * kuralımızı geçersiz kılar — karanlık temada input aniden beyaza döner. `box-shadow`

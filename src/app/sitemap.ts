@@ -9,6 +9,8 @@ const STATIC_PATHS = [
   "/fiyatlandirma",
   "/sss",
   "/hakkimizda",
+  "/toplu-siparis",
+  "/iletisim",
   "/kvkk",
   "/mesafeli-satis-sozlesmesi",
   "/gizlilik-politikasi",
