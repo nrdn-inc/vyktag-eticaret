@@ -9,6 +9,7 @@ export { Select, type SelectProps, type SelectOption } from "./Select";
 export { Checkbox, type CheckboxProps } from "./Checkbox";
 export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup";
 export { Switch, type SwitchProps } from "./Switch";
+export { PillToggleGroup, type PillToggleGroupProps, type PillOption } from "./PillToggleGroup";
 
 export { Modal, type ModalProps } from "./Modal";
 export { Tabs, TabList, Tab, TabPanel, type TabsProps, type TabListProps, type TabProps, type TabPanelProps } from "./Tabs";

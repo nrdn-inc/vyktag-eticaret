@@ -24,6 +24,15 @@ export const buttonVariants = cva(
         secondary: "bg-accent text-white hover:bg-accent-dark",
         outline:
           "border border-brand text-brand hover:bg-brand hover:text-white",
+        /**
+         * Sayfalarda "outline"dan ayrı, tekrar eden bir ikincil CTA kalıbı vardı: nötr
+         * kenarlık, dolgu değil yalnızca metin/kenarlık rengi marka rengine döner (ör. hero
+         * bandındaki "Fiyatları gör", "İncele" gibi birincil CTA'nın yanındaki ikinci seçenek).
+         * `outline` bunu karşılamaz çünkü hover'da dolduruyor — bu yüzden kopyala-yapıştır
+         * yerine üçüncü bir varyant olarak eklendi.
+         */
+        muted:
+          "border border-zinc-300 text-zinc-900 hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-zinc-100",
         ghost: "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800",
         destructive: "bg-red-600 text-white hover:bg-red-700",
         link: "rounded-none px-0 py-0 text-brand underline-offset-4 hover:underline",

@@ -16,6 +16,8 @@ import { ComparisonTable } from "@/components/ComparisonTable";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { JsonLd } from "@/components/JsonLd";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { faqJsonLd } from "@/lib/seo/structured-data";
 import { Icon } from "@/components/visuals/Icon";
 import { ProfilePagePhoto } from "@/components/visuals/ProfilePagePhoto";
@@ -89,10 +91,7 @@ export default async function Home() {
                 text="Kart, etiket veya telefon kartı — hepsi aynı dijital profile bağlanır."
                 centered={false}
               />
-              <Link
-                href="/urunler"
-                className="text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
-              >
+              <Link href="/urunler" className={cn(buttonVariants({ variant: "link" }), "text-sm")}>
                 Tümünü gör →
               </Link>
             </div>
@@ -250,7 +249,7 @@ export default async function Home() {
         </div>
 
         <div className="mt-8 text-center">
-          <Link href="/sss" className="text-sm font-semibold text-brand hover:text-brand-dark">
+          <Link href="/sss" className={cn(buttonVariants({ variant: "link" }), "text-sm")}>
             Tüm soruları gör →
           </Link>
         </div>
@@ -276,15 +275,28 @@ export default async function Home() {
               Tek seferlik yatırım, ömür boyu kullanım.
             </p>
             <div className="relative mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+              {/*
+                Bu ikisi marka rengindeki gradyan zemin üzerinde ("ters" renk) — kitin
+                primary/outline/muted varyantları hep açık zemin varsayar, burada yalnızca
+                Button'ın şekil/boşluk/geçiş mekaniği kullanılıp renkler className ile ezilir.
+              */}
               <Link
                 href="/urunler"
-                className="rounded-full bg-white px-8 py-3.5 text-base font-semibold text-brand-dark transition-transform hover:-translate-y-0.5"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "bg-white text-brand-dark shadow-none hover:-translate-y-0.5 hover:bg-white",
+                )}
               >
                 Hemen başla
               </Link>
               <Link
                 href="/fiyatlandirma"
-                className="rounded-full border border-white/40 px-8 py-3.5 text-base font-semibold text-white transition-colors hover:bg-white/10"
+                className={cn(
+                  buttonVariants({ variant: "muted", size: "lg" }),
+                  // `muted`, açık/koyu tema için ayrı `dark:text-zinc-100` taşır; bu buton ise
+                  // temadan bağımsız hep marka rengi zemin üzerinde olduğundan ikisini de ezmek gerekir.
+                  "border-white/40 text-white hover:border-white/40 hover:bg-white/10 hover:text-white dark:text-white dark:hover:text-white",
+                )}
               >
                 Planları incele
               </Link>

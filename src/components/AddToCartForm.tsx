@@ -9,6 +9,7 @@ import { isVariantPurchasable } from "@/lib/orders/stock";
 import { parseVariantAttributes } from "@/lib/catalog/product-variant-attributes";
 import { useCart } from "@/components/CartProvider";
 import { CardOptionSelector } from "@/components/CardOptionSelector";
+import { Alert, Button, Input, PillToggleGroup } from "@/components/ui";
 
 // Bu eşiğin altındaki stokta müşteriye "son X adet" uyarısı gösterilir.
 const LOW_STOCK_THRESHOLD = 10;
@@ -125,38 +126,22 @@ export function AddToCartForm({
       {product.durationOptions.length > 0 && (
         <div>
           <label className="text-sm font-semibold">Kullanım süresi</label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                onDurationPlanChange(null);
+          <div className="mt-2">
+            <PillToggleGroup
+              aria-label="Kullanım süresi"
+              value={durationPlanId ?? "unlimited"}
+              onChange={(value) => {
+                onDurationPlanChange(value === "unlimited" ? null : value);
                 resetSelectionState();
               }}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                !selectedDurationPlan
-                  ? "border-brand bg-brand text-white"
-                  : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-              }`}
-            >
-              Sınırsız (fiziksel kart)
-            </button>
-            {product.durationOptions.map((plan) => (
-              <button
-                key={plan.subscriptionPlanId}
-                type="button"
-                onClick={() => {
-                  onDurationPlanChange(plan.subscriptionPlanId);
-                  resetSelectionState();
-                }}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                  selectedDurationPlan?.subscriptionPlanId === plan.subscriptionPlanId
-                    ? "border-brand bg-brand text-white"
-                    : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-                }`}
-              >
-                {durationLabel(plan.interval)} · {formatPriceTRY(plan.priceKurus)}
-              </button>
-            ))}
+              options={[
+                { value: "unlimited", label: "Sınırsız (fiziksel kart)" },
+                ...product.durationOptions.map((plan) => ({
+                  value: plan.subscriptionPlanId,
+                  label: `${durationLabel(plan.interval)} · ${formatPriceTRY(plan.priceKurus)}`,
+                })),
+              ]}
+            />
           </div>
           {selectedDurationPlan && (
             <p className="mt-2 text-xs text-zinc-500">
@@ -183,30 +168,24 @@ export function AddToCartForm({
         product.variants.length > 1 && (
           <div>
             <label className="text-sm font-semibold">Seçenek</label>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {product.variants.map((variant) => {
-                const variantOutOfStock = !isVariantPurchasable(variant.stock);
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    disabled={variantOutOfStock}
-                    onClick={() => {
-                      onVariantChange(variant.id);
-                      setQuantity(1);
-                      setAdded(false);
-                    }}
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                      variant.id === variantId
-                        ? "border-brand bg-brand text-white"
-                        : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-                    }`}
-                  >
-                    {variant.name} · {formatPriceTRY(variant.priceKurus)}
-                    {variantOutOfStock && " · Tükendi"}
-                  </button>
-                );
-              })}
+            <div className="mt-2">
+              <PillToggleGroup
+                aria-label="Seçenek"
+                value={variantId}
+                onChange={(id) => {
+                  onVariantChange(id);
+                  setQuantity(1);
+                  setAdded(false);
+                }}
+                options={product.variants.map((variant) => {
+                  const variantOutOfStock = !isVariantPurchasable(variant.stock);
+                  return {
+                    value: variant.id,
+                    disabled: variantOutOfStock,
+                    label: `${variant.name} · ${formatPriceTRY(variant.priceKurus)}${variantOutOfStock ? " · Tükendi" : ""}`,
+                  };
+                })}
+              />
             </div>
           </div>
         )
@@ -224,46 +203,46 @@ export function AddToCartForm({
         )}
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
-            <input
+            <Input
               type="text"
               placeholder="Ad Soyad"
+              aria-label="Ad Soyad"
               value={fullName}
               onChange={(e) => onFullNameChange(e.target.value.slice(0, FULL_NAME_MAX_LENGTH))}
               maxLength={FULL_NAME_MAX_LENGTH}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
             />
             <p className="mt-1 text-right text-[11px] text-zinc-400">
               {fullName.length}/{FULL_NAME_MAX_LENGTH}
             </p>
           </div>
           <div>
-            <input
+            <Input
               type="text"
               placeholder="Unvan"
+              aria-label="Unvan"
               value={title}
               onChange={(e) => onTitleChange(e.target.value.slice(0, TITLE_MAX_LENGTH))}
               maxLength={TITLE_MAX_LENGTH}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
             />
             <p className="mt-1 text-right text-[11px] text-zinc-400">
               {title.length}/{TITLE_MAX_LENGTH}
             </p>
           </div>
-          <input
+          <Input
             type="tel"
             placeholder="Telefon"
+            aria-label="Telefon"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
-          <input
+          <Input
             type="text"
             placeholder="Not (ör. tasarım tercihi)"
+            aria-label="Not"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             maxLength={PERSONALIZATION_FIELD_MAX_LENGTH}
-            className="rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900"
           />
         </div>
       </div>
@@ -307,23 +286,20 @@ export function AddToCartForm({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={!inStock}
-          className="rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
-        >
+        <Button onClick={handleAdd} disabled={!inStock} size="lg">
           {inStock ? `Sepete ekle · ${formatPriceTRY(unitPriceKurus * quantity)}` : "Tükendi"}
-        </button>
+        </Button>
       </div>
 
       {added && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-brand/10 px-4 py-3 text-sm">
-          <span className="font-medium text-brand-dark">Ürün sepete eklendi.</span>
-          <Link href="/sepet" className="font-semibold text-brand underline">
-            Sepete git
-          </Link>
-        </div>
+        <Alert variant="success">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-medium">Ürün sepete eklendi.</span>
+            <Link href="/sepet" className="font-semibold underline">
+              Sepete git
+            </Link>
+          </div>
+        </Alert>
       )}
     </div>
   );

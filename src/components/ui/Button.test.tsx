@@ -66,4 +66,12 @@ describe("Button", () => {
     render(<Button className="mt-4">Kaydet</Button>);
     expect(screen.getByRole("button")).toHaveClass("mt-4");
   });
+
+  it("variant=muted nötr kenarlık kullanır ve hover'da dolgu değil marka rengine döner", () => {
+    render(<Button variant="muted">Vazgeç</Button>);
+    const button = screen.getByRole("button", { name: "Vazgeç" });
+    expect(button).toHaveClass("border-zinc-300");
+    expect(button).toHaveClass("hover:border-brand");
+    expect(button).not.toHaveClass("hover:bg-brand");
+  });
 });

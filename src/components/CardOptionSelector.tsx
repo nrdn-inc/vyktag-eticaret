@@ -3,6 +3,7 @@ import { formatPriceTRY } from "@/lib/format";
 import { isVariantPurchasable } from "@/lib/orders/stock";
 import { parseVariantAttributes, type CardColor, type PrintColor } from "@/lib/catalog/product-variant-attributes";
 import { LogoUploadInput } from "@/components/LogoUploadInput";
+import { Checkbox, PillToggleGroup } from "@/components/ui";
 
 type Variant = ProductWithVariants["variants"][number];
 
@@ -81,60 +82,43 @@ export function CardOptionSelector({
     <div className="space-y-5">
       <div>
         <label className="text-sm font-semibold">Kart rengi</label>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {availableCardColors.map((cardColor) => (
-            <button
-              key={cardColor}
-              type="button"
-              onClick={() => selectCardColor(cardColor)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-                cardColor === selected.attrs.cardColor
-                  ? "border-brand bg-brand text-white"
-                  : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-              }`}
-            >
-              {cardColor}
-            </button>
-          ))}
+        <div className="mt-2">
+          <PillToggleGroup
+            aria-label="Kart rengi"
+            value={selected.attrs.cardColor}
+            onChange={(value) => selectCardColor(value as CardColor)}
+            options={availableCardColors.map((cardColor) => ({ value: cardColor, label: cardColor }))}
+          />
         </div>
       </div>
 
       <div>
         <label className="text-sm font-semibold">Baskı rengi</label>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {printColorsForSelectedCard.map((printColor) => {
-            const match = findVariant(selected.attrs.cardColor, printColor, selected.attrs.customDesign) ?? findVariant(selected.attrs.cardColor, printColor, false);
-            const outOfStock = match ? !isVariantPurchasable(match.variant.stock) : false;
-            return (
-              <button
-                key={printColor}
-                type="button"
-                disabled={outOfStock}
-                onClick={() => selectPrintColor(printColor)}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                  printColor === selected.attrs.printColor
-                    ? "border-brand bg-brand text-white"
-                    : "border-zinc-300 hover:border-brand dark:border-zinc-700"
-                }`}
-              >
-                {printColor} Baskı
-                {outOfStock && " · Tükendi"}
-              </button>
-            );
-          })}
+        <div className="mt-2">
+          <PillToggleGroup
+            aria-label="Baskı rengi"
+            value={selected.attrs.printColor}
+            onChange={(value) => selectPrintColor(value as PrintColor)}
+            options={printColorsForSelectedCard.map((printColor) => {
+              const match = findVariant(selected.attrs.cardColor, printColor, selected.attrs.customDesign) ?? findVariant(selected.attrs.cardColor, printColor, false);
+              const outOfStock = match ? !isVariantPurchasable(match.variant.stock) : false;
+              return {
+                value: printColor,
+                disabled: outOfStock,
+                label: `${printColor} Baskı${outOfStock ? " · Tükendi" : ""}`,
+              };
+            })}
+          />
         </div>
       </div>
 
       {baseVariant && customVariant && (
         <div>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={selected.attrs.customDesign}
-              onChange={(e) => toggleCustomDesign(e.target.checked)}
-            />
-            Özel tasarım/logo ekleyin (+{formatPriceTRY(customDesignSurcharge)})
-          </label>
+          <Checkbox
+            label={`Özel tasarım/logo ekleyin (+${formatPriceTRY(customDesignSurcharge)})`}
+            checked={selected.attrs.customDesign}
+            onChange={(e) => toggleCustomDesign(e.target.checked)}
+          />
 
           {selected.attrs.customDesign && (
             <div className="mt-4">

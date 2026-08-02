@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { LOGO_DATA_URL_PATTERN, MAX_LOGO_DATA_URL_LENGTH } from "@/lib/logo-upload";
+import { Button } from "@/components/ui";
 
 const MAX_SOURCE_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_DIMENSION = 400;
@@ -95,22 +96,17 @@ export function LogoUploadInput({ value, onChange }: LogoUploadInputProps) {
             className="h-12 w-12 rounded-md border border-zinc-300 object-contain dark:border-zinc-700"
           />
         )}
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={busy}
-          className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700"
-        >
+        <Button variant="muted" size="sm" onClick={() => inputRef.current?.click()} disabled={busy}>
           {busy ? "İşleniyor…" : value ? "Logoyu değiştir" : "Logo yükle"}
-        </button>
+        </Button>
         {value && !busy && (
-          <button
-            type="button"
+          <Button
+            variant="link"
+            className="text-red-600 hover:text-red-700 hover:no-underline"
             onClick={() => onChange(undefined)}
-            className="text-sm font-medium text-red-600 hover:text-red-700"
           >
             Kaldır
-          </button>
+          </Button>
         )}
       </div>
       <input

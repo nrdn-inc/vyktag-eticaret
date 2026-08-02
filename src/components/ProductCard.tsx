@@ -7,6 +7,8 @@ import { NfcCard } from "@/components/visuals/NfcCard";
 import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
 import { CARD_VARIANT_PHOTOS, PRODUCTS_WITH_REAL_PHOTOS } from "@/lib/catalog/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
+import { Badge, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 /** Katalog/anasayfa listelerinde tek bir ürünü özet olarak gösteren kart. */
 export function ProductCard({ product }: { product: ProductWithVariants }) {
@@ -25,9 +27,9 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
       {/* Görsel alan */}
       <div className="relative overflow-hidden bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
         {badge && (
-          <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm">
+          <Badge variant="accent" size="sm" className="absolute left-4 top-4 z-10 uppercase tracking-wide shadow-sm">
             {badge}
-          </span>
+          </Badge>
         )}
         {allOutOfStock && (
           <span className="absolute right-4 top-4 z-10 rounded-full bg-zinc-900/80 px-3 py-1 text-[11px] font-semibold text-white">
@@ -75,7 +77,13 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
             )}
             <span className="text-xl font-bold">{formatPriceTRY(product.minPriceKurus)}</span>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors group-hover:bg-brand-dark">
+          {/*
+            Gerçek gezinme, kartın tamamını kaplayan görünmez Link'te (yukarıda) — bu span
+            yalnızca o eylemi görsel olarak temsil eder, bu yüzden gerçek bir <button>/<Link>
+            değil. Buton görünümü buttonVariants'tan alınır; grup hover'ı (kartın herhangi bir
+            yerine gelince rengin değişmesi) korunmak için ayrıca eklenir.
+          */}
+          <span className={cn(buttonVariants({ size: "sm" }), "gap-1.5 group-hover:bg-brand-dark")}>
             İncele
             <svg
               viewBox="0 0 24 24"

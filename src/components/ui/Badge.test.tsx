@@ -13,4 +13,9 @@ describe("Badge", () => {
     render(<Badge className="ml-2">Yeni</Badge>);
     expect(screen.getByText("Yeni")).toHaveClass("ml-2");
   });
+
+  it("variant=accent dolu vurgu rengi kullanır (ürün görseli üzerindeki pazarlama rozetleri için)", () => {
+    render(<Badge variant="accent">En çok satan</Badge>);
+    expect(screen.getByText("En çok satan")).toHaveClass("bg-accent", "text-white");
+  });
 });

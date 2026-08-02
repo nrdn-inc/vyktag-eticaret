@@ -72,7 +72,7 @@ Kararlar:
 
 | Prop          | Tip                                                                          | Varsayılan  | Açıklama                                          |
 | ------------- | ----------------------------------------------------------------------------- | ----------- | -------------------------------------------------- |
-| `variant`     | `primary \| secondary \| outline \| ghost \| destructive \| link`             | `primary`   |                                                      |
+| `variant`     | `primary \| secondary \| outline \| muted \| ghost \| destructive \| link`    | `primary`   | `muted`: nötr kenarlık, hover'da yalnızca marka rengine döner (dolgu yok) — `outline` doldurur |
 | `size`        | `sm \| md \| lg \| icon`                                                      | `md`        | `icon`: kare, yalnızca ikon içeren butonlar için    |
 | `loading`     | `boolean`                                                                      | `false`     | Butonu kilitler, spinner gösterir, `aria-busy` ekler |
 | `loadingText` | `ReactNode`                                                                    | —           | `loading` iken children yerine gösterilir (opsiyonel) |
@@ -170,6 +170,27 @@ ayar (ör. "iki adımlı doğrulamayı aç").
 **Dikkat (indeterminate):** `Checkbox` üç durumlu (ör. bir tablodaki "tümünü seç" satırı) bir
 prop **almaz** — bu, bileşeni bir Effect eklemeye (dolayısıyla `"use client"`e) zorlardı. Bunun
 yerine `ref` üzerinden doğrudan atayın: `checkboxRef.current.indeterminate = true`.
+
+### PillToggleGroup
+
+```tsx
+<PillToggleGroup
+  aria-label="Kullanım süresi"
+  options={[
+    { value: "unlimited", label: "Sınırsız (fiziksel kart)" },
+    { value: "6ay", label: "6 Ay · ₺149,99" },
+    { value: "1yil", label: "1 Yıl · ₺199,99", disabled: false },
+  ]}
+  value={durationPlanId}
+  onChange={setDurationPlanId}
+/>
+```
+
+Dolu-pil (segmented) tek seçimli seçici — "N seçenekten birini seç" (süre, kart rengi,
+baskı rengi, önizleme modu). `RadioGroup`'un native radio dairesi + etiket görünümüyle
+**karıştırılmamalı**: ikisi de tek seçim yapar ama `RadioGroup` form alanı gibi görünmesi
+gereken yerler için, `PillToggleGroup` bir CTA grubu gibi görünmesi gereken yerler için.
+`size`: `sm | md` (varsayılan `md`).
 
 ### Tabs
 

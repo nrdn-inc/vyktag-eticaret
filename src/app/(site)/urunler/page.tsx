@@ -8,6 +8,8 @@ import { Reveal } from "@/components/Reveal";
 import { PageHero } from "@/components/PageHero";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd } from "@/lib/seo/structured-data";
+import { Badge, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { Icon } from "@/components/visuals/Icon";
 import { NfcCard } from "@/components/visuals/NfcCard";
 import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
@@ -50,9 +52,9 @@ export default async function ProductsPage() {
                 {/* Görsel */}
                 <div className="relative flex items-center justify-center bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-8">
                   {badge && (
-                    <span className="absolute left-4 top-4 z-10 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                    <Badge variant="accent" size="sm" className="absolute left-4 top-4 z-10 uppercase tracking-wide">
                       {badge}
-                    </span>
+                    </Badge>
                   )}
                   <div className="tilt-card w-full max-w-[15rem]">
                     {PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) ? (
@@ -74,11 +76,7 @@ export default async function ProductsPage() {
                 <div className="flex flex-col p-6 sm:py-8 sm:pr-8">
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="text-2xl font-semibold">{product.name}</h2>
-                    {allOutOfStock && (
-                      <span className="rounded-full bg-zinc-200 px-2.5 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                        Tükendi
-                      </span>
-                    )}
+                    {allOutOfStock && <Badge size="sm">Tükendi</Badge>}
                   </div>
                   <p className="mt-3 leading-relaxed text-zinc-600 dark:text-zinc-400">
                     {product.description}
@@ -112,7 +110,10 @@ export default async function ProductsPage() {
                   <div className="mt-auto flex flex-wrap items-center gap-4 pt-8">
                     <Link
                       href={`/urunler/${product.slug}`}
-                      className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/20 transition-all hover:-translate-y-0.5 hover:bg-brand-dark"
+                      className={cn(
+                        buttonVariants(),
+                        "shadow-lg shadow-brand/20 hover:-translate-y-0.5",
+                      )}
                     >
                       İncele ve sepete ekle
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-3.5 w-3.5">

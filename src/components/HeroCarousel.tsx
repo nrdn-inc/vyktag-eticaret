@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HERO_SLIDES } from "@/lib/marketing";
 import { CARD_VARIANT_PHOTOS } from "@/lib/catalog/product-photos";
 import { ProductPhoto } from "@/components/visuals/ProductPhoto";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 const AUTOPLAY_MS = 6000;
 
@@ -80,14 +82,14 @@ export function HeroCarousel() {
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/urunler"
-              className="rounded-full bg-brand px-8 py-3.5 text-center text-base font-semibold text-white shadow-lg shadow-brand/25 transition-all hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-xl"
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "shadow-lg shadow-brand/25 hover:-translate-y-0.5 hover:shadow-xl",
+              )}
             >
               Kartınızı oluşturun
             </Link>
-            <Link
-              href="/fiyatlandirma"
-              className="rounded-full border border-zinc-300 px-8 py-3.5 text-center text-base font-semibold transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
-            >
+            <Link href="/fiyatlandirma" className={buttonVariants({ variant: "muted", size: "lg" })}>
               Fiyatları gör
             </Link>
           </div>
