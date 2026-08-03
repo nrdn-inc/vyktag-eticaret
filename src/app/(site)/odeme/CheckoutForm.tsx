@@ -8,9 +8,7 @@ import { lineKey } from "@/lib/orders/cart";
 import { formatPriceTRY } from "@/lib/format";
 import { IyzicoCheckoutForm } from "@/components/IyzicoCheckoutForm";
 import { startCheckout, type CheckoutResult } from "./actions";
-
-const inputClass =
-  "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
+import { Alert, Badge, Button, Checkbox, EmptyState, Input, buttonVariants } from "@/components/ui";
 
 export interface SavedAddress {
   id: string;
@@ -127,17 +125,16 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
 
   if (items.length === 0 && !(result?.ok ?? false)) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-6">
-        <h1 className="text-3xl font-bold tracking-tight">Sepetiniz boş</h1>
-        <p className="mt-3 text-zinc-600 dark:text-zinc-400">
-          Ödeme adımına geçmek için önce sepetinize ürün ekleyin.
-        </p>
-        <Link
-          href="/urunler"
-          className="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          Ürünleri keşfet
-        </Link>
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+        <EmptyState
+          title="Sepetiniz boş"
+          description="Ödeme adımına geçmek için önce sepetinize ürün ekleyin."
+          action={
+            <Link href="/urunler" className={buttonVariants({ size: "lg" })}>
+              Ürünleri keşfet
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -161,25 +158,21 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
 
       <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {result && !result.ok && (
-            <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-              {result.error}
-            </div>
-          )}
+          {result && !result.ok && <Alert variant="danger">{result.error}</Alert>}
 
           <section>
             <h2 className="mb-3 text-lg font-semibold">İletişim bilgileri</h2>
             <div className="grid gap-3 sm:grid-cols-2">
-              <input required maxLength={60} placeholder="Ad" value={firstName} onChange={(e) => setFirstName(e.target.value)} className={inputClass} />
-              <input required maxLength={60} placeholder="Soyad" value={lastName} onChange={(e) => setLastName(e.target.value)} className={inputClass} />
-              <input required maxLength={190} type="email" placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-              <input required maxLength={20} type="tel" placeholder="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} className={inputClass} />
-              <input
+              <Input required maxLength={60} placeholder="Ad" aria-label="Ad" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              <Input required maxLength={60} placeholder="Soyad" aria-label="Soyad" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              <Input required maxLength={190} type="email" placeholder="E-posta" aria-label="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input required maxLength={20} type="tel" placeholder="Telefon" aria-label="Telefon" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <Input
                 required
                 placeholder="TC Kimlik No"
+                aria-label="TC Kimlik No"
                 value={identityNumber}
                 onChange={(e) => setIdentityNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                className={inputClass}
                 inputMode="numeric"
                 maxLength={11}
               />
@@ -211,9 +204,9 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
                       <span className="font-medium">
                         {address.fullName}
                         {address.isDefault && (
-                          <span className="ml-2 rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                          <Badge variant="brand" size="sm" className="ml-2">
                             Varsayılan
-                          </span>
+                          </Badge>
                         )}
                       </span>
                       <span className="block text-zinc-600 dark:text-zinc-400">
@@ -243,16 +236,31 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
             )}
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <input required maxLength={190} placeholder="Adres" value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-              <input maxLength={190} placeholder="Adres (devamı, isteğe bağlı)" value={addressLine2} onChange={(e) => setAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-              <input required maxLength={100} placeholder="İl" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
-              <input required maxLength={100} placeholder="İlçe" value={district} onChange={(e) => setDistrict(e.target.value)} className={inputClass} />
-              <input
+              <Input
+                required
+                maxLength={190}
+                placeholder="Adres"
+                aria-label="Adres"
+                value={addressLine1}
+                onChange={(e) => setAddressLine1(e.target.value)}
+                containerClassName="sm:col-span-2"
+              />
+              <Input
+                maxLength={190}
+                placeholder="Adres (devamı, isteğe bağlı)"
+                aria-label="Adres (devamı, isteğe bağlı)"
+                value={addressLine2}
+                onChange={(e) => setAddressLine2(e.target.value)}
+                containerClassName="sm:col-span-2"
+              />
+              <Input required maxLength={100} placeholder="İl" aria-label="İl" value={city} onChange={(e) => setCity(e.target.value)} />
+              <Input required maxLength={100} placeholder="İlçe" aria-label="İlçe" value={district} onChange={(e) => setDistrict(e.target.value)} />
+              <Input
                 required
                 placeholder="Posta Kodu"
+                aria-label="Posta Kodu"
                 value={postalCode}
                 onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
-                className={inputClass}
                 inputMode="numeric"
                 maxLength={5}
               />
@@ -260,27 +268,46 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
           </section>
 
           <section>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input
-                type="checkbox"
-                checked={billingSameAsShipping}
-                onChange={(e) => setBillingSameAsShipping(e.target.checked)}
-              />
-              Fatura adresi teslimat adresiyle aynı
-            </label>
+            <Checkbox
+              label="Fatura adresi teslimat adresiyle aynı"
+              checked={billingSameAsShipping}
+              onChange={(e) => setBillingSameAsShipping(e.target.checked)}
+            />
 
             {!billingSameAsShipping && (
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <input required maxLength={190} placeholder="Fatura adresi" value={billingAddressLine1} onChange={(e) => setBillingAddressLine1(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-                <input maxLength={190} placeholder="Adres (devamı, isteğe bağlı)" value={billingAddressLine2} onChange={(e) => setBillingAddressLine2(e.target.value)} className={`${inputClass} sm:col-span-2`} />
-                <input required maxLength={100} placeholder="İl" value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className={inputClass} />
-                <input required maxLength={100} placeholder="İlçe" value={billingDistrict} onChange={(e) => setBillingDistrict(e.target.value)} className={inputClass} />
-                <input
+                <Input
+                  required
+                  maxLength={190}
+                  placeholder="Fatura adresi"
+                  aria-label="Fatura adresi"
+                  value={billingAddressLine1}
+                  onChange={(e) => setBillingAddressLine1(e.target.value)}
+                  containerClassName="sm:col-span-2"
+                />
+                <Input
+                  maxLength={190}
+                  placeholder="Adres (devamı, isteğe bağlı)"
+                  aria-label="Fatura adresi (devamı, isteğe bağlı)"
+                  value={billingAddressLine2}
+                  onChange={(e) => setBillingAddressLine2(e.target.value)}
+                  containerClassName="sm:col-span-2"
+                />
+                <Input required maxLength={100} placeholder="İl" aria-label="Fatura ili" value={billingCity} onChange={(e) => setBillingCity(e.target.value)} />
+                <Input
+                  required
+                  maxLength={100}
+                  placeholder="İlçe"
+                  aria-label="Fatura ilçesi"
+                  value={billingDistrict}
+                  onChange={(e) => setBillingDistrict(e.target.value)}
+                />
+                <Input
                   required
                   placeholder="Posta Kodu"
+                  aria-label="Fatura posta kodu"
                   value={billingPostalCode}
                   onChange={(e) => setBillingPostalCode(e.target.value.replace(/\D/g, "").slice(0, 5))}
-                  className={inputClass}
                   inputMode="numeric"
                   maxLength={5}
                 />
@@ -289,38 +316,39 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
           </section>
 
           <section>
-            <label className="flex items-start gap-2 text-sm">
-              <input
-                required
-                type="checkbox"
-                checked={contractAccepted}
-                onChange={(e) => setContractAccepted(e.target.checked)}
-                className="mt-0.5"
-              />
-              <span>
-                <Link
-                  href="/mesafeli-satis-sozlesmesi"
-                  target="_blank"
-                  className="font-medium text-brand hover:text-brand-dark"
-                >
-                  Mesafeli Satış Sözleşmesi
-                </Link>
-                &apos;ni ve{" "}
-                <Link href="/kvkk" target="_blank" className="font-medium text-brand hover:text-brand-dark">
-                  KVKK Aydınlatma Metni
-                </Link>
-                &apos;ni okudum, onaylıyorum.
-              </span>
-            </label>
+            <Checkbox
+              required
+              checked={contractAccepted}
+              onChange={(e) => setContractAccepted(e.target.checked)}
+              label={
+                <>
+                  <Link
+                    href="/mesafeli-satis-sozlesmesi"
+                    target="_blank"
+                    className="font-medium text-brand hover:text-brand-dark"
+                  >
+                    Mesafeli Satış Sözleşmesi
+                  </Link>
+                  &apos;ni ve{" "}
+                  <Link href="/kvkk" target="_blank" className="font-medium text-brand hover:text-brand-dark">
+                    KVKK Aydınlatma Metni
+                  </Link>
+                  &apos;ni okudum, onaylıyorum.
+                </>
+              }
+            />
           </section>
 
-          <button
+          <Button
             type="submit"
-            disabled={isPending || !contractAccepted}
-            className="w-full rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!contractAccepted}
+            loading={isPending}
+            loadingText="İşleniyor…"
+            fullWidth
+            size="lg"
           >
-            {isPending ? "İşleniyor…" : `Siparişi Onayla ve Öde · ${formatPriceTRY(totalKurus)}`}
-          </button>
+            Siparişi Onayla ve Öde · {formatPriceTRY(totalKurus)}
+          </Button>
           <Image
             src="/iyzico-ile-ode.svg"
             alt="iyzico ile Öde"
@@ -331,7 +359,7 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
         </form>
 
         {/* Sipariş özeti */}
-        <aside className="h-fit rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+        <aside className="h-fit rounded-2xl border border-border-soft bg-surface-muted p-6">
           <h2 className="mb-4 text-lg font-semibold">Sipariş özeti</h2>
           <ul className="space-y-3">
             {items.map((item) => (
@@ -343,7 +371,7 @@ export default function CheckoutForm({ savedAddresses, defaultContact }: Checkou
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex justify-between border-t border-zinc-200 pt-4 text-base font-semibold dark:border-zinc-800">
+          <div className="mt-4 flex justify-between border-t border-border-soft pt-4 text-base font-semibold">
             <span>Toplam</span>
             <span>{formatPriceTRY(totalKurus)}</span>
           </div>

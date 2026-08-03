@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getCrossSellSubscriptionPlan } from "@/app/actions/bundle-upsell";
 import { useCart } from "@/components/CartProvider";
 import { formatPriceTRY } from "@/lib/format";
+import { Badge, Button } from "@/components/ui";
 
 type BundlePlan = NonNullable<Awaited<ReturnType<typeof getCrossSellSubscriptionPlan>>>;
 
@@ -91,7 +92,9 @@ export function BundleUpsell() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded bg-brand/20 px-2 py-0.5 text-xs font-bold uppercase tracking-wider text-brand-dark">Fırsat</span>
+              <Badge variant="brand" size="sm" className="uppercase tracking-wider">
+                Fırsat
+              </Badge>
               <h3 className="font-bold text-zinc-900 dark:text-zinc-100">{bundlePlan.triggerProductName} Paketini Taçlandır</h3>
             </div>
             <p className="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -103,12 +106,12 @@ export function BundleUpsell() {
             </p>
           </div>
         </div>
-        <button
+        <Button
           onClick={handleAdd}
-          className="whitespace-nowrap rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-brand/30 transition-all hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-brand/40"
+          className="whitespace-nowrap rounded-xl py-3 shadow-lg shadow-brand/30 hover:-translate-y-0.5 hover:shadow-brand/40"
         >
           Sepete Ekle
-        </button>
+        </Button>
       </div>
     </div>
   );

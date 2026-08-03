@@ -6,6 +6,8 @@ import { formatPriceTRY } from "@/lib/format";
 import { useCart } from "@/components/CartProvider";
 import { CheckoutOrderBump } from "@/components/CheckoutOrderBump";
 import { BundleUpsell } from "@/components/BundleUpsell";
+import { Button, EmptyState, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export default function CartPage() {
   const { items, totalKurus, ready, updateQuantity, removeItem } = useCart();
@@ -21,17 +23,16 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-24 text-center sm:px-6">
-        <h1 className="text-3xl font-bold tracking-tight">Sepetiniz boş</h1>
-        <p className="mt-3 text-zinc-600 dark:text-zinc-400">
-          Dijital kartvizitinizi seçmek için ürünlerimize göz atın.
-        </p>
-        <Link
-          href="/urunler"
-          className="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          Ürünleri keşfet
-        </Link>
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
+        <EmptyState
+          title="Sepetiniz boş"
+          description="Dijital kartvizitinizi seçmek için ürünlerimize göz atın."
+          action={
+            <Link href="/urunler" className={buttonVariants({ size: "lg" })}>
+              Ürünleri keşfet
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -79,13 +80,14 @@ export default function CartPage() {
                 {personalizationText && (
                   <p className="mt-2 text-xs text-zinc-500">{personalizationText}</p>
                 )}
-                <button
+                <Button
                   type="button"
+                  variant="link"
+                  className="mt-2 text-xs text-red-600 hover:text-red-600"
                   onClick={() => removeItem(key)}
-                  className="mt-2 text-xs font-medium text-red-600 hover:underline"
                 >
                   Kaldır
-                </button>
+                </Button>
               </div>
 
               <div className="flex items-center justify-between gap-4 sm:justify-end">
@@ -121,16 +123,13 @@ export default function CartPage() {
       <BundleUpsell />
 
       {/* Toplam + ödeme */}
-      <div className="mt-8 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-8 rounded-2xl border border-border-soft bg-surface-muted p-6">
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold">Toplam</span>
           <span className="text-2xl font-bold">{formatPriceTRY(totalKurus)}</span>
         </div>
         <p className="mt-2 text-xs text-zinc-500">Kargo ve vergiler ödeme adımında hesaplanır.</p>
-        <Link
-          href="/odeme"
-          className="mt-6 block w-full rounded-full bg-brand px-8 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
+        <Link href="/odeme" className={cn(buttonVariants({ size: "lg" }), "mt-6 block w-full text-center")}>
           Ödemeye geç
         </Link>
       </div>

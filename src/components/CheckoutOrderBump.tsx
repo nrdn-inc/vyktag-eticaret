@@ -5,6 +5,7 @@ import { getCrossSellProduct } from "@/app/actions/cross-sell";
 import { useCart } from "@/components/CartProvider";
 import { formatPriceTRY } from "@/lib/format";
 import type { CartItem } from "@/lib/orders/cart";
+import { Button } from "@/components/ui";
 
 /**
  * Checkout Order Bump bileşeni: Kullanıcının sepete eklemiş olduğu ana ürünün yanına
@@ -59,12 +60,14 @@ export function CheckoutOrderBump() {
             </p>
           </div>
         </div>
-        <button
+        {/* Bilinçli olarak marka rengi değil, yüksek kontrastlı ters renk (order bump'ın
+            geri kalan CTA'lardan görsel olarak ayrışması amaçlanıyor). */}
+        <Button
           onClick={handleAdd}
-          className="whitespace-nowrap rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+          className="whitespace-nowrap bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           Sepete Ekle
-        </button>
+        </Button>
       </div>
     </div>
   );
