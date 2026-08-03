@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { logoutAdmin } from "@/app/admin/giris/actions";
+import { Button } from "@/components/ui";
 
 const initialState = { redirectUrl: "" };
 
@@ -16,13 +17,15 @@ export function AdminLogoutForm() {
 
   return (
     <form action={action}>
-      <button
+      <Button
         type="submit"
-        disabled={pending}
-        className="font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 disabled:opacity-50"
+        variant="link"
+        loading={pending}
+        loadingText="Çıkış yapılıyor..."
+        className="text-zinc-600 hover:text-zinc-900 hover:no-underline dark:text-zinc-400 dark:hover:text-zinc-100"
       >
-        {pending ? "Çıkış yapılıyor..." : "Çıkış yap"}
-      </button>
+        Çıkış yap
+      </Button>
     </form>
   );
 }

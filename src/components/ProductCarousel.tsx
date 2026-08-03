@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { ProductCard } from "@/components/ProductCard";
+import { Button } from "@/components/ui";
 
 /** scrollLeft karşılaştırmalarında alt piksel farklarını yok saymak için tolerans. */
 const SCROLL_EPSILON = 8;
@@ -59,15 +60,15 @@ export function ProductCarousel({ products }: { products: ProductWithVariants[] 
     track.scrollBy({ left: step * direction, behavior: "smooth" });
   };
 
-  const arrowClass =
-    "flex h-11 w-11 items-center justify-center rounded-full border border-border-soft bg-surface text-zinc-600 transition-all hover:border-brand hover:text-brand disabled:cursor-not-allowed disabled:opacity-35 dark:text-zinc-300";
+  const arrowClass = "h-11 w-11 border-border-soft bg-surface text-zinc-600 disabled:opacity-35 dark:text-zinc-300";
 
   return (
     <div className="relative">
       {overflows && (
         <div className="mb-6 flex justify-end gap-2">
-          <button
-            type="button"
+          <Button
+            variant="muted"
+            size="icon"
             onClick={() => scrollByCard(-1)}
             disabled={atStart}
             aria-label="Önceki ürünler"
@@ -76,9 +77,10 @@ export function ProductCarousel({ products }: { products: ProductWithVariants[] 
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
               <path d="M15 18l-6-6 6-6" />
             </svg>
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="muted"
+            size="icon"
             onClick={() => scrollByCard(1)}
             disabled={atEnd}
             aria-label="Sonraki ürünler"
@@ -87,7 +89,7 @@ export function ProductCarousel({ products }: { products: ProductWithVariants[] 
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-4 w-4">
               <path d="M9 6l6 6-6 6" />
             </svg>
-          </button>
+          </Button>
         </div>
       )}
 
