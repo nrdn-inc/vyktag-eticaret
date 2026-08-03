@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { TwoFactorMethod, UserRole } from "@/generated/prisma/client";
 import {
   ADMIN_SESSION_COOKIE,
+  CUSTOMER_ID_COOKIE,
   CUSTOMER_SESSION_COOKIE,
   createAdminSessionToken,
   createCustomerSessionToken,
@@ -49,6 +50,15 @@ async function establishSessionAndRedirect(user: { id: string; role: UserRole })
   const customerToken = createCustomerSessionToken(user.id);
   cookieStore.set(CUSTOMER_SESSION_COOKIE, customerToken, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+  // httpOnly değil: sepetin (CartProvider) tarayıcıda doğru kullanıcıya scope edilmesi için
+  // istemci JS tarafından okunabilmesi gerekiyor. Kimlik doğrulama için kullanılamaz.
+  cookieStore.set(CUSTOMER_ID_COOKIE, user.id, {
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
@@ -227,6 +237,7 @@ export async function verifyTotpLogin(
 export async function logoutCustomer(): Promise<{ redirectUrl: string }> {
   const cookieStore = await cookies();
   cookieStore.delete(CUSTOMER_SESSION_COOKIE);
+  cookieStore.delete(CUSTOMER_ID_COOKIE);
   // Admin hesapları için hesabım girişinde admin çerezi de kurulduğundan (bkz.
   // establishSessionAndRedirect), tek çıkış işleminin her iki oturumu da kapatması gerekir.
   cookieStore.delete(ADMIN_SESSION_COOKIE);

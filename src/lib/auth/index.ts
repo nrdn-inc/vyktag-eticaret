@@ -28,6 +28,14 @@ export async function verifyPassword(password: string, stored: string): Promise<
 
 export const ADMIN_SESSION_COOKIE = "vyktag_admin_session";
 export const CUSTOMER_SESSION_COOKIE = "vyktag_musteri_oturum";
+/**
+ * Oturum çerezinin (httpOnly) yanında kurulan, istemci JS'in okuyabildiği hafif bir çerez —
+ * yalnızca kullanıcının opak id'sini taşır (kimlik doğrulama için kullanılamaz, tek başına
+ * hassas değildir). Amacı: sepetin (bkz. components/CartProvider.tsx) tarayıcıda hangi
+ * kullanıcıya ait olduğunu bilmesi — aksi halde sepet tarayıcıya bağlı kalır, hesaba değil,
+ * ve çıkış/farklı hesapla giriş yapıldığında önceki kullanıcının sepeti sızabilir.
+ */
+export const CUSTOMER_ID_COOKIE = "vyktag_musteri_kimlik";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 gün
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 saat
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000; // 1 saat

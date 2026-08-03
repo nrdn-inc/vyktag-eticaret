@@ -10,13 +10,35 @@ import {
   updateQuantity as updateQuantityFn,
 } from "@/lib/orders/cart";
 
-const STORAGE_KEY = "vyktag-sepet";
+const STORAGE_KEY_PREFIX = "vyktag-sepet";
+// Giriş/çıkış (bkz. hesap/giris/actions.ts) her zaman tam sayfa yenilemesi (window.location.href)
+// tetiklediğinden bu modül her kimlik değişikliğinde sıfırdan yüklenir — kimliği yalnızca ilk
+// hydration'da okumak yeterlidir, akış içinde reaktif olarak izlemeye gerek yok.
+const CUSTOMER_ID_COOKIE = "vyktag_musteri_kimlik";
+
+/** Giriş yapılmışsa hesap id'sini, değilse null döner (bkz. lib/auth CUSTOMER_ID_COOKIE). */
+function readCustomerId(): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${CUSTOMER_ID_COOKIE}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+/**
+ * Sepet, hesaba göre ayrı bir localStorage anahtarında tutulur — aksi halde tarayıcıdaki tek
+ * ortak sepet hesaplar arasında sızardı: çıkış yapınca önceki kullanıcının sepeti görünmeye
+ * devam eder, farklı bir hesapla giriş yapılınca da o hesaba ait değilmiş sepet miras kalırdı.
+ * Misafir (giriş yapılmamış) durumda ayrı, sabit bir anahtar kullanılır.
+ */
+function storageKey(): string {
+  const customerId = readCustomerId();
+  return customerId ? `${STORAGE_KEY_PREFIX}:${customerId}` : `${STORAGE_KEY_PREFIX}:misafir`;
+}
 
 // Sepet, modül düzeyinde bir harici store'da tutulur ve useSyncExternalStore ile
 // bileşenlere bağlanır. Bu API sunucu/istemci anlık görüntülerini ayrı tuttuğu için
 // hydration uyumsuzluğu oluşmadan localStorage ile eşitlenir.
 let items: CartItem[] = [];
 let hydrated = false;
+let activeStorageKey = "";
 const listeners = new Set<() => void>();
 // Referansı değişmeyen boş sepet — sunucu anlık görüntüsü için (sonsuz döngüyü önler).
 const SERVER_SNAPSHOT: CartItem[] = [];
@@ -29,19 +51,32 @@ function emit() {
 
 function persist() {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    window.localStorage.setItem(activeStorageKey, JSON.stringify(items));
   } catch {
     // Depoya yazılamıyorsa sessizce geç.
   }
 }
 
-/** İlk istemci erişiminde sepeti localStorage'dan bir kez yükler. */
+/** İlk istemci erişiminde, o an giriş yapılmış hesaba ait sepeti localStorage'dan bir kez yükler. */
 function ensureHydrated() {
   if (hydrated || typeof window === "undefined") {
     return;
   }
+  activeStorageKey = storageKey();
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    let stored = window.localStorage.getItem(activeStorageKey);
+    // Geriye dönük uyum: bu değişiklikten önce sepet, hesaptan bağımsız tek bir anahtarda
+    // (`vyktag-sepet`) tutuluyordu. Misafir kullanıcının o eski sepeti kaybolmasın diye bir
+    // kereliğine yeni misafir anahtarına taşınır. Bir hesaba taşınmaz — bu tam da düzeltilen
+    // sızıntı (eski anonim sepetin hesaba miras kalması) olurdu.
+    if (stored === null && activeStorageKey === `${STORAGE_KEY_PREFIX}:misafir`) {
+      const legacy = window.localStorage.getItem(STORAGE_KEY_PREFIX);
+      if (legacy !== null) {
+        stored = legacy;
+        window.localStorage.setItem(activeStorageKey, legacy);
+        window.localStorage.removeItem(STORAGE_KEY_PREFIX);
+      }
+    }
     items = stored ? (JSON.parse(stored) as CartItem[]) : [];
   } catch {
     items = [];

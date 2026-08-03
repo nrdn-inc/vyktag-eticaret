@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
+  CUSTOMER_ID_COOKIE,
   CUSTOMER_SESSION_COOKIE,
   createCustomerSessionToken,
   hashPassword,
@@ -54,8 +55,16 @@ export async function completePasswordReset(
   });
 
   const sessionToken = createCustomerSessionToken(user.id);
-  (await cookies()).set(CUSTOMER_SESSION_COOKIE, sessionToken, {
+  const cookieStore = await cookies();
+  cookieStore.set(CUSTOMER_SESSION_COOKIE, sessionToken, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+  });
+  cookieStore.set(CUSTOMER_ID_COOKIE, user.id, {
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
