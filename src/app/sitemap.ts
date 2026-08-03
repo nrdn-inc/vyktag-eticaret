@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getActiveProductSlugs } from "@/lib/catalog";
+import { B2B_ENABLED } from "@/lib/site";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vyktag.com.tr";
 
@@ -8,8 +9,8 @@ const STATIC_PATHS = [
   "/urunler",
   "/fiyatlandirma",
   "/sss",
+  ...(B2B_ENABLED ? ["/toplu-siparis"] : []),
   "/hakkimizda",
-  "/toplu-siparis",
   "/iletisim",
   "/kvkk",
   "/mesafeli-satis-sozlesmesi",

@@ -78,6 +78,22 @@ function ensureHydrated() {
       }
     }
     items = stored ? (JSON.parse(stored) as CartItem[]) : [];
+
+    // Hesaba giriş yapılmışsa: misafirken sepete eklenmiş ürünler varsa (yani girişten hemen
+    // önce, hâlâ bu tarayıcıda) hesabın sepetine bir kereliğine taşınır. Misafir anahtarı hemen
+    // sonra temizlenir — aksi halde her sayfa yüklemesinde aynı ürünler tekrar tekrar eklenir.
+    const guestKey = `${STORAGE_KEY_PREFIX}:misafir`;
+    if (activeStorageKey !== guestKey) {
+      const guestStored = window.localStorage.getItem(guestKey);
+      if (guestStored) {
+        const guestItems = JSON.parse(guestStored) as CartItem[];
+        for (const guestItem of guestItems) {
+          items = addItemFn(items, guestItem);
+        }
+        window.localStorage.removeItem(guestKey);
+        window.localStorage.setItem(activeStorageKey, JSON.stringify(items));
+      }
+    }
   } catch {
     items = [];
   }

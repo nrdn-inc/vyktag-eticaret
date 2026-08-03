@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { mainNav } from "@/lib/site";
+import { visibleMainNav } from "@/lib/site";
 import { useIsMounted } from "@/lib/use-is-mounted";
 import { Button, buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -83,7 +83,7 @@ export function MobileNav() {
             </div>
 
             <ul className="mt-8 space-y-1">
-              {mainNav.map((item) => {
+              {visibleMainNav.map((item) => {
                 const isExternal = item.href.startsWith("http");
                 const linkClass =
                   "block rounded-xl px-4 py-3 text-base font-medium transition-colors hover:bg-surface-muted hover:text-brand";

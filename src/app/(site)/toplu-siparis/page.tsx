@@ -1,6 +1,8 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getActiveProductsCached } from "@/lib/catalog";
 import { BulkOrderClient } from "@/components/BulkOrderClient";
+import { B2B_ENABLED } from "@/lib/site";
 
 export const metadata: Metadata = {
   // Kök layout'taki `template` zaten " | VYKTag" ekliyor; burada tekrar yazmak başlığı
@@ -11,6 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default async function TopluSiparisPage() {
+  // Kurumsal (B2B) toplu sipariş şimdilik gizli — bkz. lib/site.ts B2B_ENABLED. Bileşen/route
+  // koddan silinmedi, yalnızca vitrinden kaldırıldı; bayrak true olunca doğrudan geri döner.
+  if (!B2B_ENABLED) {
+    notFound();
+  }
+
   const products = await getActiveProductsCached();
 
   // `bg-surface-muted`: sabit zinc-950 yerine tema token'ı — aksi halde bu sayfanın zemini

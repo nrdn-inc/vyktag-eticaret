@@ -7,6 +7,10 @@ export const siteConfig = {
     "VYKTag NFC dijital kartvizitleri ile iletişim bilgilerinizi tek dokunuşla paylaşın. Fiziksel kartlar, telefon etiketleri ve dijital profil aboneliği.",
 } as const;
 
+// Kurumsal (B2B) toplu sipariş özelliği şimdilik gizli — kod/route silinmedi, sadece
+// vitrinden (nav, sitemap) kaldırıldı. İleride açmak için bu bayrağı true yapmak yeterli.
+export const B2B_ENABLED = false;
+
 export const mainNav = [
   { label: "Ürünler", href: "/urunler" },
   { label: "Fiyatlandırma", href: "/fiyatlandirma" },
@@ -15,6 +19,9 @@ export const mainNav = [
   { label: "Hakkımızda", href: "/hakkimizda" },
   { label: "Giriş", href: "https://dkartvizit.com" },
 ] as const;
+
+/** Nav bileşenlerinin kullanması gereken, B2B_ENABLED'a göre filtrelenmiş sürüm. */
+export const visibleMainNav = mainNav.filter((item) => B2B_ENABLED || item.href !== "/toplu-siparis");
 
 /** Yasal metinlerde ve iletişim alanlarında kullanılan şirket bilgileri (vergi levhasına göre). */
 export const legalInfo = {

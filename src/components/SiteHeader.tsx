@@ -1,13 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
-import { mainNav, siteConfig } from "@/lib/site";
+import { visibleMainNav, siteConfig } from "@/lib/site";
+import { getCurrentCustomer } from "@/lib/auth/customer-session";
 import { CartLink } from "@/components/CartLink";
 import { MobileNav } from "@/components/MobileNav";
+import { LogoutForm } from "@/app/(site)/hesap/LogoutForm";
 import { buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
-/** Tüm sayfalarda ortak üst menü: duyuru şeridi, logo, gezinme ve mağaza çağrısı. */
-export function SiteHeader() {
+/**
+ * Tüm sayfalarda ortak üst menü: duyuru şeridi, logo, gezinme ve mağaza çağrısı.
+ * Oturum durumu (giriş yapılmış mı, kim) burada, her sayfada kalıcı olarak gösterilir.
+ */
+export async function SiteHeader() {
+  const customer = await getCurrentCustomer();
+
   return (
     <>
       {/* Duyuru şeridi */}
@@ -24,7 +31,7 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-7 sm:flex">
-            {mainNav.map((item) => {
+            {visibleMainNav.map((item) => {
               const navLinkClass =
                 "relative text-sm font-medium text-zinc-600 transition-colors hover:text-brand dark:text-zinc-300";
               const isExternal = item.href.startsWith("http");
@@ -47,15 +54,25 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="hidden items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 lg:flex">
-              <Link href="/hesap" className="transition-colors hover:text-brand">
-                Hesabım
-              </Link>
-              <span className="text-zinc-300 dark:text-zinc-700">·</span>
-              <Link href="/hesap/kayit" className="transition-colors hover:text-brand">
-                Kayıt Ol
-              </Link>
-            </div>
+            {customer ? (
+              <div className="hidden items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 lg:flex">
+                <Link href="/hesap" className="transition-colors hover:text-brand">
+                  {`Merhaba, ${customer.fullName || customer.email}`}
+                </Link>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                <LogoutForm />
+              </div>
+            ) : (
+              <div className="hidden items-center gap-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 lg:flex">
+                <Link href="/hesap" className="transition-colors hover:text-brand">
+                  Hesabım
+                </Link>
+                <span className="text-zinc-300 dark:text-zinc-700">·</span>
+                <Link href="/hesap/kayit" className="transition-colors hover:text-brand">
+                  Kayıt Ol
+                </Link>
+              </div>
+            )}
             <CartLink />
             <Link
               href="/urunler"
