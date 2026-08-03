@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus } from "@/generated/prisma/client";
 import { formatPriceTRY } from "@/lib/format";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = {
   title: "Sipariş Durumu",
@@ -50,10 +52,7 @@ export default async function OrderStatusPage({
             Ödemeniz alınamadı. Kartınızdan herhangi bir tutar çekilmediyse tekrar
             deneyebilirsiniz.
           </p>
-          <Link
-            href="/sepet"
-            className="mt-6 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-          >
+          <Link href="/sepet" className={cn(buttonVariants({ size: "lg" }), "mt-6 inline-block")}>
             Sepete dön
           </Link>
         </>
@@ -68,7 +67,7 @@ export default async function OrderStatusPage({
         </>
       )}
 
-      <div className="mt-10 rounded-2xl border border-zinc-200 bg-zinc-50 p-6 text-left dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mt-10 rounded-2xl border border-border-soft bg-surface-muted p-6 text-left">
         <div className="mb-4 flex justify-between text-sm text-zinc-500">
           <span>Sipariş No</span>
           <span className="font-medium text-zinc-900 dark:text-zinc-100">{order.orderNumber}</span>
@@ -86,7 +85,7 @@ export default async function OrderStatusPage({
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex justify-between border-t border-zinc-200 pt-4 text-base font-semibold dark:border-zinc-800">
+        <div className="mt-4 flex justify-between border-t border-border-soft pt-4 text-base font-semibold">
           <span>Toplam</span>
           <span>{formatPriceTRY(order.totalKurus)}</span>
         </div>

@@ -3,9 +3,7 @@
 import { useState, useTransition } from "react";
 import { IyzicoCheckoutForm } from "@/components/IyzicoCheckoutForm";
 import { startSubscriptionCheckout, type SubscribeResult } from "./actions";
-
-const inputClass =
-  "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
+import { Alert, Button, Input } from "@/components/ui";
 
 export function SubscribeForm({ slug, defaultGsmNumber }: { slug: string; defaultGsmNumber: string }) {
   const [identityNumber, setIdentityNumber] = useState("");
@@ -44,63 +42,56 @@ export function SubscribeForm({ slug, defaultGsmNumber }: { slug: string; defaul
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {result && !result.ok && (
-        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {result.error}
-        </div>
-      )}
+      {result && !result.ok && <Alert variant="danger">{result.error}</Alert>}
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">Fatura bilgileri</h2>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input
+          <Input
             required
             placeholder="TC Kimlik No"
+            aria-label="TC Kimlik No"
             value={identityNumber}
             onChange={(e) => setIdentityNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
-            className={inputClass}
             inputMode="numeric"
           />
-          <input
+          <Input
             required
             type="tel"
             placeholder="Telefon"
+            aria-label="Telefon"
             value={gsmNumber}
             onChange={(e) => setGsmNumber(e.target.value)}
-            className={inputClass}
           />
-          <input
+          <Input
             required
             placeholder="Adres"
+            aria-label="Adres"
             value={addressLine1}
             onChange={(e) => setAddressLine1(e.target.value)}
-            className={`${inputClass} sm:col-span-2`}
+            containerClassName="sm:col-span-2"
           />
-          <input required placeholder="İl" value={city} onChange={(e) => setCity(e.target.value)} className={inputClass} />
-          <input
+          <Input required placeholder="İl" aria-label="İl" value={city} onChange={(e) => setCity(e.target.value)} />
+          <Input
             required
             placeholder="İlçe"
+            aria-label="İlçe"
             value={district}
             onChange={(e) => setDistrict(e.target.value)}
-            className={inputClass}
           />
-          <input
+          <Input
             required
             placeholder="Posta Kodu"
+            aria-label="Posta Kodu"
             value={postalCode}
             onChange={(e) => setPostalCode(e.target.value)}
-            className={inputClass}
           />
         </div>
       </section>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="w-full rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isPending ? "İşleniyor…" : "Aboneliği Başlat ve Öde"}
-      </button>
+      <Button type="submit" loading={isPending} loadingText="İşleniyor…" fullWidth size="lg">
+        Aboneliği Başlat ve Öde
+      </Button>
     </form>
   );
 }
