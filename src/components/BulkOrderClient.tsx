@@ -55,10 +55,17 @@ export function BulkOrderClient({ products }: { products: ProductWithVariants[] 
                 label="Ürün Tipi"
                 value={selectedProduct?.id || ""}
                 onChange={handleProductChange}
-                options={products.map((p) => ({
-                  value: p.id,
-                  label: `${p.name} (${formatPriceTRY(p.minPriceKurus)}'den başlayan fiyatlarla)`,
-                }))}
+                options={products.map((p) => {
+                  // `p.minPriceKurus` abonelik (süreli kullanım hakkı) planlarını da kapsar,
+                  // ama bu akışta yalnızca fiziksel kart varyantları seçilebiliyor (aşağıdaki
+                  // "Model / Renk" listesi) — abonelik fiyatını göstermek burada gerçekte
+                  // seçilemeyecek bir tutarı vaat ederdi.
+                  const minVariantPriceKurus = Math.min(...p.variants.map((v) => v.priceKurus));
+                  return {
+                    value: p.id,
+                    label: `${p.name} (${formatPriceTRY(minVariantPriceKurus)}'den başlayan fiyatlarla)`,
+                  };
+                })}
               />
 
               {selectedProduct && selectedProduct.variants.length > 0 && (
