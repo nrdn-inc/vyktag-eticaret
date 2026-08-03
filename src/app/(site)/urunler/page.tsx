@@ -57,18 +57,19 @@ export default async function ProductsPage() {
                     </Badge>
                   )}
                   <div className="tilt-card w-full max-w-[15rem]">
-                    {PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) ? (
-                      <ProductPhoto
-                        src={CARD_VARIANT_PHOTOS[resolveCardVariant(product.variants[0]?.name)]}
-                        alt={`${product.name} — gerçek ürün fotoğrafı`}
-                      />
-                    ) : (
-                      <NfcCard
-                        variant={resolveCardVariant(product.variants[0]?.name)}
-                        fullName="Ad Soyad"
-                        title="Unvan"
-                      />
-                    )}
+                    {(() => {
+                      // Admin panelinden yüklenen gerçek fotoğraf öncelikli; yoksa statik stüdyo
+                      // fotoğrafına (geriye dönük uyumluluk), o da yoksa çizilmiş canlı önizlemeye düşülür.
+                      const previewVariant = resolveCardVariant(product.variants[0]?.name);
+                      const photo =
+                        product.variants[0]?.images[0] ??
+                        (PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) ? CARD_VARIANT_PHOTOS[previewVariant] : null);
+                      return photo ? (
+                        <ProductPhoto src={photo} alt={`${product.name} — gerçek ürün fotoğrafı`} />
+                      ) : (
+                        <NfcCard variant={previewVariant} fullName="Ad Soyad" title="Unvan" />
+                      );
+                    })()}
                   </div>
                 </div>
 

@@ -4,6 +4,7 @@ import {
   SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
   SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU,
 } from "@/lib/catalog/catalog-seed";
+import { sanitizeProductImages } from "@/lib/product-image-upload";
 
 /**
  * Kök layout `dynamic = "force-dynamic"` taşıdığından (CDN'in bozuk/eski RSC yanıtı sunmasını
@@ -41,6 +42,8 @@ export interface ProductWithVariants {
     priceKurus: number;
     stock: number;
     attributes: unknown;
+    /** Admin panelinden yüklenen gerçek ürün fotoğrafları (ilk eleman birincil). Boşsa çizilmiş canlı önizleme kullanılır. */
+    images: string[];
   }[];
   /**
    * Fiziksel kart almadan, süreli kullanım hakkı sunan alternatif seçenekler (bkz.
@@ -103,6 +106,11 @@ function computeMinPriceKurus(variantPrices: number[], durationOptions: ProductD
   return Math.min(...prices);
 }
 
+/** DB'den gelen ham `images` (Json | null) alanını, biçimi doğrulanmış bir diziye normalize eder. */
+function normalizeVariant<T extends { images: unknown }>(variant: T): Omit<T, "images"> & { images: string[] } {
+  return { ...variant, images: sanitizeProductImages(variant.images) };
+}
+
 /** Vitrin/katalog sayfaları için aktif ürünleri, varyantlarıyla birlikte en düşük fiyata göre sıralı döner. */
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
   const [products, durationOptions, subscriptionFirstCardAddon] = await Promise.all([
@@ -119,7 +127,7 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
         variants: {
           where: { isActive: true },
           orderBy: { priceKurus: "asc" },
-          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true, images: true },
         },
       },
       orderBy: { createdAt: "asc" },
@@ -136,7 +144,7 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
       name: product.name,
       description: product.description,
       minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
-      variants: product.variants,
+      variants: product.variants.map(normalizeVariant),
       durationOptions,
       subscriptionFirstCardAddon,
     }));
@@ -170,7 +178,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
         variants: {
           where: { isActive: true },
           orderBy: { priceKurus: "asc" },
-          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true },
+          select: { id: true, name: true, sku: true, priceKurus: true, stock: true, attributes: true, images: true },
         },
       },
     }),
@@ -188,7 +196,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
     name: product.name,
     description: product.description,
     minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
-    variants: product.variants,
+    variants: product.variants.map(normalizeVariant),
     durationOptions,
     subscriptionFirstCardAddon,
   };

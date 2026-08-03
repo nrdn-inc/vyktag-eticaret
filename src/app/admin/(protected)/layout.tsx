@@ -21,6 +21,12 @@ export default async function AdminLayout({
               <Link href="/admin/siparisler" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
                 Siparişler
               </Link>
+              <Link href="/admin/urunler" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+                Ürünler
+              </Link>
+              <Link href="/admin/abonelikler" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
+                Abonelikler
+              </Link>
               <Link href="/admin/stok" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
                 Stok
               </Link>

@@ -11,7 +11,7 @@ const singleVariant: ProductWithVariants = {
   description: "Kompakt NFC etiket.",
   minPriceKurus: 39990,
   variants: [
-    { id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10, attributes: null },
+    { id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10, attributes: null, images: [] },
   ],
   durationOptions: [],
   subscriptionFirstCardAddon: null,
@@ -24,8 +24,8 @@ const multiVariant: ProductWithVariants = {
   description: "NFC kart.",
   minPriceKurus: 59990,
   variants: [
-    { id: "v2", name: "Siyah", sku: "VYK-KART-SIYAH", priceKurus: 59990, stock: 10, attributes: null },
-    { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5, attributes: null },
+    { id: "v2", name: "Siyah", sku: "VYK-KART-SIYAH", priceKurus: 59990, stock: 10, attributes: null, images: [] },
+    { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5, attributes: null, images: [] },
   ],
   durationOptions: [],
   subscriptionFirstCardAddon: null,
@@ -37,7 +37,7 @@ const outOfStock: ProductWithVariants = {
   slug: "vyktag-phonecard",
   name: "VYKTag Phonecard",
   variants: [
-    { id: "v4", name: "Standart", sku: "VYK-PHONE-STD", priceKurus: 44990, stock: 0, attributes: null },
+    { id: "v4", name: "Standart", sku: "VYK-PHONE-STD", priceKurus: 44990, stock: 0, attributes: null, images: [] },
   ],
 };
 

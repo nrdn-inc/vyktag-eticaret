@@ -12,6 +12,8 @@ interface CardPreviewProps {
   productName: string;
   variantName: string;
   variantAttributes: unknown;
+  /** Admin panelinden yüklenen varyant fotoğrafları (ilk eleman birincil). Boşsa statik stüdyo fotoğrafına, o da yoksa çizilmiş canlı önizlemeye düşülür. */
+  variantImages?: string[];
   fullName: string;
   title: string;
   logoDataUrl?: string;
@@ -28,6 +30,7 @@ export function CardPreview({
   productName,
   variantName,
   variantAttributes,
+  variantImages,
   fullName,
   title,
   logoDataUrl,
@@ -36,7 +39,9 @@ export function CardPreview({
 
   const attributes = parseVariantAttributes(variantAttributes);
   const { cardVariant, accent } = resolveVariantVisual({ name: variantName, attributes: variantAttributes });
-  const photo = getCardPhoto(attributes);
+  // Admin panelinden yüklenen gerçek fotoğraf öncelikli; yoksa statik stüdyo fotoğrafına
+  // (geriye dönük uyumluluk — henüz admin'den görsel yüklenmemiş varyantlar için) düşülür.
+  const photo = variantImages?.[0] ?? getCardPhoto(attributes);
 
   const hasPersonalization = Boolean(fullName.trim() || title.trim() || logoDataUrl);
   // Fotoğrafı olmayan bir kombinasyonda tek seçenek çizilmiş önizlemedir.
@@ -46,16 +51,26 @@ export function CardPreview({
     <div>
       <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl border border-border-soft bg-gradient-to-br from-brand/10 via-accent/5 to-transparent p-6 sm:p-8">
         {mode === "photo" && photo ? (
-          <Image
-            key={photo}
-            src={photo}
-            alt={attributes ? describeCardPhoto(attributes) : `${productName} — ${variantName}`}
-            fill
-            priority
-            sizes="(min-width: 1024px) 32rem, 90vw"
-            // Stüdyo fotoğraflarının kendi boşluğu zaten geniş; ek dolgu kartı gereksiz küçültür.
-            className="animate-fade-up object-contain"
-          />
+          photo.startsWith("data:") ? (
+            // eslint-disable-next-line @next/next/no-img-element -- admin'de yüklenen data URL, next/image optimizasyonuna uygun değil.
+            <img
+              key={photo}
+              src={photo}
+              alt={attributes ? describeCardPhoto(attributes) : `${productName} — ${variantName}`}
+              className="animate-fade-up absolute inset-0 h-full w-full object-contain"
+            />
+          ) : (
+            <Image
+              key={photo}
+              src={photo}
+              alt={attributes ? describeCardPhoto(attributes) : `${productName} — ${variantName}`}
+              fill
+              priority
+              sizes="(min-width: 1024px) 32rem, 90vw"
+              // Stüdyo fotoğraflarının kendi boşluğu zaten geniş; ek dolgu kartı gereksiz küçültür.
+              className="animate-fade-up object-contain"
+            />
+          )
         ) : (
           <>
             {/* NFC dalgaları */}

@@ -16,7 +16,9 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
   const allOutOfStock = product.variants.every((v) => !isVariantPurchasable(v.stock));
   const badge = PRODUCT_BADGES[product.slug];
   const previewVariant = resolveCardVariant(product.variants[0]?.name);
-  const hasRealPhoto = PRODUCTS_WITH_REAL_PHOTOS.has(product.slug);
+  // Admin panelinden yüklenen gerçek fotoğraf öncelikli; yoksa statik stüdyo fotoğrafına
+  // (geriye dönük uyumluluk), o da yoksa çizilmiş canlı önizlemeye düşülür.
+  const photo = product.variants[0]?.images[0] ?? (PRODUCTS_WITH_REAL_PHOTOS.has(product.slug) ? CARD_VARIANT_PHOTOS[previewVariant] : null);
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border-soft bg-surface transition-all duration-300 hover:-translate-y-1 hover:border-brand/40 hover:shadow-2xl hover:shadow-brand/10">
@@ -38,8 +40,8 @@ export function ProductCard({ product }: { product: ProductWithVariants }) {
         )}
 
         <div className="tilt-card mx-auto max-w-[15rem]">
-          {hasRealPhoto ? (
-            <ProductPhoto src={CARD_VARIANT_PHOTOS[previewVariant]} alt={`${product.name} — gerçek ürün fotoğrafı`} />
+          {photo ? (
+            <ProductPhoto src={photo} alt={`${product.name} — gerçek ürün fotoğrafı`} />
           ) : (
             <NfcCard variant={previewVariant} fullName="Ad Soyad" title="Unvan" />
           )}

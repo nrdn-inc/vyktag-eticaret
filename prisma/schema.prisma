@@ -180,6 +180,10 @@ model ProductVariant {
   // customDesign: true }) — VYKTag Kart'ta kart rengi + baskı rengi seçicisini besler.
   // Bu alana sahip olmayan (null) ürünlerde eski düz "Seçenek" listesi kullanılır.
   attributes Json?
+  // Varyantın gerçek ürün fotoğrafları (data URL dizisi, ilk eleman birincil/vitrin
+  // görseli) — admin panelinden yüklenir. Boşsa (null/[]) çizilmiş canlı önizleme
+  // (bkz. components/visuals/NfcCard.tsx) gösterilmeye devam eder.
+  images     Json?
 
   orderItems OrderItem[]
 

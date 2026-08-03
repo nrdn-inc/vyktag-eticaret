@@ -6,14 +6,14 @@ import type { ProductWithVariants } from "@/lib/catalog";
 
 // VYKTag Kart'ın gerçek 8 varyantlık seed yapısının küçültülmüş bir kopyası.
 const VARIANTS: ProductWithVariants["variants"] = [
-  { id: "siyah-gumus", name: "Siyah · Gümüş Baskı", sku: "A", priceKurus: 59990, stock: 10, attributes: { cardColor: "Siyah", printColor: "Gümüş", customDesign: false } },
-  { id: "siyah-gumus-ozel", name: "Siyah · Gümüş Baskı · Özel Tasarım", sku: "B", priceKurus: 79990, stock: 5, attributes: { cardColor: "Siyah", printColor: "Gümüş", customDesign: true } },
-  { id: "siyah-altin", name: "Siyah · Altın Baskı", sku: "C", priceKurus: 59990, stock: 10, attributes: { cardColor: "Siyah", printColor: "Altın", customDesign: false } },
-  { id: "siyah-altin-ozel", name: "Siyah · Altın Baskı · Özel Tasarım", sku: "D", priceKurus: 79990, stock: 5, attributes: { cardColor: "Siyah", printColor: "Altın", customDesign: true } },
-  { id: "beyaz-siyah", name: "Beyaz · Siyah Baskı", sku: "E", priceKurus: 59990, stock: 10, attributes: { cardColor: "Beyaz", printColor: "Siyah", customDesign: false } },
-  { id: "beyaz-siyah-ozel", name: "Beyaz · Siyah Baskı · Özel Tasarım", sku: "F", priceKurus: 79990, stock: 5, attributes: { cardColor: "Beyaz", printColor: "Siyah", customDesign: true } },
-  { id: "beyaz-altin", name: "Beyaz · Altın Baskı", sku: "G", priceKurus: 59990, stock: 10, attributes: { cardColor: "Beyaz", printColor: "Altın", customDesign: false } },
-  { id: "beyaz-altin-ozel", name: "Beyaz · Altın Baskı · Özel Tasarım", sku: "H", priceKurus: 79990, stock: 5, attributes: { cardColor: "Beyaz", printColor: "Altın", customDesign: true } },
+  { id: "siyah-gumus", name: "Siyah · Gümüş Baskı", sku: "A", priceKurus: 59990, stock: 10, attributes: { cardColor: "Siyah", printColor: "Gümüş", customDesign: false }, images: [] },
+  { id: "siyah-gumus-ozel", name: "Siyah · Gümüş Baskı · Özel Tasarım", sku: "B", priceKurus: 79990, stock: 5, attributes: { cardColor: "Siyah", printColor: "Gümüş", customDesign: true }, images: [] },
+  { id: "siyah-altin", name: "Siyah · Altın Baskı", sku: "C", priceKurus: 59990, stock: 10, attributes: { cardColor: "Siyah", printColor: "Altın", customDesign: false }, images: [] },
+  { id: "siyah-altin-ozel", name: "Siyah · Altın Baskı · Özel Tasarım", sku: "D", priceKurus: 79990, stock: 5, attributes: { cardColor: "Siyah", printColor: "Altın", customDesign: true }, images: [] },
+  { id: "beyaz-siyah", name: "Beyaz · Siyah Baskı", sku: "E", priceKurus: 59990, stock: 10, attributes: { cardColor: "Beyaz", printColor: "Siyah", customDesign: false }, images: [] },
+  { id: "beyaz-siyah-ozel", name: "Beyaz · Siyah Baskı · Özel Tasarım", sku: "F", priceKurus: 79990, stock: 5, attributes: { cardColor: "Beyaz", printColor: "Siyah", customDesign: true }, images: [] },
+  { id: "beyaz-altin", name: "Beyaz · Altın Baskı", sku: "G", priceKurus: 59990, stock: 10, attributes: { cardColor: "Beyaz", printColor: "Altın", customDesign: false }, images: [] },
+  { id: "beyaz-altin-ozel", name: "Beyaz · Altın Baskı · Özel Tasarım", sku: "H", priceKurus: 79990, stock: 5, attributes: { cardColor: "Beyaz", printColor: "Altın", customDesign: true }, images: [] },
 ];
 
 describe("CardOptionSelector", () => {

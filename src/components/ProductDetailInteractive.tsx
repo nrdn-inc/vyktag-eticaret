@@ -35,6 +35,7 @@ export function ProductDetailInteractive({ product, initialVariantId }: ProductD
           productName={product.name}
           variantName={selectedVariant.name}
           variantAttributes={selectedVariant.attributes}
+          variantImages={selectedVariant.images}
           fullName={fullName}
           title={title}
           logoDataUrl={logoDataUrl}
