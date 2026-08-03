@@ -2,11 +2,9 @@
 
 import { useActionState } from "react";
 import { addAddress, type AddressFormState } from "./actions";
+import { Alert, Button, Checkbox, Input } from "@/components/ui";
 
 const initialState: AddressFormState = {};
-
-const inputClass =
-  "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
 
 export function AddAddressForm() {
   const [state, action, pending] = useActionState(addAddress, initialState);
@@ -15,29 +13,33 @@ export function AddAddressForm() {
     <form action={action} className="space-y-3 rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
       <h3 className="text-sm font-semibold">Yeni adres ekle</h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        <input required name="fullName" placeholder="Ad Soyad" className={inputClass} />
-        <input required name="phone" type="tel" placeholder="Telefon" className={inputClass} />
-        <input required name="addressLine1" placeholder="Adres" className={`${inputClass} sm:col-span-2`} />
-        <input name="addressLine2" placeholder="Adres (devamı, isteğe bağlı)" className={`${inputClass} sm:col-span-2`} />
-        <input required name="city" placeholder="İl" className={inputClass} />
-        <input required name="district" placeholder="İlçe" className={inputClass} />
-        <input required name="postalCode" placeholder="Posta Kodu" className={inputClass} />
+        <Input required name="fullName" placeholder="Ad Soyad" aria-label="Ad Soyad" />
+        <Input required name="phone" type="tel" placeholder="Telefon" aria-label="Telefon" />
+        <Input
+          required
+          name="addressLine1"
+          placeholder="Adres"
+          aria-label="Adres"
+          containerClassName="sm:col-span-2"
+        />
+        <Input
+          name="addressLine2"
+          placeholder="Adres (devamı, isteğe bağlı)"
+          aria-label="Adres (devamı, isteğe bağlı)"
+          containerClassName="sm:col-span-2"
+        />
+        <Input required name="city" placeholder="İl" aria-label="İl" />
+        <Input required name="district" placeholder="İlçe" aria-label="İlçe" />
+        <Input required name="postalCode" placeholder="Posta Kodu" aria-label="Posta Kodu" />
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="isDefault" />
-        Varsayılan adresim olsun
-      </label>
+      <Checkbox name="isDefault" label="Varsayılan adresim olsun" />
 
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <Alert variant="danger">{state.error}</Alert>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-      >
-        {pending ? "Ekleniyor…" : "Adresi ekle"}
-      </button>
+      <Button type="submit" loading={pending} loadingText="Ekleniyor…">
+        Adresi ekle
+      </Button>
     </form>
   );
 }

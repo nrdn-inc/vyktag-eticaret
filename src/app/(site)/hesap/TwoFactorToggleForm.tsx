@@ -10,13 +10,11 @@ import {
   type TotpEnrollmentState,
   type TwoFactorToggleState,
 } from "./actions";
+import { Alert, Button, Input, PillToggleGroup } from "@/components/ui";
 
 const initialToggleState: TwoFactorToggleState = {};
 const initialEnrollState: TotpEnrollmentState = {};
 const initialConfirmState: TotpConfirmState = {};
-
-const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900 sm:max-w-xs";
 
 type Method = "EMAIL" | "TOTP";
 
@@ -46,29 +44,21 @@ export function TwoFactorToggleForm({ enabled, method }: { enabled: boolean; met
           İki adımlı doğrulama açık ({methodLabel(method)}). Kapatmak için şifrenizi girin.
         </p>
 
-        <div>
-          <label htmlFor="tfa-disable-password" className="block text-sm font-medium">
-            Şifreniz
-          </label>
-          <input
-            id="tfa-disable-password"
-            required
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            className={inputClass}
-          />
-        </div>
+        <Input
+          id="tfa-disable-password"
+          required
+          name="password"
+          type="password"
+          label="Şifreniz"
+          autoComplete="current-password"
+          containerClassName="sm:max-w-xs"
+        />
 
-        {disableState.error && <p className="text-sm text-red-600">{disableState.error}</p>}
+        {disableState.error && <Alert variant="danger">{disableState.error}</Alert>}
 
-        <button
-          type="submit"
-          disabled={disablePending}
-          className="rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-        >
-          {disablePending ? "Kaydediliyor…" : "İki adımlı doğrulamayı kapat"}
-        </button>
+        <Button type="submit" loading={disablePending} loadingText="Kaydediliyor…">
+          İki adımlı doğrulamayı kapat
+        </Button>
       </form>
     );
   }
@@ -91,39 +81,27 @@ export function TwoFactorToggleForm({ enabled, method }: { enabled: boolean; met
         </p>
 
         <form action={confirmAction} className="space-y-3">
-          <div>
-            <label htmlFor="totp-confirm-code" className="block text-sm font-medium">
-              6 haneli kod
-            </label>
-            <input
-              id="totp-confirm-code"
-              required
-              name="code"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              autoComplete="one-time-code"
-              className={inputClass}
-            />
-          </div>
+          <Input
+            id="totp-confirm-code"
+            required
+            name="code"
+            label="6 haneli kod"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            autoComplete="one-time-code"
+            containerClassName="sm:max-w-xs"
+          />
 
-          {confirmState.error && <p className="text-sm text-red-600">{confirmState.error}</p>}
+          {confirmState.error && <Alert variant="danger">{confirmState.error}</Alert>}
 
           <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={confirmPending}
-              className="rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-            >
-              {confirmPending ? "Doğrulanıyor…" : "Onayla ve etkinleştir"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setEnrollCancelled(true)}
-              className="rounded-full border border-zinc-300 px-6 py-2 text-sm font-medium dark:border-zinc-700"
-            >
+            <Button type="submit" loading={confirmPending} loadingText="Doğrulanıyor…">
+              Onayla ve etkinleştir
+            </Button>
+            <Button type="button" variant="muted" onClick={() => setEnrollCancelled(true)}>
               Vazgeç
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -136,27 +114,19 @@ export function TwoFactorToggleForm({ enabled, method }: { enabled: boolean; met
         Etkinleştirdiğinizde her girişte ek bir doğrulama istenir. Yöntem seçin ve şifrenizi girin.
       </p>
 
-      <div className="flex gap-2" role="radiogroup" aria-label="İki adımlı doğrulama yöntemi">
-        {(["EMAIL", "TOTP"] as const).map((option) => (
-          <button
-            key={option}
-            type="button"
-            role="radio"
-            aria-checked={selectedMethod === option}
-            onClick={() => {
-              setSelectedMethod(option);
-              setEnrollCancelled(false);
-            }}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              selectedMethod === option
-                ? "bg-brand text-white"
-                : "border border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-400"
-            }`}
-          >
-            {methodLabel(option)}
-          </button>
-        ))}
-      </div>
+      <PillToggleGroup
+        aria-label="İki adımlı doğrulama yöntemi"
+        size="sm"
+        value={selectedMethod}
+        onChange={(value) => {
+          setSelectedMethod(value as Method);
+          setEnrollCancelled(false);
+        }}
+        options={[
+          { value: "EMAIL", label: methodLabel("EMAIL") },
+          { value: "TOTP", label: methodLabel("TOTP") },
+        ]}
+      />
 
       <p className="text-xs text-zinc-500">
         {selectedMethod === "TOTP"
@@ -165,35 +135,23 @@ export function TwoFactorToggleForm({ enabled, method }: { enabled: boolean; met
       </p>
 
       <form action={selectedMethod === "EMAIL" ? emailEnableAction : enrollAction} className="space-y-3">
-        <div>
-          <label htmlFor="tfa-enable-password" className="block text-sm font-medium">
-            Şifreniz
-          </label>
-          <input
-            id="tfa-enable-password"
-            required
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            className={inputClass}
-          />
-        </div>
+        <Input
+          id="tfa-enable-password"
+          required
+          name="password"
+          type="password"
+          label="Şifreniz"
+          autoComplete="current-password"
+          containerClassName="sm:max-w-xs"
+        />
 
         {selectedMethod === "EMAIL"
-          ? emailEnableState.error && <p className="text-sm text-red-600">{emailEnableState.error}</p>
-          : enrollState.error && <p className="text-sm text-red-600">{enrollState.error}</p>}
+          ? emailEnableState.error && <Alert variant="danger">{emailEnableState.error}</Alert>
+          : enrollState.error && <Alert variant="danger">{enrollState.error}</Alert>}
 
-        <button
-          type="submit"
-          disabled={emailEnablePending || enrollPending}
-          className="rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-        >
-          {emailEnablePending || enrollPending
-            ? "İşleniyor…"
-            : selectedMethod === "EMAIL"
-              ? "E-posta ile etkinleştir"
-              : "Authenticator ile devam et"}
-        </button>
+        <Button type="submit" loading={emailEnablePending || enrollPending} loadingText="İşleniyor…">
+          {selectedMethod === "EMAIL" ? "E-posta ile etkinleştir" : "Authenticator ile devam et"}
+        </Button>
       </form>
     </div>
   );

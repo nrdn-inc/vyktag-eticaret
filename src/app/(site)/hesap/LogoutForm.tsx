@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { logoutCustomer } from "./giris/actions";
+import { Button } from "@/components/ui";
 
 const initialState = { redirectUrl: "" };
 
@@ -16,13 +17,9 @@ export function LogoutForm() {
 
   return (
     <form action={action}>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 disabled:opacity-50"
-      >
-        {pending ? "Çıkış yapılıyor..." : "Çıkış yap"}
-      </button>
+      <Button type="submit" variant="muted" className="text-sm" loading={pending} loadingText="Çıkış yapılıyor...">
+        Çıkış yap
+      </Button>
     </form>
   );
 }

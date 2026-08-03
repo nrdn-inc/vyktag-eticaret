@@ -7,6 +7,7 @@ import { LogoutForm } from "./LogoutForm";
 import { AddAddressForm } from "./AddAddressForm";
 import { AddBillingProfileForm } from "./AddBillingProfileForm";
 import { TwoFactorToggleForm } from "./TwoFactorToggleForm";
+import { Alert, Badge, Button, buttonVariants } from "@/components/ui";
 
 export const metadata = {
   title: "Hesabım",
@@ -33,15 +34,15 @@ export default async function HesapPage({
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
       {abonelik === "basarili" && (
-        <div className="mb-8 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+        <Alert variant="success" className="mb-8">
           Aboneliğiniz başarıyla başlatıldı.
-        </div>
+        </Alert>
       )}
       {abonelik === "hata" && (
-        <div className="mb-8 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <Alert variant="danger" className="mb-8">
           Abonelik işlemi tamamlanamadı. Kartınızdan tutar çekildiyse ve bu mesajı görüyorsanız
           lütfen bizimle iletişime geçin.
-        </div>
+        </Alert>
       )}
       <header className="mb-10 flex items-start justify-between gap-4">
         <div>
@@ -52,10 +53,7 @@ export default async function HesapPage({
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           {user.role === UserRole.ADMIN && (
-            <Link
-              href="/admin/siparisler"
-              className="rounded-full border border-zinc-300 px-4 py-2 text-sm font-medium transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
-            >
+            <Link href="/admin/siparisler" className={buttonVariants({ variant: "muted", size: "sm" })}>
               Yönetim Paneli
             </Link>
           )}
@@ -80,9 +78,9 @@ export default async function HesapPage({
                       {address.isDefault && (
                         <>
                           {" "}
-                          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                          <Badge variant="brand" size="sm">
                             Varsayılan
-                          </span>
+                          </Badge>
                         </>
                       )}
                     </p>
@@ -98,15 +96,19 @@ export default async function HesapPage({
                   <div className="flex shrink-0 flex-col items-end gap-2">
                     {!address.isDefault && (
                       <form action={setDefaultAddress.bind(null, address.id)}>
-                        <button type="submit" className="text-xs font-medium text-brand hover:text-brand-dark">
+                        <Button type="submit" variant="link" className="text-xs hover:no-underline">
                           Varsayılan yap
-                        </button>
+                        </Button>
                       </form>
                     )}
                     <form action={deleteAddress.bind(null, address.id)}>
-                      <button type="submit" className="text-xs font-medium text-red-600 hover:text-red-700">
+                      <Button
+                        type="submit"
+                        variant="link"
+                        className="text-xs text-red-600 hover:text-red-700 hover:no-underline"
+                      >
                         Sil
-                      </button>
+                      </Button>
                     </form>
                   </div>
                 </div>
@@ -131,17 +133,14 @@ export default async function HesapPage({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium">
-                      {profile.title}
-                      {" "}
-                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
-                        {profile.type === "CORPORATE" ? "Kurumsal" : "Şahıs"}
-                      </span>
+                      {profile.title}{" "}
+                      <Badge size="sm">{profile.type === "CORPORATE" ? "Kurumsal" : "Şahıs"}</Badge>
                       {profile.isDefault && (
                         <>
                           {" "}
-                          <span className="rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand">
+                          <Badge variant="brand" size="sm">
                             Varsayılan
-                          </span>
+                          </Badge>
                         </>
                       )}
                     </p>
@@ -169,15 +168,19 @@ export default async function HesapPage({
                   <div className="flex shrink-0 flex-col items-end gap-2">
                     {!profile.isDefault && (
                       <form action={setDefaultBillingProfile.bind(null, profile.id)}>
-                        <button type="submit" className="text-xs font-medium text-brand hover:text-brand-dark">
+                        <Button type="submit" variant="link" className="text-xs hover:no-underline">
                           Varsayılan yap
-                        </button>
+                        </Button>
                       </form>
                     )}
                     <form action={deleteBillingProfile.bind(null, profile.id)}>
-                      <button type="submit" className="text-xs font-medium text-red-600 hover:text-red-700">
+                      <Button
+                        type="submit"
+                        variant="link"
+                        className="text-xs text-red-600 hover:text-red-700 hover:no-underline"
+                      >
                         Sil
-                      </button>
+                      </Button>
                     </form>
                   </div>
                 </div>

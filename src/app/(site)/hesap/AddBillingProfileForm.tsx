@@ -2,11 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { addBillingProfile, type BillingProfileFormState } from "./actions";
+import { Alert, Button, Checkbox, Input, RadioGroup } from "@/components/ui";
 
 const initialState: BillingProfileFormState = {};
-
-const inputClass =
-  "rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
 
 export function AddBillingProfileForm() {
   const [state, action, pending] = useActionState(addBillingProfile, initialState);
@@ -16,80 +14,81 @@ export function AddBillingProfileForm() {
     <form action={action} className="space-y-3 rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
       <h3 className="text-sm font-semibold">Yeni fatura bilgisi ekle</h3>
 
-      <div className="flex gap-4 text-sm">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="type"
-            value="INDIVIDUAL"
-            checked={type === "INDIVIDUAL"}
-            onChange={() => setType("INDIVIDUAL")}
-          />
-          Şahıs
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="type"
-            value="CORPORATE"
-            checked={type === "CORPORATE"}
-            onChange={() => setType("CORPORATE")}
-          />
-          Kurumsal
-        </label>
-      </div>
+      {/* `name="type"` gizli inputlarla senkron tutulur çünkü RadioGroup değeri React state'inde
+          tutar; native form gönderimi için `hidden` bir input aracılığıyla iletilir. */}
+      <input type="hidden" name="type" value={type} />
+      <RadioGroup
+        name="type-visual"
+        orientation="horizontal"
+        value={type}
+        onChange={(value) => setType(value as "INDIVIDUAL" | "CORPORATE")}
+        options={[
+          { value: "INDIVIDUAL", label: "Şahıs" },
+          { value: "CORPORATE", label: "Kurumsal" },
+        ]}
+      />
 
-      <input required name="title" placeholder="Başlık (ör. Ev faturam)" className={`${inputClass} w-full`} />
+      <Input required name="title" placeholder="Başlık (ör. Ev faturam)" aria-label="Başlık" />
 
       {type === "INDIVIDUAL" ? (
         <div className="grid gap-3 sm:grid-cols-2">
-          <input required name="fullName" placeholder="Ad Soyad" className={inputClass} />
-          <input
+          <Input required name="fullName" placeholder="Ad Soyad" aria-label="Ad Soyad" />
+          <Input
             required
             name="nationalId"
             placeholder="TC Kimlik No"
+            aria-label="TC Kimlik No"
             inputMode="numeric"
             maxLength={11}
-            className={inputClass}
           />
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          <input required name="companyName" placeholder="Firma Unvanı" className={`${inputClass} sm:col-span-2`} />
-          <input required name="taxOffice" placeholder="Vergi Dairesi" className={inputClass} />
-          <input
+          <Input
+            required
+            name="companyName"
+            placeholder="Firma Unvanı"
+            aria-label="Firma Unvanı"
+            containerClassName="sm:col-span-2"
+          />
+          <Input required name="taxOffice" placeholder="Vergi Dairesi" aria-label="Vergi Dairesi" />
+          <Input
             required
             name="taxNumber"
             placeholder="Vergi No"
+            aria-label="Vergi No"
             inputMode="numeric"
             maxLength={10}
-            className={inputClass}
           />
         </div>
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <input required name="addressLine1" placeholder="Adres" className={`${inputClass} sm:col-span-2`} />
-        <input name="addressLine2" placeholder="Adres (devamı, isteğe bağlı)" className={`${inputClass} sm:col-span-2`} />
-        <input required name="city" placeholder="İl" className={inputClass} />
-        <input required name="district" placeholder="İlçe" className={inputClass} />
-        <input required name="postalCode" placeholder="Posta Kodu" className={inputClass} />
+        <Input
+          required
+          name="addressLine1"
+          placeholder="Adres"
+          aria-label="Adres"
+          containerClassName="sm:col-span-2"
+        />
+        <Input
+          name="addressLine2"
+          placeholder="Adres (devamı, isteğe bağlı)"
+          aria-label="Adres (devamı, isteğe bağlı)"
+          containerClassName="sm:col-span-2"
+        />
+        <Input required name="city" placeholder="İl" aria-label="İl" />
+        <Input required name="district" placeholder="İlçe" aria-label="İlçe" />
+        <Input required name="postalCode" placeholder="Posta Kodu" aria-label="Posta Kodu" />
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" name="isDefault" />
-        Varsayılan fatura bilgim olsun
-      </label>
+      <Checkbox name="isDefault" label="Varsayılan fatura bilgim olsun" />
 
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <Alert variant="danger">{state.error}</Alert>}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-full bg-brand px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-      >
-        {pending ? "Ekleniyor…" : "Fatura bilgisini ekle"}
-      </button>
+      <Button type="submit" loading={pending} loadingText="Ekleniyor…">
+        Fatura bilgisini ekle
+      </Button>
     </form>
   );
 }
