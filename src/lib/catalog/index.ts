@@ -1,5 +1,9 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import {
+  SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
+  SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU,
+} from "@/lib/catalog/catalog-seed";
 
 /**
  * Kök layout `dynamic = "force-dynamic"` taşıdığından (CDN'in bozuk/eski RSC yanıtı sunmasını
@@ -45,6 +49,38 @@ export interface ProductWithVariants {
    * ürüne özgü bir ilişkiye (ör. Product.crossSellSubscriptionPlanId'ye benzer) taşınmalı.
    */
   durationOptions: ProductDurationOption[];
+  /**
+   * Abonelik (durationOptions) seçilirken "ilk fiziksel kartım" seçeneği için sunucu tarafında
+   * doğrulanmış iki varyant: standart (ücretsiz, kart abonelik fiyatına dahildir) ve özel
+   * tasarım/logo (tek seferlik ek ücretli). null ise (seed çalışmamış) abonelik akışında kart
+   * dahiliyeti sunulmaz. "Zaten kartım var / yenileme" seçildiğinde bu satır hiç eklenmez.
+   */
+  subscriptionFirstCardAddon: {
+    standardVariantId: string;
+    customDesignVariantId: string;
+    customDesignFeeKurus: number;
+  } | null;
+}
+
+/**
+ * Abonelik + "ilk fiziksel kart" satırının fiyatını YALNIZCA veritabanından okur (bkz.
+ * lib/orders/index.ts createOrderFromCart — istemciden gelen hiçbir tutara güvenilmez).
+ */
+async function getSubscriptionFirstCardAddon(): Promise<ProductWithVariants["subscriptionFirstCardAddon"]> {
+  const variants = await prisma.productVariant.findMany({
+    where: { sku: { in: [SUBSCRIPTION_FIRST_CARD_STANDARD_SKU, SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU] }, isActive: true },
+    select: { sku: true, id: true, priceKurus: true },
+  });
+  const standard = variants.find((v) => v.sku === SUBSCRIPTION_FIRST_CARD_STANDARD_SKU);
+  const customDesign = variants.find((v) => v.sku === SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU);
+  if (!standard || !customDesign) {
+    return null;
+  }
+  return {
+    standardVariantId: standard.id,
+    customDesignVariantId: customDesign.id,
+    customDesignFeeKurus: customDesign.priceKurus,
+  };
 }
 
 async function getActiveDurationOptions(): Promise<ProductDurationOption[]> {
@@ -69,7 +105,7 @@ function computeMinPriceKurus(variantPrices: number[], durationOptions: ProductD
 
 /** Vitrin/katalog sayfaları için aktif ürünleri, varyantlarıyla birlikte en düşük fiyata göre sıralı döner. */
 export async function getActiveProducts(): Promise<ProductWithVariants[]> {
-  const [products, durationOptions] = await Promise.all([
+  const [products, durationOptions, subscriptionFirstCardAddon] = await Promise.all([
     prisma.product.findMany({
       where: { isActive: true },
       // `include` yerine `select`: tam Product/ProductVariant satırı (images, zaman damgaları,
@@ -89,6 +125,7 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
       orderBy: { createdAt: "asc" },
     }),
     getActiveDurationOptions(),
+    getSubscriptionFirstCardAddon(),
   ]);
 
   return products
@@ -101,6 +138,7 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
       minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
       variants: product.variants,
       durationOptions,
+      subscriptionFirstCardAddon,
     }));
 }
 
@@ -121,7 +159,7 @@ export async function getActiveProductSlugs(): Promise<string[]> {
 
 /** Ürün detay sayfası için tek bir ürünü slug'a göre getirir. */
 export async function getProductBySlug(slug: string): Promise<ProductWithVariants | null> {
-  const [product, durationOptions] = await Promise.all([
+  const [product, durationOptions, subscriptionFirstCardAddon] = await Promise.all([
     prisma.product.findFirst({
       where: { slug, isActive: true },
       select: {
@@ -137,6 +175,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
       },
     }),
     getActiveDurationOptions(),
+    getSubscriptionFirstCardAddon(),
   ]);
 
   if (!product || product.variants.length === 0) {
@@ -151,6 +190,7 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
     minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
     variants: product.variants,
     durationOptions,
+    subscriptionFirstCardAddon,
   };
 }
 

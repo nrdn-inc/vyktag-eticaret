@@ -21,6 +21,18 @@ interface ProductSeed {
 const BASE_PRICE_KURUS = 34999;
 const CUSTOM_DESIGN_PRICE_KURUS = 49999; // özel tasarım/logo ücretiyle birlikte
 
+// Abonelik seçildiğinde ilk fiziksel kart artık dahildir (bkz. AddToCartForm — "İlk fiziksel
+// kartım" / "Zaten kartım var" seçimi). Bu iki gizli SKU, o kart dahiliyetini sunucu tarafında
+// fiyatı doğrulanabilir bir OrderItem satırına bağlamak için var: standart varyant 0 TL'dir
+// (kart bedeli abonelik fiyatına dahil sayılır), özel tasarım/logo seçilirse tek seferlik ek
+// ücret alınır. Bu satırın var olması aynı zamanda admin'e (bkz. lib/orders/index.ts
+// finalizeOrderPayment → DkartvizitHandoff) fiziksel kart gönderilmesi/hesap devri gerektiğini
+// bildirir — abonelik yenilemelerinde (kart seçilmediğinde) bu satır hiç eklenmez.
+export const SUBSCRIPTION_FIRST_CARD_STANDARD_SKU = "VYK-ABONELIK-ILK-KART";
+export const SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU = "VYK-ABONELIK-ILK-KART-OZEL";
+// Kart fiyatındaki özel tasarım farkıyla aynı tutar olması bilinçlidir.
+export const SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS = CUSTOM_DESIGN_PRICE_KURUS - BASE_PRICE_KURUS;
+
 export const CARD_PRODUCTS: ProductSeed[] = [
   {
     slug: "vyktag-kart",
@@ -84,6 +96,31 @@ export const CARD_PRODUCTS: ProductSeed[] = [
         priceKurus: CUSTOM_DESIGN_PRICE_KURUS,
         stock: 50,
         attributes: { cardColor: "Beyaz", printColor: "Altın", customDesign: true },
+      },
+    ],
+  },
+  {
+    // Vitrinde satılmaz (isActive: false, ürün listesinde görünmez) — yalnızca abonelik
+    // akışında "ilk fiziksel kart" satırını sunucu tarafında doğrulanmış bir fiyata bağlamak
+    // için var (bkz. dosya başı yorumu, lib/catalog/index.ts getSubscriptionFirstCardAddon).
+    slug: "vyktag-abonelik-ilk-kart",
+    name: "Abonelik — İlk Fiziksel Kart",
+    description: "Abonelik satın alırken dahil olan ilk fiziksel kart (isteğe bağlı özel tasarım/logo ile).",
+    images: [],
+    isActive: false,
+    variants: [
+      {
+        sku: SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
+        name: "İlk Fiziksel Kart (standart)",
+        priceKurus: 0,
+        // Envanter kavramı yok (dahiliyet/ücret satırı) — pratikte tükenmeyecek kadar yüksek tutulur.
+        stock: 999_999,
+      },
+      {
+        sku: SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU,
+        name: "İlk Fiziksel Kart (özel tasarım/logo)",
+        priceKurus: SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS,
+        stock: 999_999,
       },
     ],
   },

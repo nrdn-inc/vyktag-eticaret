@@ -384,6 +384,9 @@ export async function finalizeOrderPayment(
 
   // Ödeme başarılıysa, fiziksel ürün satırları için dkartvizit hesap devri kaydını (PENDING)
   // hazırlar — admin bunu /admin/siparisler üzerinden manuel olarak "sağlandı" işaretler.
+  // Abonelikte seçilen "ilk fiziksel kart" satırı da (bkz. catalog-seed.ts SUBSCRIPTION_FIRST_
+  // CARD_*) bir ProductVariant'a bağlıdır — bilinçli olarak burada da devre kaydı açılır, çünkü
+  // gerçekten fiziksel bir kart gönderilir. Yenilemede (kart seçilmediğinde) bu satır hiç yok.
   if (params.success) {
     for (const item of order.items) {
       if (item.productVariantId) {

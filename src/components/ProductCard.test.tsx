@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+﻿// @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ProductCard } from "@/components/ProductCard";
@@ -14,6 +14,7 @@ const singleVariant: ProductWithVariants = {
     { id: "v1", name: "Standart", sku: "VYK-TAG-STD", priceKurus: 39990, stock: 10, attributes: null },
   ],
   durationOptions: [],
+  subscriptionFirstCardAddon: null,
 };
 
 const multiVariant: ProductWithVariants = {
@@ -27,6 +28,7 @@ const multiVariant: ProductWithVariants = {
     { id: "v3", name: "Özel", sku: "VYK-KART-CUSTOM", priceKurus: 79990, stock: 5, attributes: null },
   ],
   durationOptions: [],
+  subscriptionFirstCardAddon: null,
 };
 
 const outOfStock: ProductWithVariants = {

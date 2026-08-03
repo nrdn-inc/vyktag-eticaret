@@ -51,7 +51,9 @@ export function ProductDetailInteractive({ product, initialVariantId }: ProductD
           </p>
           <p className="mt-4 leading-relaxed text-zinc-600 dark:text-zinc-400">
             {selectedDurationPlan
-              ? `${selectedDurationPlan.name}: fiziksel kart gönderilmez, yalnızca dijital profilinize belirtilen süre boyunca kullanım hakkı verir.`
+              ? product.subscriptionFirstCardAddon
+                ? `${selectedDurationPlan.name}: dijital profilinize belirtilen süre boyunca kullanım hakkı verir. İlk aboneliğinizde fiziksel kart da dahildir.`
+                : `${selectedDurationPlan.name}: fiziksel kart gönderilmez, yalnızca dijital profilinize belirtilen süre boyunca kullanım hakkı verir.`
               : product.description}
           </p>
 

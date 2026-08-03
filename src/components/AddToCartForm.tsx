@@ -64,6 +64,11 @@ export function AddToCartForm({
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
+  // Abonelik seçiliyken: ilk kez mi abone oluyor (fiziksel kart abonelikle birlikte, bir
+  // kereliğine gönderilir) yoksa zaten kartı olan biri mi yeniliyor (kart tekrar gönderilmez,
+  // özel tasarım ücreti de alınmaz). Varsayılan true: ürün sayfasına gelen çoğu ziyaretçi ilk
+  // kez abone olur.
+  const [isFirstSubscriptionCard, setIsFirstSubscriptionCard] = useState(true);
 
   const selectedVariant =
     product.variants.find((v) => v.id === variantId) ?? product.variants[0];
@@ -79,7 +84,17 @@ export function AddToCartForm({
   const inStock = selectedDurationPlan ? true : isVariantPurchasable(selectedVariant.stock);
   const atMaxQuantity = selectedDurationPlan ? false : quantity >= selectedVariant.stock;
   const isLowStock = !selectedDurationPlan && inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
-  const unitPriceKurus = selectedDurationPlan ? selectedDurationPlan.priceKurus : selectedVariant.priceKurus;
+
+  // Abonelikte "ilk fiziksel kartım" seçiliyken (ve sunucu tarafında doğrulanmış ücret
+  // varyantları mevcutsa) kart dahil edilir; özel tasarım/logo seçilirse tek seferlik ek
+  // ücret (+150 TL) alınır — bkz. lib/catalog/index.ts subscriptionFirstCardAddon. "Zaten
+  // kartım var (yenileme)" seçildiğinde kart/ücret hiç eklenmez.
+  const includeFirstCard = !!selectedDurationPlan && isFirstSubscriptionCard && !!product.subscriptionFirstCardAddon;
+  const wantsCustomDesign = includeFirstCard && hasStructuredOptions && !!selectedAttrs?.customDesign;
+  const firstCardFeeKurus = wantsCustomDesign ? product.subscriptionFirstCardAddon!.customDesignFeeKurus : 0;
+  const unitPriceKurus = selectedDurationPlan
+    ? selectedDurationPlan.priceKurus + firstCardFeeKurus
+    : selectedVariant.priceKurus;
 
   function resetSelectionState() {
     setQuantity(1);
@@ -94,29 +109,49 @@ export function AddToCartForm({
     if (title.trim()) personalization.title = title.trim();
     if (phone.trim()) personalization.phone = phone.trim();
     if (note.trim()) personalization.note = note.trim();
-    if (logoDataUrl && !selectedDurationPlan) personalization.logo = logoDataUrl;
+    if (logoDataUrl && (!selectedDurationPlan || wantsCustomDesign)) personalization.logo = logoDataUrl;
+    if (includeFirstCard && hasStructuredOptions && selectedAttrs) {
+      const cardNote = `İlk fiziksel kart: ${selectedAttrs.cardColor} kart, ${selectedAttrs.printColor} baskı.`;
+      personalization.note = personalization.note ? `${personalization.note} ${cardNote}` : cardNote;
+    }
 
-    const item: CartItem = selectedDurationPlan
-      ? {
-          subscriptionPlanId: selectedDurationPlan.subscriptionPlanId,
+    const items: CartItem[] = [];
+
+    if (selectedDurationPlan) {
+      items.push({
+        subscriptionPlanId: selectedDurationPlan.subscriptionPlanId,
+        productSlug: product.slug,
+        productName: product.name,
+        variantName: selectedDurationPlan.name,
+        unitPriceKurus: selectedDurationPlan.priceKurus,
+        quantity,
+        ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
+      });
+
+      if (includeFirstCard && product.subscriptionFirstCardAddon) {
+        const addon = product.subscriptionFirstCardAddon;
+        items.push({
+          variantId: wantsCustomDesign ? addon.customDesignVariantId : addon.standardVariantId,
           productSlug: product.slug,
           productName: product.name,
-          variantName: selectedDurationPlan.name,
-          unitPriceKurus: selectedDurationPlan.priceKurus,
+          variantName: wantsCustomDesign ? "İlk Fiziksel Kart (özel tasarım/logo)" : "İlk Fiziksel Kart",
+          unitPriceKurus: wantsCustomDesign ? addon.customDesignFeeKurus : 0,
           quantity,
-          ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
-        }
-      : {
-          variantId: selectedVariant.id,
-          productSlug: product.slug,
-          productName: product.name,
-          variantName: selectedVariant.name,
-          unitPriceKurus: selectedVariant.priceKurus,
-          quantity,
-          ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
-        };
+        });
+      }
+    } else {
+      items.push({
+        variantId: selectedVariant.id,
+        productSlug: product.slug,
+        productName: product.name,
+        variantName: selectedVariant.name,
+        unitPriceKurus: selectedVariant.priceKurus,
+        quantity,
+        ...(Object.keys(personalization).length > 0 ? { personalization } : {}),
+      });
+    }
 
-    addItem(item);
+    for (const item of items) addItem(item);
     setAdded(true);
   }
 
@@ -143,7 +178,7 @@ export function AddToCartForm({
               ]}
             />
           </div>
-          {selectedDurationPlan && (
+          {selectedDurationPlan && !product.subscriptionFirstCardAddon && (
             <p className="mt-2 text-xs text-zinc-500">
               Bu seçenekte fiziksel kart gönderilmez, yalnızca dijital profilinize {durationLabel(selectedDurationPlan.interval).toLowerCase()} boyunca kullanım hakkı verilir.
             </p>
@@ -151,8 +186,31 @@ export function AddToCartForm({
         </div>
       )}
 
-      {/* Varyant seçimi — yalnızca "Sınırsız" (fiziksel kart) seçiliyken anlamlı */}
-      {!selectedDurationPlan && (hasStructuredOptions ? (
+      {/* Abonelikte ilk fiziksel kart mı, yenileme mi? */}
+      {selectedDurationPlan && product.subscriptionFirstCardAddon && (
+        <div>
+          <label className="text-sm font-semibold">Fiziksel kart</label>
+          <div className="mt-2">
+            <PillToggleGroup
+              aria-label="Fiziksel kart"
+              value={isFirstSubscriptionCard ? "first" : "renewal"}
+              onChange={(value) => setIsFirstSubscriptionCard(value === "first")}
+              options={[
+                { value: "first", label: "İlk fiziksel kartım" },
+                { value: "renewal", label: "Zaten kartım var (yenileme)" },
+              ]}
+            />
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">
+            {isFirstSubscriptionCard
+              ? "İlk aboneliğinizle birlikte bir fiziksel kart da gönderilir, kart bedeli abonelik fiyatına dahildir."
+              : `Fiziksel kart gönderilmez, yalnızca dijital profilinize ${durationLabel(selectedDurationPlan.interval).toLowerCase()} boyunca kullanım hakkı verilir.`}
+          </p>
+        </div>
+      )}
+
+      {/* Varyant seçimi — fiziksel kart gönderilecekse (Sınırsız seçimi ya da abonelikte ilk kart) anlamlı */}
+      {(!selectedDurationPlan || includeFirstCard) && (hasStructuredOptions ? (
         <CardOptionSelector
           variants={product.variants}
           selectedVariantId={selectedVariant.id}
@@ -165,6 +223,7 @@ export function AddToCartForm({
           onLogoChange={onLogoChange}
         />
       ) : (
+        !selectedDurationPlan &&
         product.variants.length > 1 && (
           <div>
             <label className="text-sm font-semibold">Seçenek</label>
@@ -194,9 +253,11 @@ export function AddToCartForm({
       {/* Kişiselleştirme */}
       <div>
         <h3 className="text-sm font-semibold">
-          {selectedDurationPlan ? "Dijital profil bilgileri (isteğe bağlı)" : "Kart üzerindeki bilgiler (isteğe bağlı)"}
+          {!selectedDurationPlan || includeFirstCard
+            ? "Kart üzerindeki bilgiler (isteğe bağlı)"
+            : "Dijital profil bilgileri (isteğe bağlı)"}
         </h3>
-        {!selectedDurationPlan && !selectedAttrs?.customDesign && (
+        {(!selectedDurationPlan || includeFirstCard) && !wantsCustomDesign && (
           <p className="mt-1 text-xs text-zinc-500">
             Logonuzu siparişiniz sonrası sizden ayrıca rica edeceğiz.
           </p>
