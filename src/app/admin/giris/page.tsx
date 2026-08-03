@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import Link from "next/link";
 import { loginAdmin, type LoginState } from "./actions";
 import { Alert, Button, Input } from "@/components/ui";
 
@@ -38,6 +39,12 @@ export default function AdminLoginPage() {
             Giriş yap
           </Button>
         </form>
+
+        <div className="mt-6 text-center">
+          <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+            ← Ana sayfaya dön
+          </Link>
+        </div>
       </div>
     </div>
   );

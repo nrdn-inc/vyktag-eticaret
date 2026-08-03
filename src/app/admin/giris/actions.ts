@@ -3,7 +3,13 @@
 import { cookies, headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma/client";
-import { ADMIN_SESSION_COOKIE, CUSTOMER_SESSION_COOKIE, createAdminSessionToken, verifyPassword } from "@/lib/auth";
+import {
+  ADMIN_SESSION_COOKIE,
+  CUSTOMER_ID_COOKIE,
+  CUSTOMER_SESSION_COOKIE,
+  createAdminSessionToken,
+  verifyPassword,
+} from "@/lib/auth";
 import { clientIpFromHeaders, consumeRateLimit } from "@/lib/auth/rate-limit";
 
 export interface LoginState {
@@ -61,7 +67,10 @@ export async function logoutAdmin(): Promise<{ redirectUrl: string }> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_SESSION_COOKIE);
   // Hesabım girişinde admin hesapları için müşteri çerezi de kurulduğundan (bkz.
-  // hesap/giris/actions.ts), buradan çıkışın da o oturumu kapatması gerekir.
+  // hesap/giris/actions.ts), buradan çıkışın da o oturumu kapatması gerekir. CUSTOMER_ID_COOKIE
+  // de aynı yerde kurulur (bkz. CartProvider.tsx) — silinmezse sepet, artık geçersiz olan eski
+  // kimliğe bağlı kalmaya devam eder.
   cookieStore.delete(CUSTOMER_SESSION_COOKIE);
+  cookieStore.delete(CUSTOMER_ID_COOKIE);
   return { redirectUrl: "/admin/giris" };
 }
