@@ -51,6 +51,9 @@ export default function TeslimatVeIadePage() {
             kapsamında geçerlidir.
           </p>
           <p className="mt-3">
+            {`Kişiselleştirilmiş/özel tasarımlı ürünlerde nedensiz cayma hakkı bulunmasa da, 6502 sayılı Tüketicinin Korunması Hakkında Kanun'daki ayıplı mal hükümleri saklıdır. Ürünün üretim/baskı hatası, bozuk NFC çipi, kargo kaynaklı hasar veya sipariş sırasında ilettiğiniz ad/unvan/logo bilgilerinin tarafımızca hatalı basılması gibi bize ait bir kusur varsa, ürünü teslim aldığınız tarihten itibaren yasal süreler içinde ${legalInfo.email} adresine bildirerek ücretsiz onarım, ayıpsız yenisiyle değişim veya bedel iadesi talep edebilirsiniz; bu durumda kargo bedeli tarafımızca karşılanır. Kişisel tercih değişikliği (ör. logo/renk beğenmeme) kusur kapsamında değildir.`}
+          </p>
+          <p className="mt-3">
             Ayrıntılı hükümler için{" "}
             <Link href="/mesafeli-satis-sozlesmesi" className="font-medium text-brand hover:text-brand-dark">
               Mesafeli Satış Sözleşmesi

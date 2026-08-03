@@ -102,6 +102,9 @@ export default function MesafeliSatisSozlesmesiPage() {
             kişiselleştirme bilgisi girilmemiş standart ürünlerde ise cayma hakkı yukarıdaki 5. madde
             kapsamında geçerlidir.
           </p>
+          <p className="mt-3">
+            {`Cayma hakkının bu maddeyle bertaraf edilmesi, 6502 sayılı Kanun'daki ayıplı mal hükümlerini ortadan kaldırmaz. Kişiselleştirilmiş üründe Satıcı'ya isnat edilebilecek bir kusur (üretim/baskı hatası, bozuk NFC çipi, kargo hasarı veya ad/unvan/logo bilgilerinin hatalı basılması gibi) bulunması hâlinde Alıcı, teslim tarihinden itibaren yasal süreler içinde ücretsiz onarım, ayıpsız yenisiyle değişim veya bedel iadesi talep edebilir; bu hâlde kargo bedeli Satıcı'ya aittir. Kişisel beğeni değişikliği ayıp sayılmaz.`}
+          </p>
         </section>
 
         <section>
