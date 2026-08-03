@@ -5,6 +5,17 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import { useCart } from "@/components/CartProvider";
 import type { CartItem, CartPersonalization } from "@/lib/orders/cart";
+import {
+  Alert,
+  Badge,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 
 export interface SelectedProductVariant {
   variantId: string;
@@ -184,9 +195,9 @@ export function BulkOrderUpload({
       </div>
 
       {successMsg && (
-        <div className="mb-6 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-400">
+        <Alert variant="success" className="mb-6">
           {successMsg}
-        </div>
+        </Alert>
       )}
 
       {rows.length > 0 && (
@@ -202,40 +213,40 @@ export function BulkOrderUpload({
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-zinc-50 text-xs font-medium text-zinc-500 dark:bg-zinc-800/50 dark:text-zinc-400">
-                <tr>
-                  <th className="px-4 py-3">Ad Soyad</th>
-                  <th className="px-4 py-3">Unvan</th>
-                  <th className="px-4 py-3">Telefon</th>
-                  <th className="px-4 py-3">Not</th>
-                  <th className="px-4 py-3">Durum</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                {rows.slice(0, 10).map((row, idx) => (
-                  <tr key={idx} className={row.isValid ? "" : "bg-red-50/50 dark:bg-red-900/10"}>
-                    <td className="px-4 py-3 font-medium">{row.fullName || "-"}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.title || "-"}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{row.phone || "-"}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400 truncate max-w-[150px]">{row.note || "-"}</td>
-                    <td className="px-4 py-3">
-                      {row.isValid ? (
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          Geçerli
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                          {row.error}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Ad Soyad</TableHead>
+                <TableHead>Unvan</TableHead>
+                <TableHead>Telefon</TableHead>
+                <TableHead>Not</TableHead>
+                <TableHead>Durum</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.slice(0, 10).map((row, idx) => (
+                <TableRow key={idx} className={row.isValid ? undefined : "bg-red-50/50 dark:bg-red-900/10"}>
+                  <TableCell className="font-medium">{row.fullName || "-"}</TableCell>
+                  <TableCell className="text-zinc-600 dark:text-zinc-400">{row.title || "-"}</TableCell>
+                  <TableCell className="text-zinc-600 dark:text-zinc-400">{row.phone || "-"}</TableCell>
+                  <TableCell className="max-w-[150px] truncate text-zinc-600 dark:text-zinc-400">
+                    {row.note || "-"}
+                  </TableCell>
+                  <TableCell>
+                    {row.isValid ? (
+                      <Badge variant="success" size="sm">
+                        Geçerli
+                      </Badge>
+                    ) : (
+                      <Badge variant="danger" size="sm">
+                        {row.error}
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
           {rows.length > 10 && (
             <p className="text-center text-xs text-zinc-500">
               * Sadece ilk 10 kayıt gösteriliyor. Toplam {rows.length} kayıt eklenecek.
@@ -243,13 +254,9 @@ export function BulkOrderUpload({
           )}
 
           <div className="flex justify-end pt-4">
-            <button
-              onClick={handleAddToCart}
-              disabled={validRows.length === 0 || !selectedVariant}
-              className="rounded-full bg-brand px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-50"
-            >
+            <Button onClick={handleAddToCart} disabled={validRows.length === 0 || !selectedVariant}>
               {validRows.length} Kişiyi Sepete Ekle
-            </button>
+            </Button>
           </div>
         </div>
       )}

@@ -117,7 +117,7 @@ export default async function PricingPage() {
                       {featured && (
                         <Badge
                           size="sm"
-                          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand uppercase tracking-wide text-white"
+                          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand uppercase tracking-wide text-white dark:bg-brand dark:text-white"
                         >
                           Önerilen
                         </Badge>

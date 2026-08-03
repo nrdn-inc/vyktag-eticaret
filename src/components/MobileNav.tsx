@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { mainNav } from "@/lib/site";
 import { useIsMounted } from "@/lib/use-is-mounted";
+import { Button, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 /**
  * Dar ekranlarda gezinme menüsü. Masaüstündeki yatay menü mobilde gizlendiği için
@@ -42,17 +44,18 @@ export function MobileNav() {
 
   return (
     <div className="sm:hidden">
-      <button
-        type="button"
+      <Button
+        variant="muted"
+        size="icon"
         onClick={() => setOpen(true)}
         aria-label="Menüyü aç"
         aria-expanded={open}
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-border-soft text-zinc-600 dark:text-zinc-300"
+        className="border-border-soft text-zinc-600 dark:text-zinc-300"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden className="h-5 w-5">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
-      </button>
+      </Button>
 
       {open && mounted && createPortal(
         <div className="fixed inset-0 z-50">
@@ -66,16 +69,17 @@ export function MobileNav() {
           <nav className="absolute inset-y-0 right-0 flex w-[min(20rem,85vw)] flex-col bg-surface p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold">Menü</span>
-              <button
-                type="button"
+              <Button
+                variant="muted"
+                size="icon"
                 onClick={close}
                 aria-label="Menüyü kapat"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border-soft"
+                className="h-9 w-9 border-border-soft"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden className="h-4 w-4">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
-              </button>
+              </Button>
             </div>
 
             <ul className="mt-8 space-y-1">
@@ -125,7 +129,7 @@ export function MobileNav() {
             <Link
               href="/urunler"
               onClick={close}
-              className="mt-auto rounded-full bg-brand px-6 py-3.5 text-center text-base font-semibold text-white"
+              className={cn(buttonVariants({ size: "lg" }), "mt-auto text-center text-base")}
             >
               Mağaza
             </Link>

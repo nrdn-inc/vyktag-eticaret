@@ -7,7 +7,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+    <footer className="mt-auto border-t border-border-soft bg-surface-muted">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-4 sm:px-6">
         <div>
           <span className="text-lg font-semibold">{siteConfig.name}</span>
@@ -85,7 +85,7 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="border-t border-zinc-200 py-6 dark:border-zinc-800">
+      <div className="border-t border-border-soft py-6">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 sm:px-6">
           <div className="rounded-lg bg-white p-2">
             <Image

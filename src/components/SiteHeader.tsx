@@ -3,6 +3,8 @@ import Link from "next/link";
 import { mainNav, siteConfig } from "@/lib/site";
 import { CartLink } from "@/components/CartLink";
 import { MobileNav } from "@/components/MobileNav";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 /** Tüm sayfalarda ortak üst menü: duyuru şeridi, logo, gezinme ve mağaza çağrısı. */
 export function SiteHeader() {
@@ -57,7 +59,7 @@ export function SiteHeader() {
             <CartLink />
             <Link
               href="/urunler"
-              className="hidden rounded-full bg-brand px-5 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-dark sm:block"
+              className={cn(buttonVariants({ size: "sm" }), "hidden px-5 hover:-translate-y-0.5 sm:block")}
             >
               Mağaza
             </Link>

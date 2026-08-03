@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { ProductWithVariants } from "@/lib/catalog";
 import { formatPriceTRY } from "@/lib/format";
 import { BulkOrderUpload, type SelectedProductVariant } from "@/components/BulkOrderUpload";
+import { Select } from "@/components/ui";
 
 export function BulkOrderClient({ products }: { products: ProductWithVariants[] }) {
   const [selectedProduct, setSelectedProduct] = useState<ProductWithVariants | null>(products[0] || null);
@@ -49,42 +50,28 @@ export function BulkOrderClient({ products }: { products: ProductWithVariants[] 
           <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <h2 className="mb-4 text-lg font-semibold tracking-tight">1. Ürün ve Model Seçimi</h2>
             <div className="space-y-4">
-              <div>
-                <label htmlFor="product" className="mb-1.5 block text-sm font-medium">
-                  Ürün Tipi
-                </label>
-                <select
-                  id="product"
-                  className="w-full rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-950"
-                  value={selectedProduct?.id || ""}
-                  onChange={handleProductChange}
-                >
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({formatPriceTRY(p.minPriceKurus)}&apos;den başlayan fiyatlarla)
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Select
+                id="product"
+                label="Ürün Tipi"
+                value={selectedProduct?.id || ""}
+                onChange={handleProductChange}
+                options={products.map((p) => ({
+                  value: p.id,
+                  label: `${p.name} (${formatPriceTRY(p.minPriceKurus)}'den başlayan fiyatlarla)`,
+                }))}
+              />
 
               {selectedProduct && selectedProduct.variants.length > 0 && (
-                <div>
-                  <label htmlFor="variant" className="mb-1.5 block text-sm font-medium">
-                    Model / Renk
-                  </label>
-                  <select
-                    id="variant"
-                    className="w-full rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-950"
-                    value={selectedVariantId}
-                    onChange={(e) => setSelectedVariantId(e.target.value)}
-                  >
-                    {selectedProduct.variants.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name} — {formatPriceTRY(v.priceKurus)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  id="variant"
+                  label="Model / Renk"
+                  value={selectedVariantId}
+                  onChange={(e) => setSelectedVariantId(e.target.value)}
+                  options={selectedProduct.variants.map((v) => ({
+                    value: v.id,
+                    label: `${v.name} — ${formatPriceTRY(v.priceKurus)}`,
+                  }))}
+                />
               )}
 
               {selectedVariant && (

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useCart } from "@/components/CartProvider";
+import { Badge, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 /** Header'daki sepet bağlantısı ve ürün adedi rozeti. */
 export function CartLink() {
@@ -10,14 +12,17 @@ export function CartLink() {
   return (
     <Link
       href="/sepet"
-      className="relative flex items-center gap-2 rounded-full border border-zinc-300 px-4 py-2 text-sm font-semibold transition-colors hover:border-brand hover:text-brand dark:border-zinc-700"
+      className={cn(buttonVariants({ variant: "muted", size: "sm" }), "relative gap-2 px-4 py-2")}
       aria-label={`Sepet (${itemCount} ürün)`}
     >
       Sepet
+      {/* `neutral` varyantın karanlık moda özel dark:bg-zinc-800'ü, yalnızca ışık modu için
+          verilen bir bg-brand override'ıyla çakışan sayılmaz (tailwind-merge bunları farklı
+          koşullar için kasıtlı görür) — bu yüzden karanlık mod için de açıkça verilmesi gerekir. */}
       {ready && itemCount > 0 && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1.5 text-xs font-bold text-white">
+        <Badge size="sm" className="h-5 min-w-5 justify-center bg-brand px-1.5 text-white dark:bg-brand dark:text-white">
           {itemCount}
-        </span>
+        </Badge>
       )}
     </Link>
   );
