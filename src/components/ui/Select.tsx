@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import type { SelectHTMLAttributes } from "react";
+import type { ReactNode, SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import { fieldVariants } from "./Input";
 import { FieldShell, useFieldIds } from "./field-shell";
@@ -11,7 +11,7 @@ export interface SelectOption {
 }
 
 export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "size"> {
-  label?: string;
+  label?: ReactNode;
   description?: string;
   error?: string;
   fieldSize?: "sm" | "md" | "lg";

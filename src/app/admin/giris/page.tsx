@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { loginAdmin, type LoginState } from "./actions";
+import { Alert, Button, Input } from "@/components/ui";
 
 const initialState: LoginState = {};
 
@@ -21,42 +22,21 @@ export default function AdminLoginPage() {
         <p className="mt-1 text-sm text-zinc-500">Devam etmek için giriş yapın.</p>
 
         <form action={action} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium">
-              Kullanıcı adı veya e-posta
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              autoComplete="username"
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium">
-              Şifre
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950"
-            />
-          </div>
+          <Input
+            id="username"
+            name="username"
+            type="text"
+            label="Kullanıcı adı veya e-posta"
+            required
+            autoComplete="username"
+          />
+          <Input id="password" name="password" type="password" label="Şifre" required autoComplete="current-password" />
 
-          {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+          {state.error && <Alert variant="danger">{state.error}</Alert>}
 
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-          >
-            {pending ? "Giriş yapılıyor…" : "Giriş yap"}
-          </button>
+          <Button type="submit" loading={pending} loadingText="Giriş yapılıyor…" fullWidth>
+            Giriş yap
+          </Button>
         </form>
       </div>
     </div>

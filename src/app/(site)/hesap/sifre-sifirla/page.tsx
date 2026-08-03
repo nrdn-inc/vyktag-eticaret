@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { verifyPasswordResetToken } from "@/lib/auth";
 import { ResetPasswordForm } from "./ResetPasswordForm";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export const metadata = {
   title: "Şifreyi Sıfırla",
@@ -24,7 +26,7 @@ export default async function SifreSifirlaPage({
         </p>
         <Link
           href="/hesap/sifremi-unuttum"
-          className="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          className={cn(buttonVariants({ size: "lg" }), "mt-8 inline-block")}
         >
           Yeniden bağlantı iste
         </Link>

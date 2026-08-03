@@ -31,7 +31,7 @@ export const fieldVariants = cva(
 export interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size">,
     Pick<VariantProps<typeof fieldVariants>, "fieldSize"> {
-  label?: string;
+  label?: ReactNode;
   description?: string;
   error?: string;
   leftIcon?: ReactNode;

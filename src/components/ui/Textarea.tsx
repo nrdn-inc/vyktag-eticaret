@@ -1,12 +1,12 @@
 import { forwardRef } from "react";
-import type { InputEvent, TextareaHTMLAttributes } from "react";
+import type { InputEvent, ReactNode, TextareaHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 import { fieldVariants } from "./Input";
 import { FieldShell, useFieldIds } from "./field-shell";
 
 export interface TextareaProps
   extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "size"> {
-  label?: string;
+  label?: ReactNode;
   description?: string;
   error?: string;
   fieldSize?: "sm" | "md" | "lg";

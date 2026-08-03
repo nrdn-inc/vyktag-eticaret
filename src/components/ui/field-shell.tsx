@@ -30,7 +30,7 @@ export function useFieldIds(idProp: string | undefined, description: unknown, er
 }
 
 interface FieldShellProps extends Pick<FieldA11yIds, "fieldId" | "descriptionId" | "errorId"> {
-  label?: string;
+  label?: ReactNode;
   required?: boolean;
   description?: string;
   error?: string;

@@ -6,6 +6,7 @@ import { Reveal } from "@/components/Reveal";
 import { PageHero } from "@/components/PageHero";
 import { JsonLd } from "@/components/JsonLd";
 import { faqJsonLd } from "@/lib/seo/structured-data";
+import { buttonVariants } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Sıkça Sorulan Sorular",
@@ -57,16 +58,10 @@ export default function FaqPage() {
               ulaşabilirsiniz.
             </p>
             <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              <a
-                href={`mailto:${legalInfo.email}`}
-                className="rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-              >
+              <a href={`mailto:${legalInfo.email}`} className={buttonVariants()}>
                 {legalInfo.email}
               </a>
-              <Link
-                href="/urunler"
-                className="rounded-full border border-border-soft px-6 py-3 text-sm font-semibold transition-colors hover:border-brand hover:text-brand"
-              >
+              <Link href="/urunler" className={buttonVariants({ variant: "muted" })}>
                 Ürünleri incele
               </Link>
             </div>

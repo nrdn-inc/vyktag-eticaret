@@ -6,6 +6,8 @@ import { FAQ } from "@/lib/marketing";
 import { Reveal } from "@/components/Reveal";
 import { PageHero } from "@/components/PageHero";
 import { ComparisonTable } from "@/components/ComparisonTable";
+import { Badge, buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 import { NfcCard } from "@/components/visuals/NfcCard";
 import { resolveCardVariant } from "@/lib/catalog/product-variant-attributes";
 
@@ -77,7 +79,7 @@ export default async function PricingPage() {
                     </p>
                     <Link
                       href={`/urunler/${product.slug}`}
-                      className="mt-5 rounded-full border border-brand px-6 py-2.5 text-center text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
+                      className={cn(buttonVariants({ variant: "outline" }), "mt-5")}
                     >
                       Seçenekleri gör
                     </Link>
@@ -113,9 +115,12 @@ export default async function PricingPage() {
                       }`}
                     >
                       {featured && (
-                        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-4 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                        <Badge
+                          size="sm"
+                          className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand uppercase tracking-wide text-white"
+                        >
                           Önerilen
-                        </span>
+                        </Badge>
                       )}
                       <h3 className="text-xl font-semibold">{plan.name}</h3>
                       <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -139,11 +144,7 @@ export default async function PricingPage() {
                       </ul>
                       <Link
                         href="/urunler/vyktag-kart"
-                        className={`mt-8 rounded-full px-6 py-3 text-center text-sm font-semibold transition-colors ${
-                          featured
-                            ? "bg-brand text-white hover:bg-brand-dark"
-                            : "border border-brand text-brand hover:bg-brand hover:text-white"
-                        }`}
+                        className={cn(buttonVariants({ variant: featured ? "primary" : "outline" }), "mt-8")}
                       >
                         Başla
                       </Link>

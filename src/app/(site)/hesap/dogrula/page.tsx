@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { verifyEmailVerificationToken } from "@/lib/auth";
 import { SetPasswordForm } from "./SetPasswordForm";
+import { buttonVariants } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export const metadata = {
   title: "Hesabı Doğrula",
@@ -22,10 +24,7 @@ export default async function DogrulaPage({
           Bu doğrulama bağlantısının süresi dolmuş ya da geçersiz. Yeniden kayıt olarak yeni bir
           bağlantı isteyebilirsiniz.
         </p>
-        <Link
-          href="/hesap/kayit"
-          className="mt-8 inline-block rounded-full bg-brand px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
+        <Link href="/hesap/kayit" className={cn(buttonVariants({ size: "lg" }), "mt-8 inline-block")}>
           Yeniden kayıt ol
         </Link>
       </div>

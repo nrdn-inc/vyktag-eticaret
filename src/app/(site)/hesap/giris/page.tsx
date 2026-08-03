@@ -9,13 +9,11 @@ import {
   type LoginState,
   type TwoFactorLoginState,
 } from "./actions";
+import { Alert, Button, Input } from "@/components/ui";
 
 const initialLoginState: LoginState = {};
 const initialTwoFactorState: TwoFactorLoginState = {};
 const initialTotpState: TwoFactorLoginState = {};
-
-const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-brand dark:border-zinc-700 dark:bg-zinc-900";
 
 export default function GirisPage() {
   const [loginState, loginAction, loginPending] = useActionState(loginCustomer, initialLoginState);
@@ -56,31 +54,22 @@ export default function GirisPage() {
 
         <form action={action} className="space-y-4">
           <input type="hidden" name="token" value={pendingTwoFactorToken} />
-          <div>
-            <label htmlFor="code" className="block text-sm font-medium">
-              Doğrulama kodu
-            </label>
-            <input
-              id="code"
-              name="code"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              required
-              autoComplete="one-time-code"
-              className={inputClass}
-            />
-          </div>
+          <Input
+            id="code"
+            name="code"
+            label="Doğrulama kodu"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            required
+            autoComplete="one-time-code"
+          />
 
-          {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+          {state.error && <Alert variant="danger">{state.error}</Alert>}
 
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-          >
-            {pending ? "Doğrulanıyor…" : "Doğrula ve giriş yap"}
-          </button>
+          <Button type="submit" loading={pending} loadingText="Doğrulanıyor…" fullWidth>
+            Doğrula ve giriş yap
+          </Button>
         </form>
       </div>
     );
@@ -99,12 +88,14 @@ export default function GirisPage() {
       </header>
 
       <form action={loginAction} className="space-y-4">
-        <div>
-          <label htmlFor="username" className="block text-sm font-medium">
-            E-posta veya kullanıcı adı
-          </label>
-          <input id="username" name="username" type="text" required autoComplete="username" className={inputClass} />
-        </div>
+        <Input
+          id="username"
+          name="username"
+          type="text"
+          label="E-posta veya kullanıcı adı"
+          required
+          autoComplete="username"
+        />
         <div>
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="block text-sm font-medium">
@@ -114,25 +105,14 @@ export default function GirisPage() {
               Şifremi unuttum
             </Link>
           </div>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            className={inputClass}
-          />
+          <Input id="password" name="password" type="password" required autoComplete="current-password" />
         </div>
 
-        {loginState.error && <p className="text-sm text-red-600">{loginState.error}</p>}
+        {loginState.error && <Alert variant="danger">{loginState.error}</Alert>}
 
-        <button
-          type="submit"
-          disabled={loginPending}
-          className="w-full rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-        >
-          {loginPending ? "Giriş yapılıyor…" : "Giriş yap"}
-        </button>
+        <Button type="submit" loading={loginPending} loadingText="Giriş yapılıyor…" fullWidth>
+          Giriş yap
+        </Button>
       </form>
 
       <div className="mt-6 text-center">
