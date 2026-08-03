@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { provisionHandoff, type ActionState } from "./actions";
+import { Alert, Button, Input } from "@/components/ui";
 
 const initialState: ActionState = {};
 
@@ -12,30 +13,28 @@ export function HandoffForm({ orderItemId, orderNumber }: { orderItemId: string;
   );
 
   return (
-    <form action={action} className="mt-3 space-y-2 rounded-lg bg-zinc-50 p-3 dark:bg-zinc-950">
+    <form action={action} className="mt-3 space-y-2 rounded-lg bg-surface-muted p-3">
       <div className="flex flex-wrap gap-2">
-        <input
+        <Input
           name="dkartvizitUsername"
           type="text"
           required
           placeholder="dkartvizit kullanıcı adı"
-          className="w-56 rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          aria-label="dkartvizit kullanıcı adı"
+          containerClassName="w-56"
         />
-        <input
+        <Input
           name="notes"
           type="text"
           placeholder="Not (opsiyonel)"
-          className="flex-1 min-w-[10rem] rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          aria-label="Not"
+          containerClassName="min-w-[10rem] flex-1"
         />
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-        >
-          {pending ? "Kaydediliyor…" : "Sağlandı olarak işaretle"}
-        </button>
+        <Button type="submit" loading={pending} loadingText="Kaydediliyor…">
+          Sağlandı olarak işaretle
+        </Button>
       </div>
-      {state.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state.error && <Alert variant="danger">{state.error}</Alert>}
     </form>
   );
 }

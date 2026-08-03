@@ -4,6 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { OrderStatus, Prisma } from "@/generated/prisma/client";
 import { formatPriceTRY } from "@/lib/format";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/orders/order-status";
+import {
+  Badge,
+  Button,
+  EmptyState,
+  Input,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  buttonVariants,
+} from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Siparişler | VYKTag Yönetim",
@@ -46,90 +60,75 @@ export default async function AdminOrdersPage({
     <div>
       <h1 className="text-2xl font-bold tracking-tight">Siparişler</h1>
 
-      <form method="get" className="mt-6 flex flex-wrap gap-3">
-        <input
+      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
+        <Input
           type="text"
           name="ara"
           defaultValue={ara ?? ""}
           placeholder="Sipariş no, e-posta veya ad ara…"
-          className="w-64 rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          aria-label="Sipariş no, e-posta veya ad ara"
+          containerClassName="w-64"
         />
-        <select
+        <Select
           name="durum"
           defaultValue={durum ?? ""}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          <option value="">Tüm durumlar</option>
-          {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-        >
-          Filtrele
-        </button>
+          aria-label="Durum"
+          placeholder="Tüm durumlar"
+          options={Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+          containerClassName="w-48"
+        />
+        <Button type="submit">Filtrele</Button>
         {(durum || ara) && (
-          <Link
-            href="/admin/siparisler"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
-          >
+          <Link href="/admin/siparisler" className={buttonVariants({ variant: "ghost" })}>
             Temizle
           </Link>
         )}
       </form>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900">
-            <tr>
-              <th className="px-4 py-3 font-medium">Sipariş No</th>
-              <th className="px-4 py-3 font-medium">Tarih</th>
-              <th className="px-4 py-3 font-medium">Müşteri</th>
-              <th className="px-4 py-3 font-medium">Tutar</th>
-              <th className="px-4 py-3 font-medium">Durum</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <div className="mt-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Sipariş No</TableHead>
+              <TableHead>Tarih</TableHead>
+              <TableHead>Müşteri</TableHead>
+              <TableHead>Tutar</TableHead>
+              <TableHead>Durum</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-                <td className="px-4 py-3">
+              <TableRow key={order.id}>
+                <TableCell>
                   <Link
                     href={`/admin/siparisler/${order.orderNumber}`}
                     className="font-medium text-brand-dark hover:underline"
                   >
                     {order.orderNumber}
                   </Link>
-                </td>
-                <td className="px-4 py-3 text-zinc-500">
-                  {order.createdAt.toLocaleDateString("tr-TR")}
-                </td>
-                <td className="px-4 py-3">
+                </TableCell>
+                <TableCell className="text-zinc-500">{order.createdAt.toLocaleDateString("tr-TR")}</TableCell>
+                <TableCell>
                   <div>{order.user?.fullName ?? "—"}</div>
                   <div className="text-xs text-zinc-500">{order.user?.email}</div>
-                </td>
-                <td className="px-4 py-3 font-medium">{formatPriceTRY(order.totalKurus)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${ORDER_STATUS_BADGE_CLASSES[order.status]}`}
-                  >
+                </TableCell>
+                <TableCell className="font-medium">{formatPriceTRY(order.totalKurus)}</TableCell>
+                <TableCell>
+                  <Badge size="sm" className={ORDER_STATUS_BADGE_CLASSES[order.status]}>
                     {ORDER_STATUS_LABELS[order.status]}
-                  </span>
-                </td>
-              </tr>
+                  </Badge>
+                </TableCell>
+              </TableRow>
             ))}
             {orders.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-zinc-500">
-                  Kriterlere uyan sipariş bulunamadı.
-                </td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <EmptyState title="Kriterlere uyan sipariş bulunamadı." />
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

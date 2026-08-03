@@ -8,6 +8,7 @@ import { ORDER_STATUS_LABELS, ORDER_STATUS_BADGE_CLASSES } from "@/lib/orders/or
 import { StatusForm } from "./StatusForm";
 import { TrackingForm } from "./TrackingForm";
 import { HandoffForm } from "./HandoffForm";
+import { Badge } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Sipariş Detayı | VYKTag Yönetim",
@@ -77,11 +78,9 @@ export default async function AdminOrderDetailPage({
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-bold tracking-tight">{order.orderNumber}</h1>
-          <span
-            className={`inline-block rounded-full px-2.5 py-1 text-xs font-medium ${ORDER_STATUS_BADGE_CLASSES[order.status]}`}
-          >
+          <Badge size="sm" className={ORDER_STATUS_BADGE_CLASSES[order.status]}>
             {ORDER_STATUS_LABELS[order.status]}
-          </span>
+          </Badge>
         </div>
         <p className="mt-1 text-sm text-zinc-500">
           {order.createdAt.toLocaleString("tr-TR")} · {order.user?.fullName} ({order.user?.email})
