@@ -16,6 +16,7 @@ export const mainNav = [
   { label: "Fiyatlandırma", href: "/fiyatlandirma" },
   { label: "SSS", href: "/sss" },
   { label: "Kurumsal (B2B)", href: "/toplu-siparis" },
+  { label: "Blog", href: "/blog" },
   { label: "Hakkımızda", href: "/hakkimizda" },
   { label: "Giriş", href: "https://dkartvizit.com" },
 ] as const;

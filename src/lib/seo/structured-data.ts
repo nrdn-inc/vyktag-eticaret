@@ -8,6 +8,7 @@
  */
 
 import type { ProductWithVariants } from "@/lib/catalog";
+import type { BlogPostDetail } from "@/lib/blog";
 import type { FaqItem } from "@/lib/marketing";
 import { isVariantPurchasable } from "@/lib/orders/stock";
 import { legalInfo, siteConfig } from "@/lib/site";
@@ -107,6 +108,24 @@ export function faqJsonLd(items: readonly FaqItem[]) {
       name: item.q,
       acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
+  };
+}
+
+/** BlogPosting — arama sonucunda yazar/tarih gibi makale meta verisinin doğru okunmasını sağlar. */
+export function blogPostJsonLd(post: BlogPostDetail) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${siteUrl}/blog/${post.slug}#article`,
+    headline: post.title,
+    description: post.metaDescription ?? post.excerpt,
+    url: `${siteUrl}/blog/${post.slug}`,
+    datePublished: post.publishedAt.toISOString(),
+    dateModified: post.publishedAt.toISOString(),
+    ...(post.coverImage ? { image: [post.coverImage] } : {}),
+    author: { "@id": `${siteUrl}/#organization` },
+    publisher: { "@id": `${siteUrl}/#organization` },
+    inLanguage: "tr-TR",
   };
 }
 

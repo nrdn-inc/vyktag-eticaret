@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getActiveProductSlugs } from "@/lib/catalog";
+import { getPublishedBlogSlugs } from "@/lib/blog";
 import { B2B_ENABLED } from "@/lib/site";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vyktag.com.tr";
@@ -9,6 +10,7 @@ const STATIC_PATHS = [
   "/urunler",
   "/fiyatlandirma",
   "/sss",
+  "/blog",
   ...(B2B_ENABLED ? ["/toplu-siparis"] : []),
   "/hakkimizda",
   "/iletisim",
@@ -19,7 +21,7 @@ const STATIC_PATHS = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getActiveProductSlugs();
+  const [slugs, blogSlugs] = await Promise.all([getActiveProductSlugs(), getPublishedBlogSlugs()]);
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${baseUrl}${path}`,
@@ -31,5 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
   }));
 
-  return [...staticEntries, ...productEntries];
+  const blogEntries: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
+    url: `${baseUrl}/blog/${slug}`,
+    lastModified: new Date(),
+  }));
+
+  return [...staticEntries, ...productEntries, ...blogEntries];
 }

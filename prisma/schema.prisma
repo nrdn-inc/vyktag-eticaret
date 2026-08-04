@@ -305,6 +305,26 @@ model Payment {
   @@map("payments")
 }
 
+// SEO amaçlı blog yazısı. İçerik admin panelinden Markdown olarak girilir, vitrinde HTML'e
+// çevrilerek gösterilir (bkz. lib/blog). isPublished=false olan yazılar taslak olarak kalır,
+// vitrinde ve sitemap'te görünmez ama hiçbir zaman silinmez.
+model BlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  excerpt         String    @db.Text
+  content         String    @db.Text
+  coverImage      String?   @db.Text
+  metaTitle       String?
+  metaDescription String?   @db.Text
+  isPublished     Boolean   @default(false)
+  publishedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("blog_posts")
+}
+
 // One row per physical-card order item: tracks the manual creation of the
 // customer's dkartvizit.com account/card after the order ships (MVP has no API integration).
 model DkartvizitHandoff {

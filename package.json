@@ -1,6 +1,6 @@
 {
   "name": "4_vyktag_eticaret",
-  "version": "0.53.1",
+  "version": "0.54.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,6 +19,7 @@
     "clsx": "^2.1.1",
     "exceljs": "^4.4.0",
     "iyzipay": "^2.0.69",
+    "marked": "^18.0.9",
     "next": "16.2.12",
     "nodemailer": "^9.0.3",
     "papaparse": "^5.5.4",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.20",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@types/iyzipay": "^2.0.3",

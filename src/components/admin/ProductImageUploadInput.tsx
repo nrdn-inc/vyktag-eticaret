@@ -15,6 +15,10 @@ const MAX_DIMENSION = 1400;
 interface ProductImageUploadInputProps {
   value: string[];
   onChange: (images: string[]) => void;
+  /** Ürün varyantı dışındaki kullanımlar için (ör. blog kapak görseli, maxImages=1). */
+  maxImages?: number;
+  label?: string;
+  description?: string;
 }
 
 /**
@@ -56,16 +60,22 @@ function rasterizeImageFile(file: File): Promise<string> {
   });
 }
 
-/** Ürün/varyant için admin panelinden çoklu fotoğraf yükleme, kaldırma ve sıralama kontrolü. */
-export function ProductImageUploadInput({ value, onChange }: ProductImageUploadInputProps) {
+/** Ürün/varyant (veya blog kapak görseli) için admin panelinden fotoğraf yükleme, kaldırma ve sıralama kontrolü. */
+export function ProductImageUploadInput({
+  value,
+  onChange,
+  maxImages = MAX_IMAGES_PER_VARIANT,
+  label = "Ürün görselleri",
+  description = `İlk görsel vitrindeki birincil fotoğraf olarak kullanılır. Görsel eklenmezse müşteriye çizilmiş canlı önizleme gösterilmeye devam eder. En fazla ${MAX_IMAGES_PER_VARIANT} görsel.`,
+}: ProductImageUploadInputProps) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
     setError(null);
-    if (value.length >= MAX_IMAGES_PER_VARIANT) {
-      setError(`En fazla ${MAX_IMAGES_PER_VARIANT} görsel eklenebilir.`);
+    if (value.length >= maxImages) {
+      setError(`En fazla ${maxImages} görsel eklenebilir.`);
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -106,11 +116,8 @@ export function ProductImageUploadInput({ value, onChange }: ProductImageUploadI
 
   return (
     <div>
-      <label className="text-sm font-semibold">Ürün görselleri</label>
-      <p className="mt-1 text-xs text-zinc-500">
-        İlk görsel vitrindeki birincil fotoğraf olarak kullanılır. Görsel eklenmezse müşteriye
-        çizilmiş canlı önizleme gösterilmeye devam eder. En fazla {MAX_IMAGES_PER_VARIANT} görsel.
-      </p>
+      <label className="text-sm font-semibold">{label}</label>
+      <p className="mt-1 text-xs text-zinc-500">{description}</p>
 
       {value.length > 0 && (
         <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -167,7 +174,7 @@ export function ProductImageUploadInput({ value, onChange }: ProductImageUploadI
           variant="muted"
           size="sm"
           onClick={() => inputRef.current?.click()}
-          disabled={busy || value.length >= MAX_IMAGES_PER_VARIANT}
+          disabled={busy || value.length >= maxImages}
         >
           {busy ? "İşleniyor…" : "Görsel ekle"}
         </Button>
