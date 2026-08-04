@@ -81,7 +81,7 @@ export async function createBlogPost(_prevState: BlogPostFormState, formData: Fo
   });
 
   revalidateBlog(fields.slug);
-  redirect(`/admin/blog/${post.id}`);
+  redirect(`/admin/blog/${post.id}?kaydedildi=1`);
 }
 
 /** Var olan bir blog yazısını günceller. */
@@ -133,7 +133,7 @@ export async function updateBlogPost(
   if (fields.slug !== current.slug) {
     revalidateBlog(fields.slug);
   }
-  redirect(`/admin/blog/${postId}`);
+  redirect(`/admin/blog/${postId}?kaydedildi=1`);
 }
 
 export interface TogglePublishedState {
