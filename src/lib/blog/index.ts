@@ -32,11 +32,23 @@ export async function getPublishedBlogPosts(): Promise<BlogPostSummary[]> {
     .map((post) => ({ ...post }));
 }
 
-/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
-export const getPublishedBlogPostsCached = unstable_cache(getPublishedBlogPosts, ["blog:published-posts"], {
+const getPublishedBlogPostsCachedRaw = unstable_cache(getPublishedBlogPosts, ["blog:published-posts"], {
   tags: [BLOG_CACHE_TAG],
   revalidate: BLOG_CACHE_REVALIDATE_SECONDS,
 });
+
+/**
+ * Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu.
+ *
+ * `unstable_cache`'in üretim ortamındaki (Data Cache) sonucu JSON üzerinden geçer; bu round-trip
+ * `Date` nesnelerini düz ISO string'e çevirir (yalnızca `next dev`'de fark edilmez, çünkü orada
+ * bellek içi referans korunur). `publishedAt`'i burada yeniden `Date`'e çevirmezsek
+ * `toISOString()`/`Intl.DateTimeFormat` çağrıları üretimde 500 hatasıyla patlar.
+ */
+export async function getPublishedBlogPostsCached(): Promise<BlogPostSummary[]> {
+  const posts = await getPublishedBlogPostsCachedRaw();
+  return posts.map((post) => ({ ...post, publishedAt: new Date(post.publishedAt) }));
+}
 
 /** Yazı detay sayfası için yalnızca yayınlanmış bir yazıyı slug'a göre getirir. */
 export async function getBlogPostBySlug(slug: string): Promise<BlogPostDetail | null> {
@@ -59,11 +71,16 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPostDetail | 
   return { ...post, publishedAt: post.publishedAt };
 }
 
-/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
-export const getBlogPostBySlugCached = unstable_cache(getBlogPostBySlug, ["blog:post-by-slug"], {
+const getBlogPostBySlugCachedRaw = unstable_cache(getBlogPostBySlug, ["blog:post-by-slug"], {
   tags: [BLOG_CACHE_TAG],
   revalidate: BLOG_CACHE_REVALIDATE_SECONDS,
 });
+
+/** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. getPublishedBlogPostsCached yorumu. */
+export async function getBlogPostBySlugCached(slug: string): Promise<BlogPostDetail | null> {
+  const post = await getBlogPostBySlugCachedRaw(slug);
+  return post ? { ...post, publishedAt: new Date(post.publishedAt) } : null;
+}
 
 /** generateStaticParams/sitemap için tüm yayınlanmış yazı slug'larını döner. */
 export async function getPublishedBlogSlugs(): Promise<string[]> {
