@@ -71,8 +71,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{post.title}</h1>
 
       {post.coverImage && (
+        // h-auto: görsel doğal en-boy oranıyla, kırpılmadan gösterilir (bkz. blog/page.tsx'teki
+        // object-contain yorumu — sabit 16:9 kutu farklı oranlı yüklemelerde görseli keserdi).
         // eslint-disable-next-line @next/next/no-img-element -- admin'de yüklenen data URL, next/image optimizasyonuna uygun değil.
-        <img src={post.coverImage} alt={post.title} className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover" />
+        <img src={post.coverImage} alt={post.title} className="mt-8 h-auto w-full rounded-2xl object-contain" />
       )}
 
       <div

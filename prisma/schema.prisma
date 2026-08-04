@@ -314,7 +314,11 @@ model BlogPost {
   title           String
   excerpt         String    @db.Text
   content         String    @db.Text
-  coverImage      String?   @db.Text
+  // LongText: Text sütun tipi MySQL'de 65.535 karakterle sınırlıdır ve daha büyük bir base64
+  // data URL yazıldığında hatasız sessizce kırpar (bkz. commit mesajı — bu, yüklenen kapak
+  // görsellerinin bozuk/eksik kaydedilmesine yol açtı). MAX_BLOG_COVER_DATA_URL_LENGTH
+  // (500.000 karakter) LongText'in sınırının (≈4 milyar karakter) çok altında kalır.
+  coverImage      String?   @db.LongText
   metaTitle       String?
   metaDescription String?   @db.Text
   isPublished     Boolean   @default(false)

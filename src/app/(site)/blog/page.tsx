@@ -41,8 +41,12 @@ export default async function BlogIndexPage() {
               >
                 <Link href={`/blog/${post.slug}`}>
                   {post.coverImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- admin'de yüklenen data URL, next/image optimizasyonuna uygun değil.
-                    <img src={post.coverImage} alt={post.title} className="aspect-[16/9] w-full object-cover" />
+                    <div className="flex aspect-[16/9] w-full items-center justify-center bg-surface-muted">
+                      {/* object-contain: görsel her zaman kırpılmadan tam gösterilir (kart oranından
+                          farklı en-boy oranlı yüklemelerde object-cover görselin büyük bölümünü keserdi). */}
+                      {/* eslint-disable-next-line @next/next/no-img-element -- admin'de yüklenen data URL, next/image optimizasyonuna uygun değil. */}
+                      <img src={post.coverImage} alt={post.title} className="h-full w-full object-contain" />
+                    </div>
                   ) : (
                     <div className="aspect-[16/9] w-full bg-gradient-to-br from-brand/10 via-accent/5 to-transparent" />
                   )}
