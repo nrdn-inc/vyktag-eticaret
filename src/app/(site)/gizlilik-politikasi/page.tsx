@@ -50,6 +50,11 @@ export default function GizlilikPolitikasiPage() {
               Admin paneline giriş yapan yetkili kullanıcıların oturumunu güvenli şekilde yönetmek
               için kullanılır.
             </li>
+            <li>
+              <strong>Analitik çerezler:</strong>{" "}
+              Sitenin nasıl kullanıldığını (ziyaretçi sayısı, görüntülenen sayfalar gibi) anlamak ve
+              hizmetlerimizi geliştirmek amacıyla Google Analytics kullanılmaktadır.
+            </li>
           </ul>
           <p className="mt-3">
             Tarayıcınızın ayarlarından çerezleri silebilir veya engelleyebilirsiniz; ancak zorunlu
@@ -76,6 +81,10 @@ export default function GizlilikPolitikasiPage() {
             <li>
               <strong>Hostinger:</strong>{" "}
               Sitemizin barındırma (hosting) altyapısını sağlar.
+            </li>
+            <li>
+              <strong>Google Analytics:</strong>{" "}
+              Site trafiği ve kullanım istatistiklerinin analiz edilmesi için kullanılır.
             </li>
             <li>
               <strong>Kargo firmaları:</strong>{" "}

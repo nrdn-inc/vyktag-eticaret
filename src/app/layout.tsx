@@ -4,6 +4,7 @@ import "./globals.css";
 import { legalInfo, siteConfig } from "@/lib/site";
 import { organizationJsonLd, siteUrl, webSiteJsonLd } from "@/lib/seo/structured-data";
 import { JsonLd } from "@/components/JsonLd";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 // Statik/ISR sayfalar CDN'de (Hostinger hcdn) uzun süre önbelleğe alınabiliyor; sık art
 // arda deploy'larda eski build'in JS/RSC parçaları sunucudan silindiğinden, önbellekteki
@@ -94,7 +95,10 @@ export default function RootLayout({
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={webSiteJsonLd()} />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <GoogleAnalytics />
+      </body>
     </html>
   );
 }

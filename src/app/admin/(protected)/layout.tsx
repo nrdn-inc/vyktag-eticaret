@@ -33,6 +33,18 @@ export default async function AdminLayout({
               <Link href="/admin/stok" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
                 Stok
               </Link>
+              {/* NEXT_PUBLIC_GA_MEASUREMENT_ID tanımlanana kadar bu link gösterilmez — kimlik
+                  girilmeden Google Analytics panelinde veri olmayacağından tıklamaya değmez. */}
+              {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+                <a
+                  href="https://analytics.google.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                >
+                  İstatistikler ↗
+                </a>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-4 text-sm">
