@@ -38,10 +38,11 @@ interface AddToCartFormProps {
   onLogoChange: (dataUrl: string | undefined) => void;
 }
 
-function durationLabel(interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY"): string {
+function durationLabel(interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY" | "LIFETIME"): string {
   if (interval === "MONTHLY") return "Aylık";
   if (interval === "SIX_MONTHS") return "6 Ay";
-  return "1 Yıl";
+  if (interval === "YEARLY") return "1 Yıl";
+  return "Sınırsız";
 }
 
 /** Ürün detay sayfasında süre/varyant/adet seçimi, kişiselleştirme ve sepete ekleme formu. */
@@ -85,13 +86,20 @@ export function AddToCartForm({
   const atMaxQuantity = selectedDurationPlan ? false : quantity >= selectedVariant.stock;
   const isLowStock = !selectedDurationPlan && inStock && selectedVariant.stock <= LOW_STOCK_THRESHOLD;
 
-  // Abonelikte "ilk fiziksel kartım" seçiliyken (ve sunucu tarafında doğrulanmış ücret
-  // varyantları mevcutsa) kart dahil edilir; özel tasarım/logo seçilirse tek seferlik ek
-  // ücret (+150 TL) alınır — bkz. lib/catalog/index.ts subscriptionFirstCardAddon. "Zaten
-  // kartım var (yenileme)" seçildiğinde kart/ücret hiç eklenmez.
+  const isLifetimePlan = selectedDurationPlan?.interval === "LIFETIME";
+
+  // Abonelikte/Sınırsız'da fiziksel kart seçiliyken (ve sunucu tarafında doğrulanmış ücret
+  // varyantları mevcutsa) kart dahil edilir ve standart ek ücret alınır; özel tasarım/logo
+  // seçilirse onun YERİNE (üzerine değil) daha yüksek bir tek seferlik ücret alınır — bkz.
+  // lib/catalog/index.ts subscriptionFirstCardAddon. "Zaten kartım var (yenileme)" veya
+  // Sınırsız'da "Link" seçildiğinde kart/ücret hiç eklenmez.
   const includeFirstCard = !!selectedDurationPlan && isFirstSubscriptionCard && !!product.subscriptionFirstCardAddon;
   const wantsCustomDesign = includeFirstCard && hasStructuredOptions && !!selectedAttrs?.customDesign;
-  const firstCardFeeKurus = wantsCustomDesign ? product.subscriptionFirstCardAddon!.customDesignFeeKurus : 0;
+  const firstCardFeeKurus = includeFirstCard
+    ? wantsCustomDesign
+      ? product.subscriptionFirstCardAddon!.customDesignFeeKurus
+      : product.subscriptionFirstCardAddon!.standardFeeKurus
+    : 0;
   const unitPriceKurus = selectedDurationPlan
     ? selectedDurationPlan.priceKurus + firstCardFeeKurus
     : selectedVariant.priceKurus;
@@ -135,7 +143,7 @@ export function AddToCartForm({
           productSlug: product.slug,
           productName: product.name,
           variantName: wantsCustomDesign ? "İlk Fiziksel Kart (özel tasarım/logo)" : "İlk Fiziksel Kart",
-          unitPriceKurus: wantsCustomDesign ? addon.customDesignFeeKurus : 0,
+          unitPriceKurus: wantsCustomDesign ? addon.customDesignFeeKurus : addon.standardFeeKurus,
           quantity,
         });
       }
@@ -170,7 +178,7 @@ export function AddToCartForm({
                 resetSelectionState();
               }}
               options={[
-                { value: "unlimited", label: "Sınırsız (fiziksel kart)" },
+                { value: "unlimited", label: "Sadece Fiziksel Kart" },
                 ...product.durationOptions.map((plan) => ({
                   value: plan.subscriptionPlanId,
                   label: `${durationLabel(plan.interval)} · ${formatPriceTRY(plan.priceKurus)}`,
@@ -186,7 +194,7 @@ export function AddToCartForm({
         </div>
       )}
 
-      {/* Abonelikte ilk fiziksel kart mı, yenileme mi? */}
+      {/* Sınırsız'da fiziksel kart mı, yalnızca link mi? Diğer planlarda ilk kart mı, yenileme mi? */}
       {selectedDurationPlan && product.subscriptionFirstCardAddon && (
         <div>
           <label className="text-sm font-semibold">Fiziksel kart</label>
@@ -195,16 +203,27 @@ export function AddToCartForm({
               aria-label="Fiziksel kart"
               value={isFirstSubscriptionCard ? "first" : "renewal"}
               onChange={(value) => setIsFirstSubscriptionCard(value === "first")}
-              options={[
-                { value: "first", label: "İlk fiziksel kartım" },
-                { value: "renewal", label: "Zaten kartım var (yenileme)" },
-              ]}
+              options={
+                isLifetimePlan
+                  ? [
+                      { value: "first", label: "Fiziksel kart" },
+                      { value: "renewal", label: "Link" },
+                    ]
+                  : [
+                      { value: "first", label: "İlk fiziksel kartım" },
+                      { value: "renewal", label: "Zaten kartım var (yenileme)" },
+                    ]
+              }
             />
           </div>
           <p className="mt-2 text-xs text-zinc-500">
-            {isFirstSubscriptionCard
-              ? "İlk aboneliğinizle birlikte bir fiziksel kart da gönderilir, kart bedeli abonelik fiyatına dahildir."
-              : `Fiziksel kart gönderilmez, yalnızca dijital profilinize ${durationLabel(selectedDurationPlan.interval).toLowerCase()} boyunca kullanım hakkı verilir.`}
+            {isLifetimePlan
+              ? isFirstSubscriptionCard
+                ? `Fiziksel kart gönderilir (+${formatPriceTRY(product.subscriptionFirstCardAddon.standardFeeKurus)}).`
+                : "Yalnızca dijital link — fiziksel kart gönderilmez."
+              : isFirstSubscriptionCard
+                ? `İlk aboneliğinizle birlikte bir fiziksel kart da gönderilir (+${formatPriceTRY(product.subscriptionFirstCardAddon.standardFeeKurus)}).`
+                : `Fiziksel kart gönderilmez, yalnızca dijital profilinize ${durationLabel(selectedDurationPlan.interval).toLowerCase()} boyunca kullanım hakkı verilir.`}
           </p>
         </div>
       )}

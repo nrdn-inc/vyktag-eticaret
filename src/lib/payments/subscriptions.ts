@@ -43,6 +43,14 @@ export function decodeSubscriptionConversationId(
 
 /** Abonelik periyoduna göre bir sonraki yenileme tarihini hesaplar (iyzico'nun kendi faturalama takvimi asıldır; bu yalnızca yerel görüntüleme içindir). */
 export function computePeriodEnd(start: Date, interval: SubscriptionInterval): Date {
+  if (interval === "LIFETIME") {
+    // Bu fonksiyon yalnızca gerçek iyzico Abonelik aktivasyon akışında (activateSubscriptionFromCheckout)
+    // çağrılır; LIFETIME planları hiçbir zaman iyzicoPricingPlanRef taşımadığından o akışa asla
+    // ulaşmaz (bkz. schema.prisma SubscriptionInterval.LIFETIME yorumu). Buraya varılması bir
+    // programlama hatasıdır — sessizce "1 yıl gibi davran"ıp yanlış bir currentPeriodEnd
+    // üretmek yerine açıkça patlar.
+    throw new Error("computePeriodEnd LIFETIME ile çağrılamaz — bu plan tipi recurring Abonelik akışına asla girmemeli.");
+  }
   const end = new Date(start);
   // setMonth/setFullYear ay sonlarında taşar (31 Oca + 1 ay → 3 Mar); günü hedef ayın
   // son gününe sıkıştırarak taşmayı önlüyoruz.

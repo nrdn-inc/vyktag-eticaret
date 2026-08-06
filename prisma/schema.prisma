@@ -37,6 +37,11 @@ enum SubscriptionInterval {
   MONTHLY
   SIX_MONTHS
   YEARLY
+  // Tek seferlik ödeme, süre sınırı yok — iyzico'nun tekrarlayan (Abonelik) faturalama
+  // altyapısını KULLANMAZ; bu tür bir plan hep iyzicoPricingPlanRef=null kalır ve yalnızca
+  // ürün sayfasındaki sepet akışından (tek seferlik Checkout Form) satın alınabilir, /abonelik/[slug]
+  // (gerçek tekrarlayan akış) üzerinden asla satılamaz. Bkz. lib/payments/subscriptions.ts computePeriodEnd.
+  LIFETIME
 }
 
 enum SubscriptionStatus {

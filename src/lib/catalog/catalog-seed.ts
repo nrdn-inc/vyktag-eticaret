@@ -21,13 +21,13 @@ interface ProductSeed {
 const BASE_PRICE_KURUS = 34999;
 const CUSTOM_DESIGN_PRICE_KURUS = 49999; // özel tasarım/logo ücretiyle birlikte
 
-// Abonelik seçildiğinde ilk fiziksel kart artık dahildir (bkz. AddToCartForm — "İlk fiziksel
-// kartım" / "Zaten kartım var" seçimi). Bu iki gizli SKU, o kart dahiliyetini sunucu tarafında
-// fiyatı doğrulanabilir bir OrderItem satırına bağlamak için var: standart varyant 0 TL'dir
-// (kart bedeli abonelik fiyatına dahil sayılır), özel tasarım/logo seçilirse tek seferlik ek
-// ücret alınır. Bu satırın var olması aynı zamanda admin'e (bkz. lib/orders/index.ts
-// finalizeOrderPayment → DkartvizitHandoff) fiziksel kart gönderilmesi/hesap devri gerektiğini
-// bildirir — abonelik yenilemelerinde (kart seçilmediğinde) bu satır hiç eklenmez.
+// Abonelik/Sınırsız seçildiğinde isteğe bağlı bir fiziksel kart eklenebilir (bkz. AddToCartForm
+// — "İlk fiziksel kartım"/"Fiziksel kart" seçimi). Bu iki gizli SKU, o kart ek ücretini sunucu
+// tarafında fiyatı doğrulanabilir bir OrderItem satırına bağlamak için var: standart varyant
+// bir ek ücrete tabidir, özel tasarım/logo seçilirse onun yerine (standart ücretin üzerine değil)
+// daha yüksek bir tek seferlik ücret alınır. Bu satırın var olması aynı zamanda admin'e (bkz.
+// lib/orders/index.ts finalizeOrderPayment → DkartvizitHandoff) fiziksel kart gönderilmesi/hesap
+// devri gerektiğini bildirir — kart seçilmediğinde (yenileme veya "Link") bu satır hiç eklenmez.
 export const SUBSCRIPTION_FIRST_CARD_STANDARD_SKU = "VYK-ABONELIK-ILK-KART";
 export const SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU = "VYK-ABONELIK-ILK-KART-OZEL";
 // Kart fiyatındaki özel tasarım farkıyla aynı tutar olması bilinçlidir.
@@ -118,7 +118,7 @@ export const CARD_PRODUCTS: ProductSeed[] = [
       {
         sku: SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
         name: "İlk Fiziksel Kart (standart)",
-        priceKurus: 0,
+        priceKurus: 9999,
         // Envanter kavramı yok (dahiliyet/ücret satırı) — pratikte tükenmeyecek kadar yüksek tutulur.
         stock: 999_999,
       },
@@ -157,7 +157,7 @@ interface SubscriptionPlanSeed {
   name: string;
   description: string;
   priceKurus: number;
-  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY" | "LIFETIME";
   features: string[];
 }
 
@@ -181,6 +181,18 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlanSeed[] = [
     priceKurus: 19999,
     interval: "YEARLY",
     features: ["12 ay boyunca tam kullanım hakkı", "6 aylık plana göre daha uygun aylık maliyet"],
+  },
+  {
+    // Diğer planların aksine TEK SEFERLİK ödemedir, iyzico Abonelik (recurring) altyapısını
+    // kullanmaz — bkz. schema.prisma SubscriptionInterval.LIFETIME yorumu. Bu yüzden
+    // yalnızca ürün sayfasındaki sepet akışından satın alınabilir; fiyatlandırma sayfasındaki
+    // "Abonelik" bölümünde gösterilmez (bkz. catalog/index.ts getActiveSubscriptionPlans filtresi).
+    slug: "vyktag-sinirsiz",
+    name: "VYKTag Sınırsız",
+    description: "Dijital profilinize süre sınırı olmadan, tek seferlik ödemeyle erişin.",
+    priceKurus: 39999,
+    interval: "LIFETIME",
+    features: ["Süre sınırı yok — kalıcı kullanım hakkı", "Tek seferlik ödeme, tekrar çekim yok"],
   },
 ];
 

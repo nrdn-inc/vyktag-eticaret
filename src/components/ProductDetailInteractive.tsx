@@ -23,9 +23,9 @@ export function ProductDetailInteractive({ product, initialVariantId }: ProductD
   const selectedVariant = product.variants.find((v) => v.id === variantId) ?? product.variants[0];
   const selectedDurationPlan = product.durationOptions.find((p) => p.subscriptionPlanId === durationPlanId) ?? null;
   // `product.minPriceKurus` süreli kullanım hakkı planlarını da kapsar (vitrindeki "başlangıç
-  // fiyatı" için doğru) — ama burada "Sınırsız" (fiziksel kart) seçiliyken gösterilecek fiyat
-  // yalnızca varyantlar arasından en düşüğü olmalı, aksi halde abonelik fiyatı yanlışlıkla
-  // kart fiyatıymış gibi görünür.
+  // fiyatı" için doğru) — ama burada "Sadece Fiziksel Kart" seçiliyken gösterilecek fiyat
+  // yalnızca varyantlar arasından en düşüğü olmalı, aksi halde abonelik/Sınırsız fiyatı
+  // yanlışlıkla kart fiyatıymış gibi görünür.
   const minVariantPriceKurus = Math.min(...product.variants.map((v) => v.priceKurus));
 
   return (
@@ -53,7 +53,9 @@ export function ProductDetailInteractive({ product, initialVariantId }: ProductD
           <p className="mt-4 leading-relaxed text-zinc-600 dark:text-zinc-400">
             {selectedDurationPlan
               ? product.subscriptionFirstCardAddon
-                ? `${selectedDurationPlan.name}: dijital profilinize belirtilen süre boyunca kullanım hakkı verir. İlk aboneliğinizde fiziksel kart da dahildir.`
+                ? selectedDurationPlan.interval === "LIFETIME"
+                  ? `${selectedDurationPlan.name}: dijital profilinize süre sınırı olmadan, tek seferlik ödemeyle kullanım hakkı verir. Dilerseniz ek ücretle fiziksel kart da ekleyebilirsiniz.`
+                  : `${selectedDurationPlan.name}: dijital profilinize belirtilen süre boyunca kullanım hakkı verir. Dilerseniz ek ücretle fiziksel kart da ekleyebilirsiniz.`
                 : `${selectedDurationPlan.name}: fiziksel kart gönderilmez, yalnızca dijital profilinize belirtilen süre boyunca kullanım hakkı verir.`
               : product.description}
           </p>

@@ -17,6 +17,7 @@ const INTERVALS: SubscriptionInterval[] = [
   SubscriptionInterval.MONTHLY,
   SubscriptionInterval.SIX_MONTHS,
   SubscriptionInterval.YEARLY,
+  SubscriptionInterval.LIFETIME,
 ];
 
 function revalidateCatalog() {

@@ -27,7 +27,8 @@ export interface ProductDurationOption {
   slug: string;
   name: string;
   priceKurus: number;
-  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY";
+  /** LIFETIME: tek seferlik ödeme, iyzico Abonelik (recurring) altyapısını kullanmaz — bkz. schema.prisma. */
+  interval: "MONTHLY" | "SIX_MONTHS" | "YEARLY" | "LIFETIME";
 }
 
 export interface ProductWithVariants {
@@ -54,20 +55,21 @@ export interface ProductWithVariants {
    */
   durationOptions: ProductDurationOption[];
   /**
-   * Abonelik (durationOptions) seçilirken "ilk fiziksel kartım" seçeneği için sunucu tarafında
-   * doğrulanmış iki varyant: standart (ücretsiz, kart abonelik fiyatına dahildir) ve özel
-   * tasarım/logo (tek seferlik ek ücretli). null ise (seed çalışmamış) abonelik akışında kart
-   * dahiliyeti sunulmaz. "Zaten kartım var / yenileme" seçildiğinde bu satır hiç eklenmez.
+   * Abonelik/Sınırsız (durationOptions) seçilirken isteğe bağlı fiziksel kart için sunucu
+   * tarafında doğrulanmış iki varyant: standart (sabit ek ücretli) ve özel tasarım/logo (bu
+   * ücretin YERİNE geçen, daha yüksek tek seferlik ücret). null ise (seed çalışmamış) fiziksel
+   * kart eklenemez. Kart seçilmediğinde (yenileme veya "Link") bu satır hiç eklenmez.
    */
   subscriptionFirstCardAddon: {
     standardVariantId: string;
+    standardFeeKurus: number;
     customDesignVariantId: string;
     customDesignFeeKurus: number;
   } | null;
 }
 
 /**
- * Abonelik + "ilk fiziksel kart" satırının fiyatını YALNIZCA veritabanından okur (bkz.
+ * Abonelik/Sınırsız + "fiziksel kart" satırının fiyatını YALNIZCA veritabanından okur (bkz.
  * lib/orders/index.ts createOrderFromCart — istemciden gelen hiçbir tutara güvenilmez).
  */
 async function getSubscriptionFirstCardAddon(): Promise<ProductWithVariants["subscriptionFirstCardAddon"]> {
@@ -82,6 +84,7 @@ async function getSubscriptionFirstCardAddon(): Promise<ProductWithVariants["sub
   }
   return {
     standardVariantId: standard.id,
+    standardFeeKurus: standard.priceKurus,
     customDesignVariantId: customDesign.id,
     customDesignFeeKurus: customDesign.priceKurus,
   };
@@ -232,10 +235,17 @@ export interface SubscriptionPlanSummary {
   purchasable: boolean;
 }
 
-/** Fiyatlandırma sayfası için aktif abonelik planlarını fiyata göre sıralı döner. */
+/**
+ * Fiyatlandırma sayfası için aktif abonelik planlarını fiyata göre sıralı döner.
+ *
+ * LIFETIME (Sınırsız) planları BİLİNÇLİ OLARAK hariç tutulur: bu sayfadaki "Abonelik" bölümünün
+ * metni ("Dilediğiniz zaman iptal edebilirsiniz", "Kartı almadan süreli kullanım") tek seferlik/
+ * kalıcı bir pakete uymuyor. Sınırsız yalnızca ürün sayfasındaki süre seçicisinden erişilebilir
+ * (bkz. getActiveDurationOptions — o fonksiyon LIFETIME'ı filtrelemez).
+ */
 export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlanSummary[]> {
   const plans = await prisma.subscriptionPlan.findMany({
-    where: { isActive: true },
+    where: { isActive: true, interval: { not: "LIFETIME" } },
     select: {
       id: true,
       slug: true,
@@ -255,7 +265,9 @@ export async function getActiveSubscriptionPlans(): Promise<SubscriptionPlanSumm
     name: plan.name,
     description: plan.description,
     priceKurus: plan.priceKurus,
-    interval: plan.interval,
+    // `where: { interval: { not: "LIFETIME" } }` zaten filtreledi ama Prisma'nın döndürdüğü tip
+    // bunu yansıtmaz (tam enum kalır) — bu yüzden burada dar tipe güvenle daraltılır.
+    interval: plan.interval as SubscriptionPlanSummary["interval"],
     features: plan.features as string[],
     purchasable: plan.iyzicoPricingPlanRef !== null,
   }));
@@ -302,7 +314,10 @@ export async function getPurchasableSubscriptionPlanBySlug(
     slug: plan.slug,
     name: plan.name,
     priceKurus: plan.priceKurus,
-    interval: plan.interval,
+    // LIFETIME planları hiçbir zaman iyzicoPricingPlanRef taşımaz (bkz. schema.prisma), bu
+    // yüzden yukarıdaki kontrolü geçen bir plan burada asla LIFETIME olamaz — TS bunu
+    // çıkaramadığından dar tipe güvenle daraltılır.
+    interval: plan.interval as PurchasableSubscriptionPlan["interval"],
     iyzicoPricingPlanRef: plan.iyzicoPricingPlanRef,
   };
 }

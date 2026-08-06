@@ -16,6 +16,7 @@ const INTERVAL_LABELS: Record<string, string> = {
   MONTHLY: "Aylık",
   SIX_MONTHS: "6 Ay",
   YEARLY: "Yıllık",
+  LIFETIME: "Sınırsız",
 };
 
 async function getPlans() {

@@ -11,12 +11,16 @@ import type { SubscriptionInterval } from "@/generated/prisma/client";
 import type { PlanFormState } from "./actions";
 import { Alert, Button, Checkbox, Input, Select, Textarea } from "@/components/ui";
 
-type IntervalValue = "MONTHLY" | "SIX_MONTHS" | "YEARLY";
+type IntervalValue = "MONTHLY" | "SIX_MONTHS" | "YEARLY" | "LIFETIME";
 
 const INTERVAL_OPTIONS: { value: IntervalValue; label: string }[] = [
   { value: "MONTHLY", label: "Aylık" },
   { value: "SIX_MONTHS", label: "6 Ay" },
   { value: "YEARLY", label: "Yıllık" },
+  // Tek seferlik ödeme, iyzico Abonelik (recurring) altyapısını kullanmaz — bkz.
+  // schema.prisma SubscriptionInterval.LIFETIME yorumu. Fiyatlandırma sayfasında gösterilmez,
+  // yalnızca ürün sayfasındaki süre seçicisinden erişilir (bkz. catalog/index.ts).
+  { value: "LIFETIME", label: "Sınırsız (tek seferlik)" },
 ];
 
 interface PlanFormProps {
