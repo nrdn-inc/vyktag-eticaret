@@ -184,34 +184,43 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlanSeed[] = [
   },
 ];
 
+/**
+ * Yalnızca EKSİK kayıtları oluşturur — var olan bir ürün/varyant/plan'ın üzerine ASLA yazmaz.
+ *
+ * Önceden `upsert({ update: data, ... })` kullanılıyordu: bu, admin panelinden (bkz.
+ * src/app/admin/(protected)/urunler, .../abonelikler) yapılan HER fiyat/metin değişikliğini,
+ * bu fonksiyon tekrar çağrıldığında (ör. `npm run db:seed` yeniden çalıştırıldığında veya
+ * `catalog-seed.db.test.ts`'in `beforeAll`'ı `npm run test:db` ile tetiklendiğinde) sessizce
+ * sabit koddaki değerlere geri döndürüyordu — canlıda tam olarak bu yüzden bir fiyat
+ * güncellemesi kayboldu. Bu fonksiyonun tek amacı artık ilk kurulumda boş bir veritabanını
+ * doldurmak; var olan kayıtlara dokunmaz, admin panelinin tek gerçek kaynak olmasını korur.
+ */
 export async function seedCatalog(prisma: PrismaClient) {
   for (const { variants, isActive, ...productData } of CARD_PRODUCTS) {
     const data = { ...productData, isActive: isActive ?? true };
-    const product = await prisma.product.upsert({
-      where: { slug: data.slug },
-      update: data,
-      create: data,
-    });
+    const existingProduct = await prisma.product.findUnique({ where: { slug: data.slug } });
+    const product = existingProduct ?? (await prisma.product.create({ data }));
 
     for (const { attributes, ...variant } of variants) {
-      const variantData = {
-        ...variant,
-        productId: product.id,
-        attributes: (attributes ?? undefined) as Prisma.InputJsonValue | undefined,
-      };
-      await prisma.productVariant.upsert({
-        where: { sku: variant.sku },
-        update: variantData,
-        create: variantData,
+      const existingVariant = await prisma.productVariant.findUnique({ where: { sku: variant.sku } });
+      if (existingVariant) {
+        continue;
+      }
+      await prisma.productVariant.create({
+        data: {
+          ...variant,
+          productId: product.id,
+          attributes: (attributes ?? undefined) as Prisma.InputJsonValue | undefined,
+        },
       });
     }
   }
 
   for (const plan of SUBSCRIPTION_PLANS) {
-    await prisma.subscriptionPlan.upsert({
-      where: { slug: plan.slug },
-      update: plan,
-      create: plan,
-    });
+    const existingPlan = await prisma.subscriptionPlan.findUnique({ where: { slug: plan.slug } });
+    if (existingPlan) {
+      continue;
+    }
+    await prisma.subscriptionPlan.create({ data: plan });
   }
 }
