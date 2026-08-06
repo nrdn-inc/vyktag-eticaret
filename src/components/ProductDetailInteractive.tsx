@@ -15,7 +15,13 @@ interface ProductDetailInteractiveProps {
 /** Ürün detay sayfasının etkileşimli kısmı: kart önizlemesi ile formun aynı state'i paylaşmasını sağlar. */
 export function ProductDetailInteractive({ product, initialVariantId }: ProductDetailInteractiveProps) {
   const [variantId, setVariantId] = useState(initialVariantId ?? product.variants[0].id);
-  const [durationPlanId, setDurationPlanId] = useState<string | null>(null);
+  // "Sadece Fiziksel Kart" seçeneği kaldırıldığından (bkz. AddToCartForm), bu ürün için bir
+  // süre planı varsa varsayılan olarak en ucuzu (durationOptions fiyata göre artan sıralı,
+  // bkz. lib/catalog/index.ts getActiveDurationOptions) seçili gelir — null yalnızca hiç
+  // süre planı olmayan ürünlerde (varyant bazlı düz satın alma) anlamlıdır.
+  const [durationPlanId, setDurationPlanId] = useState<string | null>(
+    product.durationOptions[0]?.subscriptionPlanId ?? null,
+  );
   const [fullName, setFullName] = useState("");
   const [title, setTitle] = useState("");
   const [logoDataUrl, setLogoDataUrl] = useState<string | undefined>(undefined);

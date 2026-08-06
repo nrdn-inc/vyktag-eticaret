@@ -27,7 +27,7 @@ interface AddToCartFormProps {
   product: ProductWithVariants;
   variantId: string;
   onVariantChange: (variantId: string) => void;
-  /** null = "Sınırsız" (fiziksel kart, varyant seçimiyle); doluysa seçili süreli kullanım hakkı planı. */
+  /** Seçili süre planı. null yalnızca hiç durationOptions'ı olmayan ürünlerde (düz varyant satın alma) geçerlidir. */
   durationPlanId: string | null;
   onDurationPlanChange: (planId: string | null) => void;
   fullName: string;
@@ -165,25 +165,24 @@ export function AddToCartForm({
 
   return (
     <div className="space-y-6">
-      {/* Kullanım süresi: fiziksel kart (sınırsız) veya süreli kullanım hakkı */}
+      {/* Kullanım süresi: 6 Ay / 1 Yıl / Sınırsız — bunlardan biri her zaman seçili olmalı
+          ("Sadece Fiziksel Kart" seçeneği bilinçli olarak kaldırıldı, artık kart yalnızca bu
+          planlardan birinin ek satırı olarak satın alınabilir). */}
       {product.durationOptions.length > 0 && (
         <div>
           <label className="text-sm font-semibold">Kullanım süresi</label>
           <div className="mt-2">
             <PillToggleGroup
               aria-label="Kullanım süresi"
-              value={durationPlanId ?? "unlimited"}
+              value={durationPlanId ?? product.durationOptions[0].subscriptionPlanId}
               onChange={(value) => {
-                onDurationPlanChange(value === "unlimited" ? null : value);
+                onDurationPlanChange(value);
                 resetSelectionState();
               }}
-              options={[
-                { value: "unlimited", label: "Sadece Fiziksel Kart" },
-                ...product.durationOptions.map((plan) => ({
-                  value: plan.subscriptionPlanId,
-                  label: `${durationLabel(plan.interval)} · ${formatPriceTRY(plan.priceKurus)}`,
-                })),
-              ]}
+              options={product.durationOptions.map((plan) => ({
+                value: plan.subscriptionPlanId,
+                label: `${durationLabel(plan.interval)} · ${formatPriceTRY(plan.priceKurus)}`,
+              }))}
             />
           </div>
           {selectedDurationPlan && !product.subscriptionFirstCardAddon && (
@@ -228,7 +227,9 @@ export function AddToCartForm({
         </div>
       )}
 
-      {/* Varyant seçimi — fiziksel kart gönderilecekse (Sınırsız seçimi ya da abonelikte ilk kart) anlamlı */}
+      {/* Varyant seçimi — fiziksel kart gönderilecekse (bir süre planında "Fiziksel kart"/"İlk
+          fiziksel kartım" seçiliyse, ya da hiç süre planı olmayan bir üründe düz varyant
+          satın alımında) anlamlı */}
       {(!selectedDurationPlan || includeFirstCard) && (hasStructuredOptions ? (
         <CardOptionSelector
           variants={product.variants}
