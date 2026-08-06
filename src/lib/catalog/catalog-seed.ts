@@ -33,6 +33,12 @@ export const SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU = "VYK-ABONELIK-ILK-KART-
 // Kart fiyatındaki özel tasarım farkıyla aynı tutar olması bilinçlidir.
 export const SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS = CUSTOM_DESIGN_PRICE_KURUS - BASE_PRICE_KURUS;
 
+// Süreli kullanım hakkı (abonelik) planları ve "ilk fiziksel kart" ek ücreti şu an yalnızca
+// bu vitrin ürününe iliştirilir (bkz. catalog/index.ts computeMinPriceKurus/durationOptions
+// kullanımı) — başka bir ürün aktif edildiğinde onun fiyatına abonelik fiyatlarının
+// karışmaması için bu slug'a göre filtrelenir.
+export const FLAGSHIP_PRODUCT_SLUG = "vyktag-kart";
+
 export const CARD_PRODUCTS: ProductSeed[] = [
   {
     slug: "vyktag-kart",

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import {
   SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
   SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU,
+  FLAGSHIP_PRODUCT_SLUG,
 } from "@/lib/catalog/catalog-seed";
 import { sanitizeProductImages } from "@/lib/product-image-upload";
 
@@ -138,16 +139,23 @@ export async function getActiveProducts(): Promise<ProductWithVariants[]> {
 
   return products
     .filter((product) => product.variants.length > 0)
-    .map((product) => ({
-      id: product.id,
-      slug: product.slug,
-      name: product.name,
-      description: product.description,
-      minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
-      variants: product.variants.map(normalizeVariant),
-      durationOptions,
-      subscriptionFirstCardAddon,
-    }));
+    .map((product) => {
+      // Süreli kullanım hakkı (abonelik) planları yalnızca amiral gemisi ürüne iliştirilir —
+      // aksi halde her ürünün "başlangıç fiyatı" yanlışlıkla en ucuz abonelik planına düşer
+      // (bkz. FLAGSHIP_PRODUCT_SLUG yorumu).
+      const isFlagship = product.slug === FLAGSHIP_PRODUCT_SLUG;
+      const productDurationOptions = isFlagship ? durationOptions : [];
+      return {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), productDurationOptions),
+        variants: product.variants.map(normalizeVariant),
+        durationOptions: productDurationOptions,
+        subscriptionFirstCardAddon: isFlagship ? subscriptionFirstCardAddon : null,
+      };
+    });
 }
 
 /** Sayfaların kullanması gereken, önbelleklenmiş sürüm — bkz. dosya başı yorumu. */
@@ -190,15 +198,19 @@ export async function getProductBySlug(slug: string): Promise<ProductWithVariant
     return null;
   }
 
+  // bkz. getActiveProducts içindeki aynı isimli yorum.
+  const isFlagship = product.slug === FLAGSHIP_PRODUCT_SLUG;
+  const productDurationOptions = isFlagship ? durationOptions : [];
+
   return {
     id: product.id,
     slug: product.slug,
     name: product.name,
     description: product.description,
-    minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), durationOptions),
+    minPriceKurus: computeMinPriceKurus(product.variants.map((v) => v.priceKurus), productDurationOptions),
     variants: product.variants.map(normalizeVariant),
-    durationOptions,
-    subscriptionFirstCardAddon,
+    durationOptions: productDurationOptions,
+    subscriptionFirstCardAddon: isFlagship ? subscriptionFirstCardAddon : null,
   };
 }
 
