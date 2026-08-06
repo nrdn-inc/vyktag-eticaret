@@ -105,9 +105,20 @@ async function getActiveDurationOptions(): Promise<ProductDurationOption[]> {
   }));
 }
 
+/**
+ * Vitrindeki "başlangıç fiyatı" için en ucuz GERÇEKTEN ULAŞILABİLİR yolu döner.
+ *
+ * Süre planları (durationOptions) varsa çıplak varyant fiyatları artık ulaşılamaz: satın alma
+ * her zaman bir plan üzerinden yapılıyor (bkz. AddToCartForm — "Sadece Fiziksel Kart" seçeneği
+ * kaldırıldı), bu yüzden yalnızca plan fiyatları dikkate alınır (en ucuzu, kart eklenmeden —
+ * ör. "Zaten kartım var" — zaten en düşük toplamı verir). Süre planı olmayan ürünlerde
+ * (Tag/Phonecard gibi düz varyant satın alma) davranış değişmez.
+ */
 function computeMinPriceKurus(variantPrices: number[], durationOptions: ProductDurationOption[]): number {
-  const prices = [...variantPrices, ...durationOptions.map((o) => o.priceKurus)];
-  return Math.min(...prices);
+  if (durationOptions.length > 0) {
+    return Math.min(...durationOptions.map((o) => o.priceKurus));
+  }
+  return Math.min(...variantPrices);
 }
 
 /** DB'den gelen ham `images` (Json | null) alanını, biçimi doğrulanmış bir diziye normalize eder. */

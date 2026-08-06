@@ -87,6 +87,10 @@ export default async function ProductsPage() {
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                       Seçenekler
                     </h3>
+                    {/* Varyant fiyatı burada gösterilmez: satın alma artık her zaman bir süre
+                        planı (6 Ay/1 Yıl/Sınırsız) üzerinden yapılıyor (bkz. AddToCartForm —
+                        "Sadece Fiziksel Kart" seçeneği kaldırıldı), tek başına ₺99,99 gibi bir
+                        fiyat göstermek artık doğrudan satın alınabilirmiş izlenimi verip yanıltırdı. */}
                     <ul className="mt-3 flex flex-wrap gap-2.5">
                       {product.variants.map((variant) => (
                         <li key={variant.id}>
@@ -95,10 +99,6 @@ export default async function ProductsPage() {
                             className="flex items-center gap-2 rounded-full border border-border-soft px-4 py-2 text-sm transition-colors hover:border-brand/50 hover:bg-brand/5"
                           >
                             <span className="font-medium">{variant.name}</span>
-                            <span className="text-zinc-300 dark:text-zinc-700">·</span>
-                            <span className="font-semibold text-brand-dark">
-                              {formatPriceTRY(variant.priceKurus)}
-                            </span>
                             {!isVariantPurchasable(variant.stock) && (
                               <span className="text-xs text-zinc-400">(tükendi)</span>
                             )}
