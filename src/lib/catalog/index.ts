@@ -56,9 +56,12 @@ export interface ProductWithVariants {
   durationOptions: ProductDurationOption[];
   /**
    * Abonelik/Sınırsız (durationOptions) seçilirken isteğe bağlı fiziksel kart için sunucu
-   * tarafında doğrulanmış iki varyant: standart (sabit ek ücretli) ve özel tasarım/logo (bu
-   * ücretin YERİNE geçen, daha yüksek tek seferlik ücret). null ise (seed çalışmamış) fiziksel
-   * kart eklenemez. Kart seçilmediğinde (yenileme veya "Link") bu satır hiç eklenmez.
+   * tarafında doğrulanmış iki varyant: standart (sabit ek ücret) ve özel tasarım/logo.
+   * `customDesignFeeKurus`, standart ücreti de İÇEREN toplam tutardır (standart ücret + özel
+   * tasarım hizmet ücreti — bkz. catalog-seed.ts SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS); arayüzde
+   * "+X TL" olarak fark gösterilecekse `customDesignFeeKurus - standardFeeKurus` kullanılmalı
+   * (bkz. AddToCartForm). null ise (seed çalışmamış) fiziksel kart eklenemez. Kart seçilmediğinde
+   * (yenileme veya "Link") bu satır hiç eklenmez.
    */
   subscriptionFirstCardAddon: {
     standardVariantId: string;

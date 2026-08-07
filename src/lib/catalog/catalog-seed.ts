@@ -23,15 +23,18 @@ const CUSTOM_DESIGN_PRICE_KURUS = 49999; // özel tasarım/logo ücretiyle birli
 
 // Abonelik/Sınırsız seçildiğinde isteğe bağlı bir fiziksel kart eklenebilir (bkz. AddToCartForm
 // — "İlk fiziksel kartım"/"Fiziksel kart" seçimi). Bu iki gizli SKU, o kart ek ücretini sunucu
-// tarafında fiyatı doğrulanabilir bir OrderItem satırına bağlamak için var: standart varyant
-// bir ek ücrete tabidir, özel tasarım/logo seçilirse onun yerine (standart ücretin üzerine değil)
-// daha yüksek bir tek seferlik ücret alınır. Bu satırın var olması aynı zamanda admin'e (bkz.
-// lib/orders/index.ts finalizeOrderPayment → DkartvizitHandoff) fiziksel kart gönderilmesi/hesap
-// devri gerektiğini bildirir — kart seçilmediğinde (yenileme veya "Link") bu satır hiç eklenmez.
+// tarafında fiyatı doğrulanabilir bir OrderItem satırına bağlamak için var. Bu satırın var
+// olması aynı zamanda admin'e (bkz. lib/orders/index.ts finalizeOrderPayment →
+// DkartvizitHandoff) fiziksel kart gönderilmesi/hesap devri gerektiğini bildirir — kart
+// seçilmediğinde (yenileme veya "Link") bu satır hiç eklenmez.
 export const SUBSCRIPTION_FIRST_CARD_STANDARD_SKU = "VYK-ABONELIK-ILK-KART";
 export const SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU = "VYK-ABONELIK-ILK-KART-OZEL";
-// Kart fiyatındaki özel tasarım farkıyla aynı tutar olması bilinçlidir.
-export const SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS = CUSTOM_DESIGN_PRICE_KURUS - BASE_PRICE_KURUS;
+// Standart ilk kart ücreti.
+export const SUBSCRIPTION_FIRST_CARD_STANDARD_FEE_KURUS = 9999;
+// Özel tasarım/logo HİZMETİNİN kendi ücreti — standart kart ücretinin ÜZERİNE eklenir (bkz.
+// aşağıdaki VYK-ABONELIK-ILK-KART-OZEL varyantı: priceKurus = standart + bu değer). AddToCartForm/
+// CardOptionSelector'daki "+149,99 TL" etiketi de doğrudan bu sabiti kullanır.
+export const SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS = 14999;
 
 // Süreli kullanım hakkı (abonelik) planları ve "ilk fiziksel kart" ek ücreti şu an yalnızca
 // bu vitrin ürününe iliştirilir (bkz. catalog/index.ts computeMinPriceKurus/durationOptions
@@ -118,14 +121,17 @@ export const CARD_PRODUCTS: ProductSeed[] = [
       {
         sku: SUBSCRIPTION_FIRST_CARD_STANDARD_SKU,
         name: "İlk Fiziksel Kart (standart)",
-        priceKurus: 9999,
+        priceKurus: SUBSCRIPTION_FIRST_CARD_STANDARD_FEE_KURUS,
         // Envanter kavramı yok (dahiliyet/ücret satırı) — pratikte tükenmeyecek kadar yüksek tutulur.
         stock: 999_999,
       },
       {
         sku: SUBSCRIPTION_FIRST_CARD_CUSTOM_DESIGN_SKU,
         name: "İlk Fiziksel Kart (özel tasarım/logo)",
-        priceKurus: SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS,
+        // Standart ücret + özel tasarım hizmet ücreti (bkz. dosya başı yorumu) — tek bir SKU/
+        // OrderItem satırı olduğundan (fulfillment/DkartvizitHandoff tek satır bekler) toplam
+        // burada önceden toplanır.
+        priceKurus: SUBSCRIPTION_FIRST_CARD_STANDARD_FEE_KURUS + SUBSCRIPTION_CUSTOM_DESIGN_FEE_KURUS,
         stock: 999_999,
       },
     ],

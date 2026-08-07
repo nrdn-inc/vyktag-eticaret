@@ -241,6 +241,11 @@ export function AddToCartForm({
           }}
           logoDataUrl={logoDataUrl}
           onLogoChange={onLogoChange}
+          customDesignSurchargeKurus={
+            product.subscriptionFirstCardAddon
+              ? product.subscriptionFirstCardAddon.customDesignFeeKurus - product.subscriptionFirstCardAddon.standardFeeKurus
+              : undefined
+          }
         />
       ) : (
         !selectedDurationPlan &&

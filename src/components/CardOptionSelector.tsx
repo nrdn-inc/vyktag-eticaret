@@ -13,6 +13,14 @@ interface CardOptionSelectorProps {
   onSelect: (variantId: string) => void;
   logoDataUrl?: string;
   onLogoChange: (dataUrl: string | undefined) => void;
+  /**
+   * "Özel tasarım/logo ekleyin" onay kutusunda gösterilecek "+X TL" farkını dışarıdan verir.
+   * Bu bileşen artık yalnızca abonelik/Sınırsız akışında (bkz. AddToCartForm) kullanıldığından,
+   * gerçek ücret çıplak varyant fiyat farkı DEĞİL, sunucu tarafında doğrulanmış
+   * subscriptionFirstCardAddon ücretlerinin farkıdır. Verilmezse (ör. gelecekte düz varyant
+   * satın alma geri gelirse) varyant fiyat farkına geri düşer.
+   */
+  customDesignSurchargeKurus?: number;
 }
 
 const CARD_COLOR_ORDER: CardColor[] = ["Siyah", "Beyaz"];
@@ -29,6 +37,7 @@ export function CardOptionSelector({
   onSelect,
   logoDataUrl,
   onLogoChange,
+  customDesignSurchargeKurus,
 }: CardOptionSelectorProps) {
   const parsed = variants.map((v) => ({ variant: v, attrs: parseVariantAttributes(v.attributes)! }));
 
@@ -76,7 +85,8 @@ export function CardOptionSelector({
   const baseVariant = findVariant(selected.attrs.cardColor, selected.attrs.printColor, false);
   const customVariant = findVariant(selected.attrs.cardColor, selected.attrs.printColor, true);
   const customDesignSurcharge =
-    baseVariant && customVariant ? customVariant.variant.priceKurus - baseVariant.variant.priceKurus : 0;
+    customDesignSurchargeKurus ??
+    (baseVariant && customVariant ? customVariant.variant.priceKurus - baseVariant.variant.priceKurus : 0);
 
   return (
     <div className="space-y-5">
