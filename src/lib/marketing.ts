@@ -31,7 +31,7 @@ export const VALUE_PROPS: ValueProp[] = [
   {
     icon: "chart",
     title: "Ölçülebilir etkileşim",
-    text: "Kartınızın kaç kez görüntülendiğini ve kaç kişinin sizi rehberine eklediğini canlı olarak izleyin. Kağıt kartvizitte asla bilemeyeceğiniz veriler.",
+    text: "Görüntülenme, rehbere eklenme ve dönüşüm oranını canlı izleyin; önceki döneme göre değişimi tek bakışta görün. Kağıt kartvizitte asla bilemeyeceğiniz veriler.",
   },
   {
     icon: "leaf",
@@ -77,13 +77,27 @@ export const CARD_FEATURES: string[] = [
   "Ara, WhatsApp, E-posta, Konum, Web, Instagram, Katalog, Portfolyo, Randevu Al kısayolları",
   "Katalog ve portfolyo belgeleri PDF olarak veya Drive/Dropbox bağlantısı şeklinde eklenir",
   "Kart üzerinde “Bana Ulaşın” formu",
-  "IBAN ve fatura bilgileri — tek dokunuşla kopyalanır",
+  "Banka hesap bilgileri — IBAN tek dokunuşla kopyalanır",
+  "Fatura bilgileri — vergi dairesi, vergi no ve adres tek dokunuşla kopyalanır",
   "İndirilebilir QR kod (PNG/SVG) ve kişisel link",
   "İkinci GSM, WhatsApp numarası ve sabit hat desteği",
   "Tek dokunuşla paylaşım menüsü — WhatsApp, Telegram, e-posta, sosyal medya",
   "Outlook/Gmail/Apple Mail uyumlu, panelden tek tıkla oluşturulan HTML e-posta imzası",
-  "“Ürün Kartı” modu — kartı ürün görseli, teknik özellik tablosu ve “Teklif İste” formuyla dijital katalog vitrinine dönüştürün",
+  "“Ürün Kartı” modu — kart genişliğinde büyük ürün görseli, kategori rozeti, teknik özellik tablosu ve “Teklif İste” formuyla dijital katalog vitrinine dönüştürün",
   "Kurumsal renk ve yazı tipi uyarlaması",
+];
+
+/** Ana sayfadaki "Yönetim paneli" bölümü — broşür "Yönetim Paneli" sayfası. */
+export const DASHBOARD_FEATURES: string[] = [
+  "Tüm kartları fotoğraf, unvan ve durumuyla (aktif / pasif / süresi dolmuş) tek ekranda görün",
+  "Her kart için bugün / son 7 gün / son 30 gün / toplam görüntülenme ve rehbere eklenme sayıları",
+  "30 günlük görüntülenme ve rehbere ekleme trend grafikleriyle performansı tek bakışta görün",
+  "Önceki 30 güne göre yüzde değişim (artış/azalış) otomatik hesaplanır",
+  "Dönüşüm oranı — görüntülenmenin rehbere eklenmeye dönüşme yüzdesi — anlık gösterilir",
+  "Son 30 günün en iyi performans gösteren kartviziti panelde otomatik öne çıkarılır",
+  "İsme veya unvana göre anında arama ve filtreleme",
+  "Excel şablonuyla toplu ekleme/güncelleme — onlarca kartı dakikalar içinde aktarın",
+  "Kullanım istatistiklerini Excel olarak dışa aktarın, raporlayın",
 ];
 
 export interface Audience {

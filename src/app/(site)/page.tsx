@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site";
 import {
   AUDIENCES,
   CARD_FEATURES,
+  DASHBOARD_FEATURES,
   FAQ,
   HOW_IT_WORKS,
   TRUST_STATS,
@@ -144,6 +145,39 @@ export default async function Home() {
             </div>
           </Reveal>
         </div>
+      </section>
+
+      {/* Yönetim paneli */}
+      <section className="mx-auto max-w-4xl px-4 py-20 sm:px-6 sm:py-24">
+        <Reveal>
+          <SectionHeading
+            eyebrow="Yönetim paneli"
+            title="Her şey tek ekranda"
+            text="Kimin kartının ne zaman, kaç kez görüntülendiğini anlık izleyin — kağıt kartvizitte asla bilemeyeceğiniz veriler."
+          />
+        </Reveal>
+
+        <Reveal delayMs={100}>
+          <ul className="mt-12 grid gap-3 sm:grid-cols-2">
+            {DASHBOARD_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-2.5 text-sm">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                  className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+                >
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                <span className="text-zinc-700 dark:text-zinc-300">{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
       </section>
 
       {/* Nasıl çalışır */}
